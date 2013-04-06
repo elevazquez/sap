@@ -24,31 +24,36 @@ def add():
         rol = Rol(form.codigo.data, form.descripcion.data)
         db_session.add(rol)
         db_session.commit()
+        print 'Rol Creado'
         #return redirect(url_for('login'))
     return render_template('rol.html', form=form)
 
 @app.route('/editar', methods=['GET', 'POST'])
 def editar():
-    rol = Rol('nuevo', 'nuevo')
-    #rol = request.current_user
-    form = RolFormulario(request.form, rol)
+    form = RolFormulario(request.form)
+    init_db(db_session)
+    rol = db_session.query(Rol).filter_by(codigo=form.codigo.data).first()  
     if request.method == 'POST' and form.validate():
         form.populate_obj(rol)
         init_db(db_session)
-        db_session.merge(rol.descripcion)
+        db_session.dirty(rol)
         db_session.commit()
+        print 'Rol Actualizado'
     return render_template('rol.html', form=form)
 
 @app.route('/eliminar', methods=['GET', 'POST'])
 def eliminar():
-    rol = Rol('a', 'aa')
     #rol = request.current_user
-    form = RolFormulario(request.form, rol)
+    form = RolFormulario(request.form)
+    init_db(db_session)
+    rol = db_session.query(Rol).filter_by(codigo=form.codigo.data).first()  
+    #form = RolFormulario(request.form, rol)
     if request.method == 'POST' and form.validate():
         form.populate_obj(rol)
         init_db(db_session)
         db_session.delete(rol)
         db_session.commit()
+        print 'Rol Eliminado'
     return render_template('rol.html', form=form)
 
 @app.route('/buscar', methods=['GET', 'POST'])
