@@ -1,0 +1,12 @@
+{% extends "base.html" %} 
+{% block content %}
+<div class="primary">
+	<h1>Eliminar Rol</h1>
+	<form id=eliminar method=post action="/eliminar">
+  		<dl>
+    		<div>{{ form.codigo.label }} {{ form.codigo()}}</div>
+  		</dl>
+  		<p><input type=submit value=Aceptar>
+	</form>
+</div>
+{% endblock %}

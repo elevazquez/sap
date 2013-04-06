@@ -25,8 +25,7 @@ def add():
         db_session.add(rol)
         db_session.commit()
         print 'Rol Creado'
-        #return redirect(url_for('login'))
-    return render_template('rol.html', form=form)
+    return render_template('nuevorol.html', form=form)
 
 @app.route('/editar', methods=['GET', 'POST'])
 def editar():
@@ -39,7 +38,7 @@ def editar():
         db_session.dirty(rol)
         db_session.commit()
         print 'Rol Actualizado'
-    return render_template('rol.html', form=form)
+    return render_template('actualizarrol.html', form=form)
 
 @app.route('/eliminar', methods=['GET', 'POST'])
 def eliminar():
@@ -54,14 +53,14 @@ def eliminar():
         db_session.delete(rol)
         db_session.commit()
         print 'Rol Eliminado'
-    return render_template('rol.html', form=form)
+    return render_template('eliminarrol.html', form=form)
 
 @app.route('/buscar', methods=['GET', 'POST'])
 def buscar():
     valor = request.form
-    v = valor.getvalue()
+    #v = valor.getvalue().toString()
     init_db(db_session)
-    r = db_session.query(Rol).filter_by(codigo=v).first()
+    r = db_session.query(Rol).filter_by(codigo=valor.patron.data).first()
     if r == None:
         return 'no existe concordancia'
     return '%d, %s, %s' %(r.id, r.codigo, r.descripcion)

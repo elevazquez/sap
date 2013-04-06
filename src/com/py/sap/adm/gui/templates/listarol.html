@@ -1,12 +1,25 @@
+{% extends "base.html" %} 
 {% block content %}
+<div class="primary">
 <h1>Roles</h1>
 <form id=buscar method=get action="/buscar">
-	<p>Patrón: <br/>
-		<input type="text" name= "patron" />
-		<input type=submit value=Buscar />
-</p>
+		<input id=p type="text" name= "patron" />
+		<input type=submit name= "Buscar" value=Buscar />
 </form>
 <table>
+	<TR>
+		<TH class="c3"><a href="{{ url_for('add') }}">Nuevo</a></TH>
+		<TH class="c4"><a href="{{ url_for('editar') }}">Editar</a></TH>
+		<TH class="c5"><a href="{{ url_for('eliminar') }}">Eliminar</a></TH>
+	</TR>
+</table>
+<p></p>
+<table border="1">
+	<TR>
+		<TH class="c3">Id</TH>
+		<TH class="c4">Codigo</TH>
+		<TH class="c5">Descripcion</TH>
+	</TR>
 	{% for rol in roles %}
 	<TR>
 		<TD class="c3"><SPAN>{{rol.id|e}}</SPAN></TD>
@@ -19,4 +32,5 @@
 	</TR>
 	{% endfor %}
 </table>
+ </div>
 {% endblock %}
