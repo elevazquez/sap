@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<!--[if IE 7 ]>    <html class="ie7 oldie"> <![endif]-->
+<!--[if IE 8 ]>    <html class="ie8 oldie"> <![endif]-->
+<!--[if IE 9 ]>    <html class="ie9"> <![endif]-->
+<!--[if (gt IE 9)|!(IE)]><!--> <html> <!--<![endif]-->
+
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta charset="utf-8"/>
+    <title>Sap</title>
+    <link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static', filename='plantilla.css') }}" />
+</head>
+
+<body id="arriba">
+	<div id="header-wrap">
+			<header>
+				<hgroup>
+					<h1>SAP</h1>
+				</hgroup>
+	
+				<div class="subscribe">
+					 {% if 'username' in session %}
+						<a href="#">{{session['username']}}</a> | <a href="{{ url_for('logout') }}">Salir</a> 
+					 {% else %}
+					 	<a href="{{ url_for('index') }} ">Entrar</a>
+					 {% endif %}
+				</div>
+				
+			</header>
+  	</div>
+  	
+				
+
+	<div id="content-wrap" >
+	
+        <div id="content" class="clearfix">  
+			<div id="main">
+					
+						{% block content %} {% endblock %}
+					
+				{% if 'username' in session %}
+					<div >
+						<h3>Menu</h3>
+						<ul>  
+							<li><a href="{{ url_for('administrarRol') }}">Administrar Rol</a></li>
+							<li><a href="index.html#TemplateInfo">user</a></li>
+							<li><a href="style.html">Style Demo</a></li>
+							<li><a href="blog.html">Blog</a></li>
+							<li><a href="archives.html">Archives</a></li>
+							<li><a href="http://themeforest.net?ref=ealigam" title="Web Templates">Web Templates</a></li>
+						</ul>			
+					</div>
+				 {% endif %}	
+			</div>
+		</div>
+	</div>
+	
+</body>
+</html>

@@ -1,0 +1,24 @@
+{% extends "principal.html" %} 
+{% block content %}
+  <div class="primary">
+
+	{% if 'username' in session %}
+		<p> Bienvenido {{session['username']}}!</p> 
+    	
+	{% else %}		
+		<form action="{{ url_for('index') }}" method="post" >
+			<p>Usuario: <br/>
+			<input type="text" name= "username" /></p>
+			<p>Contraseña: <br />
+			<input type="password" name= 'passwd' ></p>
+			<p><input type="submit" value="Entrar" /> </p> 		
+		</form>
+	{% endif %}
+	{% with messages = get_flashed_messages() %}
+		{% for message in messages %}
+			{{message}}
+	    {% endfor %}
+	 {% endwith %}
+	
+</div>
+{% endblock %}
