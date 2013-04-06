@@ -51,11 +51,20 @@ def eliminar():
         db_session.commit()
     return render_template('rol.html', form=form)
 
-@app.route('/buscar')
+@app.route('/buscar', methods=['GET', 'POST'])
 def buscar():
+    valor = request.form
     init_db(db_session)
-    r = db_session.query(Rol).filter_by(codigo='cod').first()
+    r = db_session.query(Rol).filter_by(codigo=valor).first()
+    if r == None:
+        return 'no existe concordancia'
     return '%d, %s, %s' %(r.id, r.codigo, r.descripcion)
+
+@app.route('/listarol')
+def listar():
+    init_db(db_session)
+    roles = db_session.query(Rol).order_by(Rol.id)
+    return render_template('listarol.html', roles = roles)
 
 """Lanza un mensaje de error en caso de que la pagina solicitada no exista"""
 @app.errorhandler(404)

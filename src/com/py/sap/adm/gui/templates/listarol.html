@@ -1,0 +1,22 @@
+{% block content %}
+<h1>Roles</h1>
+<form id=buscar method=post action="/buscar">
+	<p>Patrón: <br/>
+		<input type="text" name= "patron" />
+		<input type=submit value=Buscar />
+</p>
+</form>
+<table>
+	{% for rol in roles %}
+	<TR>
+		<TD class="c3"><SPAN>{{rol.id|e}}</SPAN></TD>
+		<TD class="c4"><SPAN>{{rol.codigo|e}}</SPAN></TD>
+		<TD class="c5"><SPAN>{{rol.descripcion|e}}</SPAN></TD>
+	</TR>
+	{% else %}
+  	<TR>
+    	<li><em>roles no encontrados</em></li>
+	</TR>
+	{% endfor %}
+</table>
+{% endblock %}
