@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Sequence, Date
+from sqlalchemy import *
 from com.py.sap.util.database import Base
 
 class Usuario (Base):
