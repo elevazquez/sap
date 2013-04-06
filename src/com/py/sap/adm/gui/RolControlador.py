@@ -54,8 +54,9 @@ def eliminar():
 @app.route('/buscar', methods=['GET', 'POST'])
 def buscar():
     valor = request.form
+    v = valor.getvalue()
     init_db(db_session)
-    r = db_session.query(Rol).filter_by(codigo=valor).first()
+    r = db_session.query(Rol).filter_by(codigo=v).first()
     if r == None:
         return 'no existe concordancia'
     return '%d, %s, %s' %(r.id, r.codigo, r.descripcion)
