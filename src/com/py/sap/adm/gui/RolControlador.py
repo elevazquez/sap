@@ -35,7 +35,8 @@ def editar():
     if request.method == 'POST' and form.validate():
         form.populate_obj(rol)
         init_db(db_session)
-        db_session.dirty(rol)
+        db_session.merge(rol)
+        #db_session.commit()
         db_session.commit()
         print 'Rol Actualizado'
     return render_template('actualizarrol.html', form=form)
@@ -47,7 +48,7 @@ def eliminar():
     init_db(db_session)
     rol = db_session.query(Rol).filter_by(codigo=form.codigo.data).first()  
     #form = RolFormulario(request.form, rol)
-    if request.method == 'POST' and form.validate():
+    if request.method == 'POST' :
         form.populate_obj(rol)
         init_db(db_session)
         db_session.delete(rol)
