@@ -1,6 +1,6 @@
 from com.py.sap.util.database import init_db, engine
 from sqlalchemy.orm import scoped_session, sessionmaker
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash 
 from com.py.sap.adm.mod.Rol import Rol
 from com.py.sap.adm.gui.RolFormulario import RolFormulario
 import flask, flask.views
@@ -24,7 +24,8 @@ def add():
         rol = Rol(form.codigo.data, form.descripcion.data)
         db_session.add(rol)
         db_session.commit()
-        print 'Rol Creado'
+        message = 'Rol creado'
+        return redirect('/listarol')
     return render_template('nuevorol.html', form=form)
 
 @app.route('/editar', methods=['GET', 'POST'])
@@ -36,9 +37,8 @@ def editar():
         form.populate_obj(rol)
         init_db(db_session)
         db_session.merge(rol)
-        #db_session.commit()
         db_session.commit()
-        print 'Rol Actualizado'
+        return redirect('/listarol')
     return render_template('actualizarrol.html', form=form)
 
 @app.route('/eliminar', methods=['GET', 'POST'])
@@ -53,18 +53,18 @@ def eliminar():
         init_db(db_session)
         db_session.delete(rol)
         db_session.commit()
-        print 'Rol Eliminado'
+        return redirect('/listarol')
     return render_template('eliminarrol.html', form=form)
 
 @app.route('/buscar', methods=['GET', 'POST'])
 def buscar():
-    valor = request.form
+    valor = request.args['patron']
     #v = valor.getvalue().toString()
     init_db(db_session)
-    r = db_session.query(Rol).filter_by(codigo=valor.patron.data).first()
+    r = db_session.query(Rol).filter_by(codigo=valor)
     if r == None:
         return 'no existe concordancia'
-    return '%d, %s, %s' %(r.id, r.codigo, r.descripcion)
+    return render_template('listarol.html', roles = r)
 
 @app.route('/listarol')
 def listar():
