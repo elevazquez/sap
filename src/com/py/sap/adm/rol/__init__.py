@@ -1,13 +1,14 @@
+from com.py.sap.loginC import app
+from flask import render_template
+
 from com.py.sap.util.database import init_db, engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from flask import Flask, render_template, request, redirect, url_for, flash 
 from com.py.sap.adm.mod.Rol import Rol
-from com.py.sap.adm.gui.RolFormulario import RolFormulario
+from com.py.sap.adm.rol.RolFormulario import RolFormulario
 import flask, flask.views
 import os
 
-app = flask.Flask(__name__)
-app.secret_key="sap"
 db_session = scoped_session(sessionmaker(autocommit=False,
                                          autoflush=False,
                                          bind=engine))
@@ -25,8 +26,8 @@ def add():
         db_session.add(rol)
         db_session.commit()
         message = 'Rol creado'
-        return redirect('/listarol')
-    return render_template('nuevorol.html', form=form)
+        return redirect('/listarol') #/listarol
+    return render_template('rol/nuevorol.html', form=form)
 
 @app.route('/editar', methods=['GET', 'POST'])
 def editar():
@@ -39,7 +40,7 @@ def editar():
         db_session.merge(rol)
         db_session.commit()
         return redirect('/listarol')
-    return render_template('actualizarrol.html', form=form)
+    return render_template('rol/actualizarrol.html', form=form)
 
 @app.route('/eliminar', methods=['GET', 'POST'])
 def eliminar():
@@ -54,7 +55,7 @@ def eliminar():
         db_session.delete(rol)
         db_session.commit()
         return redirect('/listarol')
-    return render_template('eliminarrol.html', form=form)
+    return render_template('rol/eliminarrol.html', form=form)
 
 @app.route('/buscar', methods=['GET', 'POST'])
 def buscar():
@@ -64,13 +65,13 @@ def buscar():
     r = db_session.query(Rol).filter_by(codigo=valor)
     if r == None:
         return 'no existe concordancia'
-    return render_template('listarol.html', roles = r)
+    return render_template('rol/listarol.html', roles = r)
 
 @app.route('/listarol')
-def listar():
+def listarol():
     init_db(db_session)
     roles = db_session.query(Rol).order_by(Rol.id)
-    return render_template('listarol.html', roles = roles)
+    return render_template('rol/listarol.html', roles = roles)
 
 """Lanza un mensaje de error en caso de que la pagina solicitada no exista"""
 @app.errorhandler(404)
@@ -83,9 +84,4 @@ def shutdown_session(response):
     db_session.remove()
     return response
 
-app.add_url_rule('/',
-                 view_func= RolControlador.as_view('rol'),
-                 methods=["GET","POST"])
 
-app.debug = True
-app.run()

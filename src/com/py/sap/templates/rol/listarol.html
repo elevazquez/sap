@@ -1,6 +1,7 @@
-{% extends "base.html" %} 
+{% extends "principal.html" %} 
 {% block content %}
 <div class="primary">
+<div >
 <h1>Roles</h1>
 <form id=buscar method=get action="/buscar">
 		<input type="text" name= "patron" />
@@ -23,7 +24,7 @@
 	</TR>
 	{% for rol in roles %}
 	<TR>
-		<TH class="c4"><a href="{{ url_for('editar', rol = rol) }}"><img src="/home/lila/Descargas/e.jepg" alt="Editar" border="0" height="10" width="10"></a></TH>
+		<TH class="c4"><a href="{{ url_for('editar', rol = rol) }}"><img src="/images/social_email.png" alt="Editar" border="0" height="10" width="10"></a></TH>
 		<TD class="c3"><SPAN>{{rol.id|e}}</SPAN></TD>
 		<TD class="c4"><SPAN>{{rol.codigo|e}}</SPAN></TD>
 		<TD class="c5"><SPAN>{{rol.descripcion|e}}</SPAN></TD>
@@ -34,5 +35,6 @@
 	</TR>
 	{% endfor %}
 </table>
- </div>
+</div>
+</div>
 {% endblock %}
