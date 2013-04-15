@@ -180,9 +180,9 @@ strong, b {
 /* Images */
 img {
     background: #F3F4F5;
-    border: 1px solid #DEDFE0;
-	padding: 15px;
-
+    border: 0px;
+	padding: 0px;
+	
     -moz-border-radius: 3px;
     -webkit-border-radius: 3px;
     border-radius: 3px;
@@ -206,7 +206,7 @@ th, td {
   	border-style: solid;
 }
 th {
-  	padding: .8em 1em;
+  	padding: .2em 1em;
 	background: #2C76A6;
   	border-color: #308ABA #308ABA #246F97 #308ABA;
 	color: #fff;
@@ -216,7 +216,7 @@ th {
 }
 td {
 	border-color: #E9E9E9;
-	padding: .7em 1em;
+	padding: .2em 1em;
 }
 
 /* Form */
@@ -244,7 +244,7 @@ form label {
     font-family: 'Lucida Grande', 'Lucida Sans Unicode', 'Lucida Sans', Verdana, Sans-Serif;
     font-weight: bold;
     line-height: 24px;
-    font-size: 13px;
+    font-size: 17px;
     margin: 0 0 5px 0;
     text-shadow: 1px 1px 0 rgba(255, 255, 255, 1);
     color:#666666;
