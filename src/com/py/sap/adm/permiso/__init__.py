@@ -24,8 +24,8 @@ def flash_errors(form):
             ))
 
 """ Funcion para agregar registros a la tabla Permiso""" 
-@app.route('/permiso/addpermiso', methods=['GET', 'POST'])
-def addpermiso():
+@app.route('/permiso/nuevopermiso', methods=['GET', 'POST'])
+def nuevopermiso():
     form = PermisoFormulario(request.form)
     flash('mensaje','error')
     if request.method == 'POST' and form.validate():
@@ -35,7 +35,7 @@ def addpermiso():
         db_session.commit()
         flash('El permiso ha sido registrado con exito')
         return redirect('/permiso/administrarpermiso')
-    return render_template('permiso/addpermiso.html', form=form)
+    return render_template('permiso/nuevopermiso.html', form=form)
 
 @app.route('/permiso/editarpermiso', methods=['GET', 'POST'])
 def editarpermiso():
