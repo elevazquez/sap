@@ -26,7 +26,7 @@ def add():
         db_session.add(rol)
         db_session.commit()
         message = 'Rol creado'
-        return redirect('/listarol') #/listarol
+        return redirect('/administrarrol') #/listarol
     return render_template('rol/nuevorol.html', form=form)
 
 @app.route('/editar', methods=['GET', 'POST'])
@@ -38,7 +38,7 @@ def editar():
         form.populate_obj(rol)
         db_session.merge(rol)
         db_session.commit()
-        return redirect('/listarol')
+        return redirect('/administrarrol')
     return render_template('rol/actualizarrol.html', form=form)
 
 @app.route('/eliminar', methods=['GET', 'POST'])
@@ -49,7 +49,7 @@ def eliminar():
     init_db(db_session)
     db_session.delete(rol)
     db_session.commit()
-    return redirect('/listarol')
+    return redirect('/administrarrol')
     
 @app.route('/buscar', methods=['GET', 'POST'])
 def buscar():
@@ -58,13 +58,13 @@ def buscar():
     r = db_session.query(Rol).filter_by(codigo=valor)
     if r == None:
         return 'no existe concordancia'
-    return render_template('rol/listarol.html', roles = r)
+    return render_template('rol/administrarrol.html', roles = r)
 
-@app.route('/listarol')
-def listarol():
+@app.route('/administrarrol')
+def administrarrol():
     init_db(db_session)
     roles = db_session.query(Rol).order_by(Rol.codigo)
-    return render_template('rol/listarol.html', roles = roles)
+    return render_template('rol/administrarrol.html', roles = roles)
 
 """Lanza un mensaje de error en caso de que la pagina solicitada no exista"""
 @app.errorhandler(404)
