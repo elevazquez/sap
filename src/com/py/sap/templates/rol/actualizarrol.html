@@ -3,10 +3,8 @@
 <div class="primary">
 	<h1>Modificar Rol</h1>
 	<form id=editar method=post action="/editar">
-  		<dl>
-    		<div><label>Código</label><input type="text" name="codigo" value="{{request.args.get('cod')}}" id="codigo" readonly="true"/></div>
-    		<div><label>Descripción</label><input type="text" name="descripcion" value="{{request.args.get('des')}}" id="descripcion" /></div>
-  		</dl>
+  			<label>Código</label><input type="text" name="codigo" value="{{request.args.get('cod')}}" id="codigo" readonly="true"/>
+    		<label>Descripción</label><input type="text" name="descripcion" value="{{request.args.get('des')}}" id="descripcion" />
   		<p><input type=submit value=Guardar>
   		<input type="button" value="Cancelar"  onClick="javascript:history.back()"> 
 	</form>
