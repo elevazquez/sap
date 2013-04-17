@@ -326,7 +326,7 @@ form input.button {
     float: left;
     height: 90px;
     width: 100%;
-    background-image: url(images/header-bg.jpg);
+    background-image: url(images/header-bg.png);
     background-repeat:repeat-x;
 }
 header {

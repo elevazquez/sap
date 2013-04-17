@@ -15,6 +15,6 @@ def init_db(db_session):
     from com.py.sap.adm.mod.Rol import Rol
     from com.py.sap.adm.mod.Usuario import Usuario
     from com.py.sap.adm.mod.Recurso import Recurso
-    from com.py.sap.adm.mod.Proyecto import Proyecto
+    from com.py.sap.adm.mod.Permiso import Permiso
     Base.metadata.create_all(bind=engine)
     
