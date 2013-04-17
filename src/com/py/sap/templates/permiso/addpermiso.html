@@ -2,7 +2,7 @@
 {% block content %}
 <div class="primary">
 	<h1>Agregar Permiso</h1>
-	<form id=addpermiso method=post action="permiso/addpermiso">
+	<form id=addpermiso method=post action="/permiso/addpermiso">
     	{{ form.codigo.label }} {{ form.codigo()}}
     	{{ form.descripcion.label }} {{ form.descripcion() }}
     	{{ form.recurso.label }} {{ form.recurso() }}

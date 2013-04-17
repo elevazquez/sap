@@ -1,8 +1,8 @@
 {% extends "principal.html" %} 
 {% block content %}
 <div class="primary">
-	<h1>Modificar Rol</h1>
-	<form id=editar method=post action="/editar">
+	<h1>Modificar Permiso</h1>
+	<form id=editar method=post action="/permiso/editarpermiso">
     		<label>Código</label> {{ form.codigo() }}
     		<label>Descripción</label> {{ form.descripcion() }}
   		<p><input type=submit value=Guardar>

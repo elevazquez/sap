@@ -27,17 +27,18 @@ def flash_errors(form):
 @app.route('/permiso/addpermiso', methods=['GET', 'POST'])
 def addpermiso():
     form = PermisoFormulario(request.form)
+    flash('mensaje','error')
     if request.method == 'POST' and form.validate():
-        flash_errors(form)
         init_db(db_session)
-        permiso = Permiso(form.codigo.data, form.descripcion.data, form.recurso.data)
+        permiso = Permiso(form.codigo.data, form.descripcion.data, 1)
         db_session.add(permiso)
         db_session.commit()
+        flash('El permiso ha sido registrado con exito')
         return redirect('/permiso/administrarpermiso')
     return render_template('permiso/addpermiso.html', form=form)
 
 @app.route('/permiso/editarpermiso', methods=['GET', 'POST'])
-def editar():
+def editarpermiso():
     form = PermisoFormulario(request.form)
     init_db(db_session)
     permiso = db_session.query(Permiso).filter_by(codigo=form.nombre.data).first()  
@@ -50,7 +51,7 @@ def editar():
     return render_template('permiso/editarpermiso.html', form=form)
 
 @app.route('/permiso/eliminarpermiso', methods=['GET', 'POST'])
-def eliminar():
+def eliminarpermiso():
     #rol = request.current_user
     form = PermisoFormulario(request.form)
     init_db(db_session)
@@ -64,17 +65,16 @@ def eliminar():
         return redirect('/permiso/administrarpermiso')
     return render_template('permiso/eliminarpermiso.html', form=form)
 
-@app.route('/permiso/buscar', methods=['GET', 'POST'])
-def buscar():
+@app.route('/permiso/buscarpermiso', methods=['GET', 'POST'])
+def buscarpermiso():
     valor = request.args['patron']
     init_db(db_session)
-    p = db_session.query(Permiso).filter_by(nombre=valor)
-    if p == None:
-        return 'no existe concordancia'
+    p = db_session.query(Permiso).filter_by(codigo=valor)
     return render_template('permiso/administrarpermiso.html', permisos = p)
 
 @app.route('/permiso/administrarpermiso')
 def administrarpermiso():
+    flash('permiso listado')
     init_db(db_session)
     permisos = db_session.query(Permiso).order_by(Permiso.id)
     return render_template('permiso/administrarpermiso.html', permisos = permisos)
