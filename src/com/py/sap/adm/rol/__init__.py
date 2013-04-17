@@ -32,8 +32,6 @@ def add():
 @app.route('/editar', methods=['GET', 'POST'])
 def editar():
     form = RolFormulario(request.form)
-    if (form.codigo.data == None) : request.args.get('cod')
-    if (form.descripcion.data == None) : request.args.get('des')
     init_db(db_session)
     rol = db_session.query(Rol).filter_by(codigo=form.codigo.data).first()  
     if request.method == 'POST' and form.validate():
@@ -45,24 +43,17 @@ def editar():
 
 @app.route('/eliminar', methods=['GET', 'POST'])
 def eliminar():
-    #form = RolFormulario(request.form)
     cod = request.args.get('cod')
     init_db(db_session)
-    #rol = db_session.query(Rol).filter_by(codigo=form.codigo.data).first()  
     rol = db_session.query(Rol).filter_by(codigo=cod).first()  
-    #form = RolFormulario(request.form, rol)
-    #if request.method == 'POST' :
-        #form.populate_obj(rol)
     init_db(db_session)
     db_session.delete(rol)
     db_session.commit()
     return redirect('/listarol')
-    #return render_template('rol/listarol.html')
-
+    
 @app.route('/buscar', methods=['GET', 'POST'])
 def buscar():
     valor = request.args['patron']
-    #v = valor.getvalue().toString()
     init_db(db_session)
     r = db_session.query(Rol).filter_by(codigo=valor)
     if r == None:
@@ -72,7 +63,7 @@ def buscar():
 @app.route('/listarol')
 def listarol():
     init_db(db_session)
-    roles = db_session.query(Rol).order_by(Rol.id)
+    roles = db_session.query(Rol).order_by(Rol.codigo)
     return render_template('rol/listarol.html', roles = roles)
 
 """Lanza un mensaje de error en caso de que la pagina solicitada no exista"""

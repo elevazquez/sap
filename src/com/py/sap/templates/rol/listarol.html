@@ -12,7 +12,6 @@
 		} 
 	} 
 </SCRIPT> 
-
 	
 <h1>Roles</h1>
 <form id=buscar method=get action="/buscar">
@@ -24,7 +23,6 @@
 <table border="1">
 	<TR>
 		<TH class="c3"></TH>
-		<TH class="c3">Id</TH>
 		<TH class="c4">Código</TH>
 		<TH class="c5">Descripción</TH>
 	</TR>
@@ -32,13 +30,14 @@
 	<TR>
 		<TD class="c4"><a href="{{ url_for('editar', cod=rol.codigo, des=rol.descripcion) }}" ><img src="../static/images/e.png" alt="Editar" height="20" width="20" title="Editar" style="vertical-align: middle;"></a>
 		<a href="{{ url_for('eliminar', cod=rol.codigo) }}" onclick="javascript:return confirmar()"><img src="../static/images/b.png" alt="Eliminar" height="20" width="20" title="Eliminar" style="vertical-align: middle;"> </a></TD>
-		<TD class="c3" id="idrol"><SPAN>{{rol.id|e}}</SPAN></TD>
 		<TD class="c4"><SPAN>{{rol.codigo|e}}</SPAN></TD>
 		<TD class="c5"><SPAN>{{rol.descripcion|e}}</SPAN></TD>
 	</TR>
 	{% else %}
   	<TR>
-    	<li><em>roles no encontrados</em></li>
+    	<script language="Javascript" type="text/javascript">
+    		alert("No se encontraron Roles que coincidan con el texto introducido.");
+		</script> 
 	</TR>
 	{% endfor %}
 </table>
