@@ -13,18 +13,27 @@ db_session = scoped_session(sessionmaker(autocommit=False,
 class RolControlador(flask.views.MethodView):
     def get(self):
         return flask.render_template('rol.html')
-    
-""" Funcion para agregar registros a la tabla Rol""" 
+
+
+def flash_errors(form):
+    for field, errors in form.errors.items():
+        for error in errors:
+            flash(u"Error in the %s field - %s" % (
+                getattr(form, field).label.text,
+                error
+            ))
+
+""" Funcion para agregar registros a la tabla Permiso""" 
 @app.route('/permiso/addpermiso', methods=['GET', 'POST'])
-def add():
+def addpermiso():
     form = PermisoFormulario(request.form)
     if request.method == 'POST' and form.validate():
+        flash_errors(form)
         init_db(db_session)
-        permiso = Permiso(form.codigo.data, form.descripcion.data)
+        permiso = Permiso(form.codigo.data, form.descripcion.data, form.recurso.data)
         db_session.add(permiso)
         db_session.commit()
-        message = 'Permiso creado'
-        return redirect('/administrarpermiso') #/listarol
+        return redirect('/permiso/administrarpermiso')
     return render_template('permiso/addpermiso.html', form=form)
 
 @app.route('/permiso/editarpermiso', methods=['GET', 'POST'])
@@ -37,7 +46,7 @@ def editar():
         init_db(db_session)
         db_session.merge(permiso)
         db_session.commit()
-        return redirect('/administrarpermiso')
+        return redirect('/permiso/administrarpermiso')
     return render_template('permiso/editarpermiso.html', form=form)
 
 @app.route('/permiso/eliminarpermiso', methods=['GET', 'POST'])
@@ -52,7 +61,7 @@ def eliminar():
         init_db(db_session)
         db_session.delete(permiso)
         db_session.commit()
-        return redirect('/administrarpermiso')
+        return redirect('/permiso/administrarpermiso')
     return render_template('permiso/eliminarpermiso.html', form=form)
 
 @app.route('/permiso/buscar', methods=['GET', 'POST'])
