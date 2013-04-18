@@ -15,14 +15,14 @@ class Fase (Base):
     proyecto = relationship('Proyecto', backref=backref('proyecto', lazy='dynamic'))
     
     def __init__(self, nro_orden=None, nombre=None, descripcion=None, estado=None, fecha_inicio=None,
-    fecha_fin=None, proyecto=None):
+    fecha_fin=None, id_proyecto=None):
         self.nro_orden = nro_orden
         self.nombre = nombre
         self.descripcion = descripcion
         self.estado = estado
         self.fecha_inicio = fecha_inicio
         self.fecha_fin = fecha_fin
-        self.proyecto = proyecto
+        self.id_proyecto = id_proyecto
     
     def __repr__(self):
         return '<Fase %d %s %s %s %d %d %s>' % (self.nro_orden, self.nombre, self.descripcion, self.estado,
