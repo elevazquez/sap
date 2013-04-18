@@ -10,10 +10,10 @@ class Permiso (Base):
     id_recurso = Column(Integer, ForeignKey('recurso.id'))
     recurso = relationship('Recurso', backref=backref('recursos', lazy='dynamic'))
     
-    def __init__(self, codigo=None, descripcion=None, recurso=None):
+    def __init__(self, codigo=None, descripcion=None, id_recurso=None):
         self.codigo = codigo
         self.descripcion = descripcion 
-        self.recurso = recurso
+        self.id_recurso = id_recurso
  
     def __repr__(self):
         return '<Permiso %s %s %s>' % (self.codigo, self.descripcion, self.recurso)

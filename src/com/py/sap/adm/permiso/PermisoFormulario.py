@@ -1,4 +1,4 @@
-from wtforms import Form, TextField, validators, SelectField
+from wtforms import Form, TextField, validators, SelectField, IntegerField
 from com.py.sap.adm.mod.Recurso import Recurso
 from com.py.sap.util.database import engine
 from sqlalchemy.orm import scoped_session, sessionmaker
@@ -12,5 +12,5 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 class PermisoFormulario(Form):
     codigo = TextField('Codigo', [validators.Length(min=1, max=50), validators.Required()])
     descripcion = TextField('Descripcion', [validators.Length(min=2, max=100)])
-    recurso = TextField('Recurso', [validators.Length(min=1, max=10)])
+    recurso = IntegerField('Recurso', [validators.Required()])
     #recurso = SelectField('Recurso', choices=[(r.id, r.nombre) for r in db_session.query(Recurso).order_by(Recurso.nombre)])
