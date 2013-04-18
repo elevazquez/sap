@@ -14,7 +14,6 @@ class RolControlador(flask.views.MethodView):
     def get(self):
         return flask.render_template('rol.html')
 
-
 def flash_errors(form):
     for field, errors in form.errors.items():
         for error in errors:
@@ -24,18 +23,17 @@ def flash_errors(form):
             ))
 
 """ Funcion para agregar registros a la tabla Permiso""" 
-@app.route('/permiso/addpermiso', methods=['GET', 'POST'])
-def addpermiso():
+@app.route('/permiso/nuevopermiso', methods=['GET', 'POST'])
+def nuevopermiso():
     form = PermisoFormulario(request.form)
-    flash('mensaje','error')
     if request.method == 'POST' and form.validate():
         init_db(db_session)
-        permiso = Permiso(form.codigo.data, form.descripcion.data, 1)
+        permiso = Permiso(form.codigo.data, form.descripcion.data, form.recurso.data)
         db_session.add(permiso)
         db_session.commit()
-        flash('El permiso ha sido registrado con exito')
+        flash('El permiso ha sido registrado con exito','info')
         return redirect('/permiso/administrarpermiso')
-    return render_template('permiso/addpermiso.html', form=form)
+    return render_template('permiso/nuevopermiso.html', form=form)
 
 @app.route('/permiso/editarpermiso', methods=['GET', 'POST'])
 def editarpermiso():
@@ -74,11 +72,10 @@ def buscarpermiso():
 
 @app.route('/permiso/administrarpermiso')
 def administrarpermiso():
-    flash('permiso listado')
     init_db(db_session)
     permisos = db_session.query(Permiso).order_by(Permiso.id)
     return render_template('permiso/administrarpermiso.html', permisos = permisos)
-
+[]
 """Lanza un mensaje de error en caso de que la pagina solicitada no exista"""
 @app.errorhandler(404)
 def page_not_found(error):
