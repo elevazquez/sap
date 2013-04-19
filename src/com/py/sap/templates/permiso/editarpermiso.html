@@ -3,10 +3,11 @@
 <div class="primary">
 	<h1>Modificar Permiso</h1>
 	<form id=editar method=post action="/permiso/editarpermiso">
-    		<label>Código</label> {{ form.codigo() }}
-    		<label>Descripción</label> {{ form.descripcion() }}
+    		{{ form.codigo.label }} {{ form.codigo()}}
+    		{{ form.descripcion.label }} {{ form.descripcion() }}
+    		{{ form.recurso.label }} {{ form.recurso() }}
   		<p><input type=submit value=Guardar>
   		<input type="button" value="Cancelar"  onClick="javascript:history.back()"> 
 	</form>
 </div>
-{% endblock %}
+{% endblock %}.8

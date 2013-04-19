@@ -11,7 +11,7 @@ import os
 db_session = scoped_session(sessionmaker(autocommit=False,
                                          autoflush=False,
                                          bind=engine))
-class RolControlador(flask.views.MethodView):
+class PermisoControlador(flask.views.MethodView):
     def get(self):
         return flask.render_template('rol.html')
 
@@ -38,37 +38,33 @@ def nuevopermiso():
 
 @app.route('/permiso/editarpermiso', methods=['GET', 'POST'])
 def editarpermiso():
-    form = PermisoFormulario(request.form)
     init_db(db_session)
-    permiso = db_session.query(Permiso).filter_by(codigo=form.nombre.data).first()  
+    p = db_session.query(Permiso).filter_by(codigo=request.args.get('codigo')).first()
+    form = PermisoFormulario(request.form,  obj=p)
+    permiso = db_session.query(Permiso).filter_by(codigo=form.codigo.data).first()  
     if request.method == 'POST' and form.validate():
         form.populate_obj(permiso)
-        init_db(db_session)
-        db_session.merge(permiso)
+        db_session.merge(p)
         db_session.commit()
         return redirect('/permiso/administrarpermiso')
     return render_template('permiso/editarpermiso.html', form=form)
 
 @app.route('/permiso/eliminarpermiso', methods=['GET', 'POST'])
 def eliminarpermiso():
-    #rol = request.current_user
-    form = PermisoFormulario(request.form)
+    cod = request.args.get('codigo')
     init_db(db_session)
-    permiso = db_session.query(Permiso).filter_by(nombre=form.codigo.data).first()  
-    #form = RolFormulario(request.form, rol)
-    if request.method == 'POST' :
-        form.populate_obj(permiso)
-        init_db(db_session)
-        db_session.delete(permiso)
-        db_session.commit()
-        return redirect('/permiso/administrarpermiso')
-    return render_template('permiso/eliminarpermiso.html', form=form)
+    rol = db_session.query(Permiso).filter_by(codigo=cod).first()
+    db_session.delete(rol)
+    db_session.commit()
+    return redirect('/permiso/administrarpermiso')
 
 @app.route('/permiso/buscarpermiso', methods=['GET', 'POST'])
 def buscarpermiso():
     valor = request.args['patron']
     parametro = request.args['parametro']
     init_db(db_session)
+    if valor=='':
+        administrarpermiso()
     if parametro == 'id_recurso':
         p = db_session.query(Permiso).from_statement("SELECT * FROM permiso where "+parametro+" = CAST("+valor+" AS Int)").all()
     else:
