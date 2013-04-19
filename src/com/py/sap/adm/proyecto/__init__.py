@@ -45,6 +45,11 @@ def editarproyecto():
     form = ProyFormulario(request.form)
     init_db(db_session)
     proyecto = db_session.query(Proyecto).filter_by(nombre=form.nombre.data).first()  
+    
+    form.estado.data.default = proyecto.estado
+    form.process()
+    
+    
     if request.method == 'POST' and form.validate():
         form.populate_obj(proyecto)
         db_session.merge(proyecto)
