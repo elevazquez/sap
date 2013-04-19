@@ -5,7 +5,7 @@
 	<form id=nuevopermiso method=post action="/permiso/nuevopermiso">
     	{{ form.codigo.label }} {{ form.codigo()}}
     	{{ form.descripcion.label }} {{ form.descripcion() }}
-    	{{ form.recurso.label }} {{ form.recurso() }}
+    	{{ form.recurso.label }} {{ form.id_recurso() }}
   		<p><input type=submit value=Guardar>
   		<input type="button" value="Cancelar"  onClick="javascript:history.back()">
 	</form>
