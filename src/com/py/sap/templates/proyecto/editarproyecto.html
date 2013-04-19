@@ -5,17 +5,12 @@
 	<form id=editarproyecto method=post action="/proyecto/editarproyecto">
   			<label>Nombre</label><input type="text" name="nombre" value="{{request.args.get('nom')}}" id="nombre" />
     		<label>Descripción</label><input type="text" name="descripcion" value="{{request.args.get('des')}}" id="descripcion"/>
-    		<label>Estado</label> <select name="estado" id="estado">
-								  	<option value="N">Nuevo</option>
-  								  	<option value="P">En Progreso</option>
-  								  	<option value="A">Anulado</option>
-  								  	<option value="F">Finalizado</option>
-								  </select>
-			<label>Cant Miembros</label><input type="number" name="cant_miembros" value="{{request.args.get('cant')}}" id="cant_miembros"/>
+    		<label>Estado</label> {{ form.estado() }}
+    		<label>Cant Miembros</label><input type="number" name="cant_miembros" value="{{request.args.get('cant')}}" id="cant_miembros"/>
     		<label>Fecha Inicio</label><input type="date" name="fecha_inicio" value="{{request.args.get('ini')}}" id="fecha_inicio"/>
     		<label>Fecha Fin</label><input type="date" name="fecha_fin" value="{{request.args.get('fin')}}" id="fecha_fin"/>
     		<label>Fecha Ult Mod</label><input type="date" name="fecha_ultima_mod" value="{{request.args.get('mod')}}" id="fecha_ultima_mod"/>
-    		<label>Líder de Proyecto</label><input type="number" name="id_usuario_lider" value="{{request.args.get('li')}}" id="id_usuario_lider"/>
+    		<label>Líder de Proyecto</label>{{ form.usuario_lider() }}
   		<p><input type=submit value=Guardar>
   		<input type="button" value="Cancelar"  onClick="javascript:history.back()"> 
 	</form>
