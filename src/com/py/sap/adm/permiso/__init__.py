@@ -4,6 +4,7 @@ import sqlalchemy
 from sqlalchemy.orm import scoped_session, sessionmaker
 from flask import Flask, render_template, request, redirect, url_for, flash 
 from com.py.sap.adm.mod.Permiso import Permiso
+from com.py.sap.adm.mod.Recurso import Recurso
 from com.py.sap.adm.permiso.PermisoFormulario import PermisoFormulario
 import flask, flask.views
 import os
@@ -40,10 +41,12 @@ def nuevopermiso():
 def editarpermiso():
     init_db(db_session)
     p = db_session.query(Permiso).filter_by(codigo=request.args.get('codigo')).first()
-    form = PermisoFormulario(request.form,  obj=p)
+    form = PermisoFormulario(request.form, obj=p)
+    form.recurso.default = p.id_recurso
+    form.process()
     permiso = db_session.query(Permiso).filter_by(codigo=form.codigo.data).first()  
     if request.method == 'POST' and form.validate():
-        form.populate_obj(permiso)
+        form.populate_obj(p)
         db_session.merge(p)
         db_session.commit()
         return redirect('/permiso/administrarpermiso')
