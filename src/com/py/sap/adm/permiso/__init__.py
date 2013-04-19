@@ -1,5 +1,6 @@
 from com.py.sap.loginC import app
 from com.py.sap.util.database import init_db, engine
+import sqlalchemy
 from sqlalchemy.orm import scoped_session, sessionmaker
 from flask import Flask, render_template, request, redirect, url_for, flash 
 from com.py.sap.adm.mod.Permiso import Permiso
@@ -66,8 +67,13 @@ def eliminarpermiso():
 @app.route('/permiso/buscarpermiso', methods=['GET', 'POST'])
 def buscarpermiso():
     valor = request.args['patron']
+    parametro = request.args['parametro']
     init_db(db_session)
-    p = db_session.query(Permiso).filter_by(codigo=valor)
+    if parametro == 'id_recurso':
+        p = db_session.query(Permiso).from_statement("SELECT * FROM permiso where "+parametro+" = CAST("+valor+" AS Int)").all()
+    else:
+        p = db_session.query(Permiso).from_statement("SELECT * FROM permiso where "+parametro+" ilike '%"+valor+"%'").all()
+    #p = db_session.query(Permiso).filter(Permiso.codigo.like('%'+valor+'%'))
     return render_template('permiso/administrarpermiso.html', permisos = p)
 
 @app.route('/permiso/administrarpermiso')
