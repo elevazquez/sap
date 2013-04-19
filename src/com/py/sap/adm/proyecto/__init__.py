@@ -65,6 +65,18 @@ def eliminarproyecto():
 @app.route('/proyecto/buscarproyecto', methods=['GET', 'POST'])
 def buscarproyecto():
     valor = request.args['patron']
+    parametro = request.args['parametro']
+    init_db(db_session)
+    if valor == "" : 
+        administrarproyecto()
+    if parametro == 'cant_miembros' or parametro == 'id_usuario_lider':
+        p = db_session.query(Proyecto).from_statement("SELECT * FROM proyecto where "+parametro+" = CAST("+valor+" AS Int)").all()
+    else:
+        p = db_session.query(Proyecto).from_statement("SELECT * FROM proyecto where "+parametro+" ilike '%"+valor+"%'").all()
+    return render_template('proyecto/administrarproyecto.html', proyectos = p)
+    
+    
+    valor = request.args['patron']
     init_db(db_session)
     r = db_session.query(Proyecto).filter_by(nombre=valor)
     if r == None:

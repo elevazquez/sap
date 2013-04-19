@@ -15,8 +15,12 @@
 	
 <h1>Roles</h1>
 <form id=buscar method=get action="/buscar">
-		<input type="text" name= "patron" />
-		<input type=submit name= "Buscar" value=Buscar />
+			<input type="text" name="patron" /> 
+			<select name=parametro>
+				<option value="codigo">Código</option>
+				<option value="descripcion">Descripción</option>
+			</select> 
+			<input type=submit name="Buscar" value=Buscar /> 
 		<a href="{{ url_for('add') }}" ><img src="../static/images/a.png" alt="Agregar" height="30" width="30" title="Agregar" ></a>
 </form>
 <p></p>

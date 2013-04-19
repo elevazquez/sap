@@ -13,10 +13,19 @@
 	} 
 </SCRIPT> 
 	
-<h1>Fases</h1>
-<form id=buscar method=get action="/fase/buscar">
-		<input type="text" name= "patron" />
-		<input type=submit name= "Buscar" value=Buscar />
+<h1>Fases</h1>		
+<form id=buscar method=get action="/fase/buscarfase">
+			<input type="text" name="patron" /> 
+			<select name=parametro>
+				<option value="nro_orden">Número</option>
+				<option value="nombre">Nombre</option>
+				<option value="descripcion">Descripción</option>
+				<option value="estado">Estado</option>
+				<option value="fecha_inicio">Fecha Inicio</option>
+				<option value="fecha_fin">Fecha Fin</option>
+				<option value="id_proyecto">Proyecto</option>
+			</select> 
+			<input type=submit name="Buscar" value=Buscar /> 			
 		<a href="{{ url_for('nuevafase') }}" ><img src="../static/images/a.png" alt="Agregar" height="30" width="30" title="Agregar" ></a>
 </form>
 <p></p>
