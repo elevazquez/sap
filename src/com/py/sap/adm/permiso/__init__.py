@@ -41,11 +41,10 @@ def nuevopermiso():
 def editarpermiso():
     init_db(db_session)
     p = db_session.query(Permiso).filter_by(codigo=request.args.get('codigo')).first()
-    form = PermisoFormulario(request.form, obj=p)
-    form.recurso.default = p.id_recurso
-    form.process()
-    permiso = db_session.query(Permiso).filter_by(codigo=form.codigo.data).first()  
+    form = PermisoFormulario(request.form)
+    form = PermisoFormulario(obj=p)
     if request.method == 'POST' and form.validate():
+        print('ingreso')
         form.populate_obj(p)
         db_session.merge(p)
         db_session.commit()
