@@ -20,35 +20,45 @@
 		<a href="{{ url_for('nuevafase') }}" ><img src="../static/images/a.png" alt="Agregar" height="30" width="30" title="Agregar" ></a>
 </form>
 <p></p>
+{% with errors = get_flashed_messages(category_filter=["info"]) %}
+{% if errors %}
+<div class="block-message">
+  <a class="close" href="{{ url_for( 'administrarfase' ) }}" dir="rtl">×</a>
+  <ul>
+    {%- for msg in errors %}
+    <li>{{ msg }}</li>
+    {% endfor -%}
+  </ul>
+</div>
+{% endif %}
+{% endwith %}
 <table border="1">
 	<TR>
-		<TH class="c3"></TH>
-		<TH class="c4">Número</TH>
-		<TH class="c4">Nombre</TH>
-		<TH class="c5">Descripción</TH>
+		<TH class="c1"></TH>
+		<TH class="c2">Número</TH>
+		<TH class="c3">Nombre</TH>
+		<TH class="c4">Descripción</TH>
 		<TH class="c5">Estado</TH>
-		<TH class="c5">Fecha Inicio</TH>
-		<TH class="c5">Fecha Fin</TH>
-		<TH class="c5">Proyecto</TH>
+		<TH class="c6">Fecha Inicio</TH>
+		<TH class="c7">Fecha Fin</TH>
+		<TH class="c8">Proyecto</TH>
 	</TR>
 	{% for fase in fases %}
 	<TR>
-		<TD class="c4"><a href="{{ url_for('editarfase', cod=fase.nro_orden, des=fase.descripcion) }}" ><img src="../static/images/e.png" alt="Editar" height="20" width="20" title="Editar" style="vertical-align: middle;"></a>
-		<a href="{{ url_for('eliminarfase', id=fase.id) }}" onclick="javascript:return confirmar()"><img src="../static/images/b.png" alt="Eliminar" height="20" width="20" title="Eliminar" style="vertical-align: middle;"> </a></TD>
-		<TD class="c4"><SPAN>{{fase.nro_orden|e}}</SPAN></TD>
-		<TD class="c5"><SPAN>{{fase.nombre|e}}</SPAN></TD>
-		<TD class="c5"><SPAN>{{fase.descripcion|e}}</SPAN></TD>
+		<TD class="c1"><a href="{{ url_for('editarfase', nro=fase.nro_orden, nom=fase.nombre, 
+		des=fase.descripcion, es=fase.estado, ini=fase.fecha_inicio, fin=fase.fecha_fin, pry=fase.id_proyecto) }}" ><img src="../static/images/e.png" alt="Editar" height="20" width="20" title="Editar" style="vertical-align: middle;"></a>
+		<a href="{{ url_for('eliminarfase', nro=fase.nro_orden, pry=fase.id_proyecto) }}" onclick="javascript:return confirmar()"><img src="../static/images/b.png" alt="Eliminar" height="20" width="20" title="Eliminar" style="vertical-align: middle;"> </a></TD>
+		<TD class="c2"><SPAN>{{fase.nro_orden|e}}</SPAN></TD>
+		<TD class="c3"><SPAN>{{fase.nombre|e}}</SPAN></TD>
+		<TD class="c4"><SPAN>{{fase.descripcion|e}}</SPAN></TD>
 		<TD class="c5"><SPAN>{{fase.estado|e}}</SPAN></TD>
-		<TD class="c5"><SPAN>{{fase.fecha_inicio|e}}</SPAN></TD>
-		<TD class="c5"><SPAN>{{fase.fecha_fin|e}}</SPAN></TD>
-		<TD class="c5"><SPAN>{{fase.id_proyecto|e}}</SPAN></TD>
+		<TD class="c6"><SPAN>{{fase.fecha_inicio|e}}</SPAN></TD>
+		<TD class="c7"><SPAN>{{fase.fecha_fin|e}}</SPAN></TD>
+		<TD class="c8"><SPAN>{{fase.id_proyecto|e}}</SPAN></TD>
 	</TR>
 	{% else %}
   	<TR>
-    	<script language="Javascript" type="text/javascript">
-    		alert("No se encontraron Fases que coincidan con el texto introducido.");
-    		history.back();
-		</script> 
+		<em>Sin registro de fases</em>
 	</TR>
 	{% endfor %}
 </table>

@@ -25,7 +25,7 @@ def add():
         rol = Rol(form.codigo.data, form.descripcion.data)
         db_session.add(rol)
         db_session.commit()
-        message = 'Rol creado'
+        flash('El rol ha sido registrado con exito','info')
         return redirect('/administrarrol') #/listarol
     return render_template('rol/nuevorol.html', form=form)
 
