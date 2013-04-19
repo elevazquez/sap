@@ -54,11 +54,13 @@ def eliminar():
 @app.route('/buscar', methods=['GET', 'POST'])
 def buscar():
     valor = request.args['patron']
+    parametro = request.args['parametro']
     init_db(db_session)
-    r = db_session.query(Rol).filter_by(codigo=valor)
-    if r == None:
-        return 'no existe concordancia'
-    return render_template('rol/administrarrol.html', roles = r)
+    if valor == "" : 
+        administrarrol()
+    p = db_session.query(Rol).from_statement("SELECT * FROM rol where "+parametro+" ilike '%"+valor+"%'").all()
+    return render_template('rol/administrarrol.html', roles = p)
+
 
 @app.route('/administrarrol')
 def administrarrol():

@@ -65,11 +65,15 @@ def eliminarfase():
 @app.route('/fase/buscarfase', methods=['GET', 'POST'])
 def buscarfase():
     valor = request.args['patron']
+    parametro = request.args['parametro']
     init_db(db_session)
-    r = db_session.query(Fase).filter_by(nro_orden=valor)
-    if r == None:
-        return 'no existe concordancia'
-    return render_template('fase/administrarfase.html', fases = r)
+    if valor == "" : 
+        p = db_session.query(Fase).order_by(Fase.nro_orden)
+    elif parametro == 'nro_orden' or parametro == 'id_proyecto':
+        p = db_session.query(Fase).from_statement("SELECT * FROM fase where "+parametro+" = CAST("+valor+" AS Int)").all()
+    else:
+        p = db_session.query(Fase).from_statement("SELECT * FROM fase where "+parametro+" ilike '%"+valor+"%'").all()
+    return render_template('fase/administrarfase.html', fases = p)
 
 @app.route('/fase/administrarfase')
 def administrarfase():
