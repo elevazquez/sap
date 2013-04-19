@@ -20,6 +20,18 @@
 		<a href="{{ url_for('add') }}" ><img src="../static/images/a.png" alt="Agregar" height="30" width="30" title="Agregar" ></a>
 </form>
 <p></p>
+{% with errors = get_flashed_messages(category_filter=["info"]) %}
+{% if errors %}
+<div class="block-message">
+  <a class="close" href="{{ url_for( 'administrarrol' ) }}" dir="rtl">×</a>
+  <ul>
+    {%- for msg in errors %}
+    <li>{{ msg }}</li>
+    {% endfor -%}
+  </ul>
+</div>
+{% endif %}
+{% endwith %}
 <table border="1">
 	<TR>
 		<TH class="c3"></TH>
@@ -35,10 +47,7 @@
 	</TR>
 	{% else %}
   	<TR>
-    	<script language="Javascript" type="text/javascript">
-    		alert("No se encontraron Roles que coincidan con el texto introducido.");
-    		history.back();
-		</script> 
+		<em>Sin registro de roles</em>
 	</TR>
 	{% endfor %}
 </table>

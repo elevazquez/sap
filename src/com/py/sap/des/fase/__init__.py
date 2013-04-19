@@ -16,41 +16,51 @@ class FaseControlador(flask.views.MethodView):
     def get(self):
         return flask.render_template('fase.html')
     
+def flash_errors(form):
+    for field, errors in form.errors.items():
+        for error in errors:
+            flash(u"Error in the %s field - %s" % (
+                getattr(form, field).label.text,
+                error
+            ))
+                
 """ Funcion para agregar registros a la tabla Fase""" 
 @app.route('/fase/nuevafase', methods=['GET', 'POST'])
 def nuevafase():
     form = FaseFormulario(request.form)
-    if request.method == 'POST' and form.validate():
+    if request.method == 'POST' :
         init_db(db_session)
-        fase = Fase(form.nro_orden.data, form.descripcion.data, 
+        fase = Fase(form.nro_orden.data, form.nombre.data, form.descripcion.data, 
                     form.estado.data, form.fecha_inicio.data, 
                     form.fecha_fin.data, form.id_proyecto.data)
         db_session.add(fase)
         db_session.commit()
-        return redirect('/administrarfase') 
+        flash('La fase ha sido registrada con exito','info')
+        return redirect('/fase/administrarfase') 
     return render_template('fase/nuevafase.html', form=form)
 
 @app.route('/fase/editarfase', methods=['GET', 'POST'])
 def editarfase():
     form = FaseFormulario(request.form)
     init_db(db_session)
-    fase = db_session.query(Fase).filter_by(id=form.id.data).first()  
+    fase = db_session.query(Fase).filter_by(nro_orden=form.nro_orden.data).filter_by(id_proyecto=form.id_proyecto.data).first()  
     if request.method == 'POST' and form.validate():
         form.populate_obj(fase)
         db_session.merge(fase)
         db_session.commit()
-        return redirect('/administrarfase')
+        return redirect('/fase/administrarfase')
     return render_template('fase/editarfase.html', form=form)
 
 @app.route('/fase/eliminarfase', methods=['GET', 'POST'])
 def eliminarfase():
-    id = request.args.get('id')
+    nro = request.args.get('nro')
+    pry = request.args.get('pry')
     init_db(db_session)
-    fase = db_session.query(Fase).filter_by(id=id).first()  
+    fase = db_session.query(Fase).filter_by(nro_orden=nro).filter_by(id_proyecto=pry).first()  
     init_db(db_session)
     db_session.delete(fase)
     db_session.commit()
-    return redirect('/administrarfase')
+    return redirect('/fase/administrarfase')
     
 @app.route('/fase/buscarfase', methods=['GET', 'POST'])
 def buscarfase():
