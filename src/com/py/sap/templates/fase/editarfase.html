@@ -6,11 +6,11 @@
   			<label>Número</label><input type="number" name="nro_orden" value="{{request.args.get('nro')}}" id="nro_orden" readonly="true"/>
     		<label>Nombre</label><input type="text" name="nombre" value="{{request.args.get('nom')}}" id="nombre" />
     		<label>Descripción</label><input type="text" name="descripcion" value="{{request.args.get('des')}}" id="descripcion"/>
-    		<label>Estado</label> <select name="estado" id="estado">
-								  	<option value="I">Inicial</option>
-  								  	<option value="P">En Progreso</option>
-  								  	<option value="L">En Línea Base</option>
-  								  	<option value="A">Aprobado</option>
+    		<label>Estado</label> <select name="estado" id="estado" selected="{{request.args.get('es')}}">
+								  	<option value="I" >Inicial</option>
+  								  	<option value="P" >En Progreso</option>
+  								  	<option value="L" >En Línea Base</option>
+  								  	<option value="A" >Aprobado</option>
 								  </select>
     		<label>Fecha Inicio</label><input type="date" name="fecha_inicio" value="{{request.args.get('ini')}}" id="fecha_inicio"/>
     		<label>Fecha Fin</label><input type="date" name="fecha_fin" value="{{request.args.get('fin')}}" id="fecha_fin"/>

@@ -67,7 +67,7 @@
 		<TD class="c6"><SPAN>{{proyecto.fecha_inicio|e}}</SPAN></TD>
 		<TD class="c7"><SPAN>{{proyecto.fecha_fin|e}}</SPAN></TD>
 		<TD class="c7"><SPAN>{{proyecto.fecha_ultima_mod|e}}</SPAN></TD>
-		<TD class="c8"><SPAN>{{proyecto.id_usuario_lider|e}}</SPAN></TD>
+		<TD class="c8"><SPAN>{{proyecto.usuario_lider.nombre|e}} {{proyecto.usuario_lider.apellido|e}}</SPAN></TD>
 	</TR>
 	{% else %}
   	<TR>

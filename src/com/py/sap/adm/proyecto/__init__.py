@@ -33,7 +33,7 @@ def nuevoproyecto():
         pry = Proyecto(form.nombre.data, form.descripcion.data, 
                     form.estado.data, form.cant_miembros.data, 
                     form.fecha_inicio.data, form.fecha_fin.data, 
-                    form.fecha_ultima_mod, form.id_usuario_lider.data)
+                    form.fecha_ultima_mod.data, form.usuario_lider.data)
         db_session.add(pry)
         db_session.commit()
         flash('El Proyecto ha sido registrado con exito','info')
