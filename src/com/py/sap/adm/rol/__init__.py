@@ -39,7 +39,7 @@ def editar():
         db_session.merge(rol)
         db_session.commit()
         return redirect('/administrarrol')
-    return render_template('rol/actualizarrol.html', form=form)
+    return render_template('rol/editarrol.html', form=form)
 
 @app.route('/eliminar', methods=['GET', 'POST'])
 def eliminar():
