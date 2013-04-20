@@ -39,11 +39,12 @@ def nuevopermiso():
 
 @app.route('/permiso/editarpermiso', methods=['GET', 'POST'])
 def editarpermiso():
-    init_db(db_session)
+   
     p = db_session.query(Permiso).filter_by(codigo=request.args.get('codigo')).first()
     form = PermisoFormulario(request.form,p)
     permiso = db_session.query(Permiso).filter_by(codigo=request.args.get('codigo')).first()
     if request.method == 'POST':
+        init_db(db_session)
         print(form.id_recurso.data)
         print(form.codigo.data)
         print(form.descripcion.data)
