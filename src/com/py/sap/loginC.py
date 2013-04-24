@@ -4,28 +4,29 @@ from flask_principal import Principal, identity_changed, Identity, AnonymousIden
 from flask_login import LoginManager, login_user, logout_user, login_required
 from com.py.sap.util.database import init_db,engine
 from sqlalchemy.orm import scoped_session, sessionmaker
-from com.py.sap.adm.mod.Usuario import Usuario
 from wtforms import Form
+from com.py.sap.adm.mod.Usuario import Usuario
+from com.py.sap.adm.mod.UsuarioRol import UsuarioRol
 
 app = Flask(__name__)
 app.secret_key="sap"
 
-# load the extension
-#===============================================================================
-# principal = Principal(app)
-#===============================================================================
+#load the extension
+principal = Principal(app)
 
-#login se configura con la aplicacion
 #===============================================================================
-# login_manager = LoginManager()
-# login_manager.setup_app(app)
+# El login manager contiene el codigo que permite que la aplicacion y Flasklogin trabajen juntos,
+# tal como cargar el usuario desde un id, donde enviar los suarios cuando ellos necesiten
+# iniciar sesion, y similares.
 #===============================================================================
+login_manager = LoginManager()
+# configurarlo para la aplicacion
+login_manager.setup_app(app)
 
 from com.py.sap.adm.rol import *
 from com.py.sap.adm.permiso import *
 from com.py.sap.adm.proyecto import *
 from com.py.sap.des.fase import *
-from com.py.sap.Userlogin import Userlogin
 
 def get_resource_as_string(name, charset='utf-8'):
     with app.open_resource(name) as f:
@@ -37,9 +38,15 @@ db_session = scoped_session(sessionmaker(autocommit=False,
                                          autoflush=False,
                                          bind=engine))
 
+
+#===============================================================================
+# Este callback se utiliza para recargar el objeto usuario apartir del 
+# ID del usuario almacenado en la sesion.
+#===============================================================================
+@login_manager.user_loader
 def load_user(userid):
     # Return an instance of the User model
-    return db_session.query(Usuario).Get(userid)
+    return db_session.query(Usuario).get(userid)
 
 """ Pagina Principal -Login"""
 class Main(views.MethodView):
@@ -65,40 +72,46 @@ class Main(views.MethodView):
         if user == None :
             flash("Usuario o Password Incorrecto", "success")
         else:
-            # Keep the user info in the session using Flask-Login
+            #Keep the user info in the session using Flask-Login
+            login_user(user)
+            #Tell Flask-Principal the identity changed
+            identity_changed.send(current_app._get_current_object(),
+                                 identity=Identity(user.id))
+            
+            is_administrador(user.id)
             #===================================================================
-            # user = Userlogin(user)
-            # login_user(user)
+            # session['username'] = username
             #===================================================================
-            # Tell Flask-Principal the identity changed
-            #===================================================================
-            # identity_changed.send(current_app._get_current_object(),
-            #                      identity=Identity(user.id))
-            #===================================================================
-            session['username'] = username
         return redirect(url_for('index'))
 
-
 """ funcion llamada cuando el usuario cierra sesion"""
+# el decorator indica que la vista requiere que los usuarios esten logueados
 @app.route('/logout')
+@login_required
 def logout():  
     # Remove the user information from the session
-    #logout_user()
+    logout_user()
 
-    # Remove session keys set by Flask-Principal
-    #===========================================================================
-    # for key in ('identity.name', 'identity.auth_type'):
-    #    session.pop(key, None)
-    #===========================================================================
-    # Tell Flask-Principal the user is anonymous
-    #===========================================================================
-    # identity_changed.send(current_app._get_current_object(),
-    #                      identity=AnonymousIdentity())
-    #===========================================================================
+    #Remove session keys set by Flask-Principal
+    for key in ('identity.name', 'identity.auth_type'):
+        session.pop(key, None)
+    #Tell Flask-Principal the user is anonymous
+    identity_changed.send(current_app._get_current_object(),
+                         identity=AnonymousIdentity())
 
-    session.pop('username', None)
+    session.pop('is_administrador', None)
     return redirect(url_for('index'))
-      
+
+def is_administrador(userid):
+    roles = db_session.query(UsuarioRol).filter_by(id_usuario=userid).all()
+    isadmin = False
+    for rol in roles:
+        if isadmin == False:
+            if rol.rol.codigo == 'administrador' :
+                session['is_administrador'] = True
+                isadmin=True
+            else:
+                session['is_administrador'] = False
         
 app.add_url_rule('/',
                  view_func= Main.as_view('index'),

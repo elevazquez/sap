@@ -1,7 +1,10 @@
-from sqlalchemy import *
+from sqlalchemy import Column, Integer, Sequence, String, Date
 from com.py.sap.util.database import Base
+#Para implementar una clase de usuario mas sencilla se hereda de UserMixin
+#implement these methods: is_authenticated(), is_active(), is_anonymous(), get_id()
+from flask_login import UserMixin
 
-class Usuario (Base):
+class Usuario (Base, UserMixin):
     __tablename__ = 'usuario'
     id = Column('id', Integer, Sequence('usuario_id_seq'), primary_key=True)
     usuario = Column('usuario', String(50), unique=True)
@@ -27,4 +30,7 @@ class Usuario (Base):
     def __repr__(self):
         return '<Usuario %s %s %s %s %s %s %s %d>' % (self.usuario, self.nombre, self.apellido,
         self.password, self.correo, self.domicilio, self.telefono, self.fecha_nac)
+    
+    def getUserName(self): 
+        return self.usuario
     

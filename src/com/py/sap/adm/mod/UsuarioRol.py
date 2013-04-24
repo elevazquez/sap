@@ -1,18 +1,8 @@
-  id serial NOT NULL,
-  id_rol integer NOT NULL,
-  id_usuario integer NOT NULL,
-  nombre character varying(50) NOT NULL,
-  descripcion character varying(100) NOT NULL,
-  CONSTRAINT pk_usuario_rol PRIMARY KEY (id ),
-  CONSTRAINT fk_usuario_rol FOREIGN KEY (id_rol)
-      REFERENCES rol (id) MATCH SIMPLE
-      ON UPDATE NO ACTION ON DELETE NO ACTION,
-  CONSTRAINT fk_usurol_usu FOREIGN KEY (id_usuario)
-      REFERENCES usuario (id) MATCH SIMPLE
-      ON UPDATE NO ACTION ON DELETE NO ACTION
-from sqlalchemy import *
-from sqlalchemy.orm import *
+from sqlalchemy import Column, Sequence, ForeignKey, Integer, String
+from sqlalchemy.orm import backref, relationship
 from com.py.sap.util.database import Base
+from com.py.sap.adm.mod.Rol import Rol
+from com.py.sap.adm.mod.Usuario import Usuario
 
 class UsuarioRol (Base):
     __tablename__ = 'usuario_rol'
@@ -22,14 +12,14 @@ class UsuarioRol (Base):
     id_rol = Column(Integer, ForeignKey('rol.id'))
     rol = relationship('Rol', backref=backref('roles', lazy='dynamic'))
     id_usuario = Column(Integer, ForeignKey('usuario.id'))
-    usuario = relationship('Usuario', backref=backref('usuarios', lazy='dynamic'))
+    usuario = relationship('Usuario', backref=backref('usuariosroles', lazy='dynamic'))
     
-    def __init__(self, nombre=None, descripcion=None, rol=None, usuario=None):
+    def __init__(self, nombre=None, descripcion=None, rol=None, id_usuario=None):
         self.nombre = nombre
         self.descripcion = descripcion
-        self.rol = fase
-        self.usuario = usuario
+        self.rol = rol
+        self.id_usuario = id_usuario
     
     def __repr__(self):
-        return '<Usuario Rol %s %s %s %s>' % (self.nombre, self.descripcion, self.rol, self.usuario)
+        return '<Usuario Rol %s %s %s %s>' % (self.nombre, self.descripcion, self.rol, self.id_usuario)
     

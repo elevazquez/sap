@@ -1,6 +1,7 @@
-from sqlalchemy import *
-from sqlalchemy.orm import *
+from sqlalchemy import Integer, Sequence, String, Column, ForeignKey
+from sqlalchemy.orm import backref, relationship
 from com.py.sap.util.database import Base
+from com.py.sap.adm.mod.Recurso import Recurso
 
 class Permiso (Base):
     __tablename__ = 'permiso'

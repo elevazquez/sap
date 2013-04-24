@@ -1,6 +1,7 @@
 from sqlalchemy import *
 from sqlalchemy.orm import *
 from com.py.sap.util.database import Base
+from com.py.sap.adm.mod.Usuario import Usuario
 
 class Proyecto (Base):
     __tablename__ = 'proyecto'
@@ -13,7 +14,7 @@ class Proyecto (Base):
     fecha_fin = Column('fecha_fin', Date)
     fecha_ultima_mod = Column('fecha_ultima_mod', Date)
     id_usuario_lider = Column(Integer, ForeignKey('usuario.id'))
-    usuario_lider = relationship('Usuario', backref=backref('usuarios', lazy='dynamic'))
+    usuario = relationship('Usuario', backref=backref('usuarios', lazy='dynamic'))
     
     def __init__(self, nombre=None, descripcion=None, estado=None, cant_miembros=None, fecha_inicio=None,
     fecha_fin=None, fecha_ultima_mod=None, id_usuario_lider=None):
@@ -29,5 +30,5 @@ class Proyecto (Base):
     def __repr__(self):
         return '<Proyecto %s %s %s %d %d %d %d %s>' % (self.nombre, self.descripcion, self.estado,
         self.cant_miembros, self.fecha_inicio, self.fecha_fin, self.fecha_ultima_mod,
-        self.usuario_lider)
+        self.id_usuario_lider)
     

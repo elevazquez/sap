@@ -6,9 +6,7 @@
     <title>Sap</title>
     <style type=text/css>{{ get_resource_as_string('static/plantilla.css') }}</style>
 </head>
-
-
-
+<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
 <body id="arriba">
 	<div id="header-wrap">
 			<header>
@@ -17,8 +15,10 @@
 				</hgroup>
 	
 				<div class="subscribe">
-					 {% if 'username' in session %}
-						<a href="#">{{session['username']}}</a> | <a href="{{ url_for('logout') }}">Salir</a> 
+					 {# {% if 'username' in session %} #}
+					 {% if current_user.is_authenticated() %}
+						<!-- <a href="#">{{session['username']}}</a> | <a href="{{ url_for('logout') }}">Salir</a>  -->
+						 <a href="#">{{ current_user.getUserName() }}</a> | <a href="{{ url_for('logout') }}">Salir</a>   
 					 {% else %}
 					 	<a href="{{ url_for('index') }} ">Entrar</a>
 					 {% endif %}
@@ -36,7 +36,8 @@
 					
 						{% block content %} {% endblock %}
 					
-				{% if 'username' in session %}
+				{# {% if 'username' in session %} #}
+				{% if current_user.is_authenticated() and session['is_administrador'] %}
 					<div >
 						<h3>Menu</h3>
 						<ul>  
