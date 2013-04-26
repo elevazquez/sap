@@ -30,7 +30,7 @@ def nuevopermiso():
     form = PermisoFormulario(request.form)
     if request.method == 'POST' and form.validate():
         init_db(db_session)
-        permiso = Permiso(form.codigo.data, form.descripcion.data, form.recurso.data)
+        permiso = Permiso(form.codigo.data, form.descripcion.data, form.id_recurso.data)
         db_session.add(permiso)
         db_session.commit()
         flash('El permiso ha sido registrado con exito','info')
@@ -39,19 +39,18 @@ def nuevopermiso():
 
 @app.route('/permiso/editarpermiso', methods=['GET', 'POST'])
 def editarpermiso():
-   
     p = db_session.query(Permiso).filter_by(codigo=request.args.get('codigo')).first()
     form = PermisoFormulario(request.form,p)
-    permiso = db_session.query(Permiso).filter_by(codigo=request.args.get('codigo')).first()
     if request.method == 'POST':
         init_db(db_session)
-        print(form.id_recurso.data)
-        print(form.codigo.data)
-        print(form.descripcion.data)
         #form.populate_obj(permiso)
-        permiso.id_recurso=form.id_recurso.data
-        permiso.descripcion=form.descripcion.data
-        db_session.merge(permiso)
+        print(form.id_recurso.data)
+        #print(form.codigo.data)
+        print(form.descripcion.data)
+        form.populate_obj(p)
+        p.id_recurso=form.id_recurso.data
+        p.descripcion=form.descripcion.data
+        db_session.merge(p)
         db_session.commit()
         return redirect('/permiso/administrarpermiso')
     return render_template('permiso/editarpermiso.html', form=form)

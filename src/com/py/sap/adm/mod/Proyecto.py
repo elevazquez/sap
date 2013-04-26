@@ -1,5 +1,5 @@
-from sqlalchemy import *
-from sqlalchemy.orm import *
+from sqlalchemy import Integer, Sequence, String, Column, Date, ForeignKey
+from sqlalchemy.orm import relationship, backref
 from com.py.sap.util.database import Base
 from com.py.sap.adm.mod.Usuario import Usuario
 
