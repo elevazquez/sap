@@ -1,5 +1,4 @@
 from wtforms import Form, TextField, validators, IntegerField, SelectField, DateField
-from com.py.sap.adm.mod.Proyecto import Proyecto
 from com.py.sap.adm.mod.Usuario import Usuario
 from com.py.sap.util.database import engine
 from sqlalchemy.orm import scoped_session, sessionmaker
@@ -16,4 +15,4 @@ class ProyFormulario(Form):
     fecha_inicio = DateField('Fecha Inicio', format='%Y-%m-%d' )
     fecha_fin = DateField('Fecha Fin', format='%Y-%m-%d' )
     fecha_ultima_mod = DateField('Fecha Ultima Modificacion', format='%Y-%m-%d' )
-    usuario_lider = SelectField('Usuario', choices=[(u.id, u.nombre + " " + u.apellido) for u in db_session.query(Usuario).order_by(Usuario.nombre)], coerce=int)
+    id_usuario_lider = SelectField('Lider de Proyecto', choices=[(u.id, u.nombre + " " + u.apellido) for u in db_session.query(Usuario).order_by(Usuario.nombre)], coerce=int)

@@ -2,6 +2,18 @@
 {% block content %}
 <div class="primary">
 	<h1>Modificar Proyecto</h1>
+		{% with errors = get_flashed_messages(category_filter=["error"]) %} {%
+		if errors %}
+			<div class="block-message">
+				<a class="close" href="#"
+					dir="rtl">×</a>
+					<ul>
+						{%- for msg in errors %}
+							<li>{{ msg }}</li> {% endfor -%}
+					</ul>
+			</div>
+		{% endif %} 
+	{% endwith %}
 	<form id=editarproyecto method=post action="/proyecto/editarproyecto">
   			<label>Nombre</label><input type="text" name="nombre" value="{{request.args.get('nom')}}" id="nombre" />
     		<label>Descripción</label><input type="text" name="descripcion" value="{{request.args.get('des')}}" id="descripcion"/>
@@ -10,7 +22,7 @@
     		<label>Fecha Inicio</label><input type="date" name="fecha_inicio" value="{{request.args.get('ini')}}" id="fecha_inicio"/>
     		<label>Fecha Fin</label><input type="date" name="fecha_fin" value="{{request.args.get('fin')}}" id="fecha_fin"/>
     		<label>Fecha Ult Mod</label><input type="date" name="fecha_ultima_mod" value="{{request.args.get('mod')}}" id="fecha_ultima_mod"/>
-    		<label>Líder de Proyecto</label>{{ form.usuario_lider() }}
+    		<label>Líder de Proyecto</label>{{ form.id_usuario_lider() }}
   		<p><input type=submit value=Guardar>
   		<input type="button" value="Cancelar"  onClick="javascript:history.back()"> 
 	</form>

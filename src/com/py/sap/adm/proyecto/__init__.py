@@ -1,5 +1,4 @@
 from com.py.sap.loginC import app
-from flask import render_template
 
 from com.py.sap.util.database import init_db, engine
 from sqlalchemy.orm import scoped_session, sessionmaker
@@ -22,7 +21,7 @@ def flash_errors(form):
             flash(u"Error in the %s field - %s" % (
                 getattr(form, field).label.text,
                 error
-            ))
+            ),'error')
                 
 """ Funcion para agregar registros a la tabla Proyecto""" 
 @app.route('/proyecto/nuevoproyecto', methods=['GET', 'POST'])
@@ -42,14 +41,17 @@ def nuevoproyecto():
 
 @app.route('/proyecto/editarproyecto', methods=['GET', 'POST'])
 def editarproyecto():
-    form = ProyFormulario(request.form)
     init_db(db_session)
+    p = db_session.query(Proyecto).filter_by(nombre=request.args.get('nom')).first()  
+    form = ProyFormulario(request.form,p)
     proyecto = db_session.query(Proyecto).filter_by(nombre=form.nombre.data).first()  
     if request.method == 'POST' and form.validate():
         form.populate_obj(proyecto)
         db_session.merge(proyecto)
         db_session.commit()
         return redirect('/proyecto/administrarproyecto')
+    else:
+        flash_errors(form)
     return render_template('proyecto/editarproyecto.html', form=form)
 
 @app.route('/proyecto/eliminarproyecto', methods=['GET', 'POST'])

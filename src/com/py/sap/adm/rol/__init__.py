@@ -1,5 +1,4 @@
 from com.py.sap.loginC import app
-from flask import render_template
 
 from com.py.sap.util.database import init_db, engine
 from sqlalchemy.orm import scoped_session, sessionmaker

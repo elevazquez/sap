@@ -14,7 +14,7 @@ db_session = scoped_session(sessionmaker(autocommit=False,
                                          bind=engine))
 class PermisoControlador(flask.views.MethodView):
     def get(self):
-        return flask.render_template('rol.html')
+        return flask.render_template('permiso.html')
 
 def flash_errors(form):
     for field, errors in form.errors.items():
@@ -22,7 +22,7 @@ def flash_errors(form):
             flash(u"Error in the %s field - %s" % (
                 getattr(form, field).label.text,
                 error
-            ))
+            ),'error')
 
 """ Funcion para agregar registros a la tabla Permiso""" 
 @app.route('/permiso/nuevopermiso', methods=['GET', 'POST'])
@@ -39,20 +39,17 @@ def nuevopermiso():
 
 @app.route('/permiso/editarpermiso', methods=['GET', 'POST'])
 def editarpermiso():
+    init_db(db_session)
     p = db_session.query(Permiso).filter_by(codigo=request.args.get('codigo')).first()
     form = PermisoFormulario(request.form,p)
-    if request.method == 'POST':
-        init_db(db_session)
-        #form.populate_obj(permiso)
-        print(form.id_recurso.data)
-        #print(form.codigo.data)
-        print(form.descripcion.data)
-        form.populate_obj(p)
-        p.id_recurso=form.id_recurso.data
-        p.descripcion=form.descripcion.data
-        db_session.merge(p)
+    permiso = db_session.query(Permiso).filter_by(codigo=form.codigo.data).first()
+    if request.method == 'POST' and form.validate():
+        form.populate_obj(permiso)
+        db_session.merge(permiso)
         db_session.commit()
         return redirect('/permiso/administrarpermiso')
+    else:
+        flash_errors(form)
     return render_template('permiso/editarpermiso.html', form=form)
 
 @app.route('/permiso/eliminarpermiso', methods=['GET', 'POST'])
@@ -83,7 +80,7 @@ def administrarpermiso():
     init_db(db_session)
     permisos = db_session.query(Permiso).order_by(Permiso.id)
     return render_template('permiso/administrarpermiso.html', permisos = permisos)
-[]
+
 """Lanza un mensaje de error en caso de que la pagina solicitada no exista"""
 @app.errorhandler(404)
 def page_not_found(error):
