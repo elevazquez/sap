@@ -23,7 +23,6 @@
 				<option value="estado">Estado</option>
 				<option value="fecha_inicio">Fecha Inicio</option>
 				<option value="fecha_fin">Fecha Fin</option>
-				<option value="id_proyecto">Proyecto</option>
 			</select> 
 			<input type=submit name="Buscar" value=Buscar /> 			
 		<a href="{{ url_for('nuevafase') }}" ><img src="../static/images/a.png" alt="Agregar" height="30" width="30" title="Agregar" ></a>
@@ -54,16 +53,15 @@
 	</TR>
 	{% for fase in fases %}
 	<TR>
-		<TD class="c1"><a href="{{ url_for('editarfase', nro=fase.nro_orden, nom=fase.nombre, 
-		des=fase.descripcion, es=fase.estado, ini=fase.fecha_inicio, fin=fase.fecha_fin, pry=fase.id_proyecto) }}" ><img src="../static/images/e.png" alt="Editar" height="20" width="20" title="Editar" style="vertical-align: middle;"></a>
-		<a href="{{ url_for('eliminarfase', nro=fase.nro_orden, pry=fase.id_proyecto) }}" onclick="javascript:return confirmar()"><img src="../static/images/b.png" alt="Eliminar" height="20" width="20" title="Eliminar" style="vertical-align: middle;"> </a></TD>
+		<TD class="c1"><a href="{{ url_for('editarfase', nro=fase.nro_orden) }}" ><img src="../static/images/e.png" alt="Editar" height="20" width="20" title="Editar" style="vertical-align: middle;"></a>
+		<a href="{{ url_for('eliminarfase', nro=fase.nro_orden) }}" onclick="javascript:return confirmar()"><img src="../static/images/b.png" alt="Eliminar" height="20" width="20" title="Eliminar" style="vertical-align: middle;"> </a></TD>
 		<TD class="c2"><SPAN>{{fase.nro_orden|e}}</SPAN></TD>
 		<TD class="c3"><SPAN>{{fase.nombre|e}}</SPAN></TD>
 		<TD class="c4"><SPAN>{{fase.descripcion|e}}</SPAN></TD>
 		<TD class="c5"><SPAN>{{fase.estado|e}}</SPAN></TD>
 		<TD class="c6"><SPAN>{{fase.fecha_inicio|e}}</SPAN></TD>
 		<TD class="c7"><SPAN>{{fase.fecha_fin|e}}</SPAN></TD>
-		<TD class="c8"><SPAN>{{fase.id_proyecto|e}}</SPAN></TD>
+		<TD class="c8"><SPAN>{{fase.proyecto.nombre|e}}</SPAN></TD>
 	</TR>
 	{% else %}
   	<TR>

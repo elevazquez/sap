@@ -15,4 +15,4 @@ class ProyFormulario(Form):
     fecha_inicio = DateField('Fecha Inicio', format='%Y-%m-%d' )
     fecha_fin = DateField('Fecha Fin', format='%Y-%m-%d' )
     fecha_ultima_mod = DateField('Fecha Ultima Modificacion', format='%Y-%m-%d' )
-    id_usuario_lider = SelectField('Lider de Proyecto', choices=[(u.id, u.nombre + " " + u.apellido) for u in db_session.query(Usuario).order_by(Usuario.nombre)], coerce=int)
+    usuario_lider = SelectField('Lider de Proyecto', choices=[(u.id, u.nombre + " " + u.apellido) for u in db_session.query(Usuario).order_by(Usuario.nombre)], coerce=int)

@@ -79,6 +79,7 @@ class Main(views.MethodView):
                                  identity=Identity(user.id))
             
             is_administrador(user.id)
+            session['pry'] = 1
             #===================================================================
             # session['username'] = username
             #===================================================================

@@ -2,11 +2,13 @@ from com.py.sap.loginC import app
 
 from com.py.sap.util.database import init_db, engine
 from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy.exc import DatabaseError
 from flask import Flask, render_template, request, redirect, url_for, flash 
 from com.py.sap.adm.mod.Proyecto import Proyecto
 from com.py.sap.adm.proyecto.ProyFormulario import ProyFormulario
 import flask, flask.views
 import os
+import datetime
 
 db_session = scoped_session(sessionmaker(autocommit=False,
                                          autoflush=False,
@@ -26,43 +28,68 @@ def flash_errors(form):
 """ Funcion para agregar registros a la tabla Proyecto""" 
 @app.route('/proyecto/nuevoproyecto', methods=['GET', 'POST'])
 def nuevoproyecto():
+    """ Se obtiene la fecha actual para almacenar la fecha de ultima actualizacion """
+    today = datetime.date.today()
     form = ProyFormulario(request.form)
+    if form.fecha_inicio.data > form.fecha_fin.data :
+        flash('La fecha de inicio no puede ser mayor que la fecha de finalizacion','error')
+        return render_template('proyecto/nuevoproyecto.html', form=form) 
     if request.method == 'POST' and form.validate():
         init_db(db_session)
-        pry = Proyecto(form.nombre.data, form.descripcion.data, 
+        try:
+            pry = Proyecto(form.nombre.data, form.descripcion.data, 
                     form.estado.data, form.cant_miembros.data, 
                     form.fecha_inicio.data, form.fecha_fin.data, 
-                    form.fecha_ultima_mod.data, form.usuario_lider.data)
-        db_session.add(pry)
-        db_session.commit()
-        flash('El Proyecto ha sido registrado con exito','info')
-        return redirect('/proyecto/administrarproyecto') 
+                    today, form.usuario_lider.data)
+            db_session.add(pry)
+            db_session.commit()
+            flash('El Proyecto ha sido registrado con exito','info')
+            return redirect('/proyecto/administrarproyecto')
+        except DatabaseError, e:
+            flash('Error en la Base de Datos' + e.args[0],'error')
+            return render_template('proyecto/nuevoproyecto.html', form=form)
+    else:
+        flash_errors(form) 
     return render_template('proyecto/nuevoproyecto.html', form=form)
 
 @app.route('/proyecto/editarproyecto', methods=['GET', 'POST'])
 def editarproyecto():
+    """ Se obtiene la fecha actual para almacenar la fecha de ultima actualizacion """
+    today = datetime.date.today()
     init_db(db_session)
     p = db_session.query(Proyecto).filter_by(nombre=request.args.get('nom')).first()  
     form = ProyFormulario(request.form,p)
     proyecto = db_session.query(Proyecto).filter_by(nombre=form.nombre.data).first()  
+    if form.fecha_inicio.data > form.fecha_fin.data :
+        flash('La fecha de inicio no puede ser mayor que la fecha de finalizacion','error')
+        return render_template('proyecto/editarproyecto.html', form=form) 
     if request.method == 'POST' and form.validate():
-        form.populate_obj(proyecto)
-        db_session.merge(proyecto)
-        db_session.commit()
-        return redirect('/proyecto/administrarproyecto')
+        try:
+            form.populate_obj(proyecto)
+            proyecto.fecha_ultima_mod = today
+            db_session.merge(proyecto)
+            db_session.commit()
+            return redirect('/proyecto/administrarproyecto')
+        except DatabaseError, e:
+            flash('Error en la Base de Datos' + e.args[0],'error')
+            return render_template('proyecto/editarproyecto.html', form=form)
     else:
         flash_errors(form)
     return render_template('proyecto/editarproyecto.html', form=form)
 
 @app.route('/proyecto/eliminarproyecto', methods=['GET', 'POST'])
 def eliminarproyecto():
-    nom = request.args.get('nom')
-    init_db(db_session)
-    proyecto = db_session.query(Proyecto).filter_by(nombre=nom).first()  
-    init_db(db_session)
-    db_session.delete(proyecto)
-    db_session.commit()
-    return redirect('/proyecto/administrarproyecto')
+    try:
+        nom = request.args.get('nom')
+        init_db(db_session)
+        proyecto = db_session.query(Proyecto).filter_by(nombre=nom).first()  
+        init_db(db_session)
+        db_session.delete(proyecto)
+        db_session.commit()
+        return redirect('/proyecto/administrarproyecto')
+    except DatabaseError, e:
+            flash('Error en la Base de Datos' + e.args[0],'error')
+            return render_template('proyecto/administrarproyecto.html')
     
 @app.route('/proyecto/buscarproyecto', methods=['GET', 'POST'])
 def buscarproyecto():
@@ -72,12 +99,12 @@ def buscarproyecto():
     if valor == "" : 
         administrarproyecto()
     if parametro == 'cant_miembros' or parametro == 'id_usuario_lider':
-        p = db_session.query(Proyecto).from_statement("SELECT * FROM proyecto where "+parametro+" = CAST("+valor+" AS Int)").all()
+        p = db_session.query(Proyecto).from_statement("SELECT * FROM proyecto where to_char("+parametro+", '99999') ilike '%"+valor+"%'").all()
+    elif parametro == 'fecha_inicio' or parametro == 'fecha_fin':
+        p = db_session.query(Proyecto).from_statement("SELECT * FROM proyecto where to_char("+parametro+", 'YYYY-mm-dd') ilike '%"+valor+"%'").all()
     else:
         p = db_session.query(Proyecto).from_statement("SELECT * FROM proyecto where "+parametro+" ilike '%"+valor+"%'").all()
-    return render_template('proyecto/administrarproyecto.html', proyectos = p)
-    
-    
+    return render_template('proyecto/administrarproyecto.html', proyectos = p)   
     valor = request.args['patron']
     init_db(db_session)
     r = db_session.query(Proyecto).filter_by(nombre=valor)

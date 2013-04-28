@@ -2,21 +2,28 @@
 {% block content %}
 <div class="primary">
 	<h1>Modificar Fase</h1>
+	{% with errors = get_flashed_messages(category_filter=["error"]) %} 
+			{% if errors %}
+			<div class="block-message">
+				<a class="close" href="#"
+					dir="rtl">×</a>
+					<ul>
+						{%- for msg in errors %}
+							<li>{{ msg }}</li> {% endfor -%}
+					</ul>
+			</div>
+		{% endif %} 
+	{% endwith %}
 	<form id=editar method=post action="/fase/editarfase">
-  			<label>Número</label><input type="number" name="nro_orden" value="{{request.args.get('nro')}}" id="nro_orden" readonly="true"/>
-    		<label>Nombre</label><input type="text" name="nombre" value="{{request.args.get('nom')}}" id="nombre" />
-    		<label>Descripción</label><input type="text" name="descripcion" value="{{request.args.get('des')}}" id="descripcion"/>
-    		<label>Estado</label> <select name="estado" id="estado" selected="{{request.args.get('es')}}">
-								  	<option value="I" >Inicial</option>
-  								  	<option value="P" >En Progreso</option>
-  								  	<option value="L" >En Línea Base</option>
-  								  	<option value="A" >Aprobado</option>
-								  </select>
-    		<label>Fecha Inicio</label><input type="date" name="fecha_inicio" value="{{request.args.get('ini')}}" id="fecha_inicio"/>
-    		<label>Fecha Fin</label><input type="date" name="fecha_fin" value="{{request.args.get('fin')}}" id="fecha_fin"/>
-    		<label>Proyecto</label><input type="number" name="id_proyecto" value="{{request.args.get('pry')}}" id="id_proyecto"/>
+  			<label>Número</label><input type="text" name="nro_orden" value="{{ form.nro_orden.data }}" id="nro_orden" readonly="true"/>
+  			<label>Nombre</label> {{ form.nro_orden() }}
+    		<label>Descripción</label> {{ form.descripcion() }}
+    		<label>Estado</label> {{ form.estado() }}
+    		<label>Fecha Inicio</label><input type="date" name="fecha_inicio" value="{{ form.fecha_inicio.data }}" id="fecha_inicio"/>
+    		<label>Fecha Fin</label><input type="date" name="fecha_fin" value="{{ form.fecha_fin.data }}" id="fecha_fin"/>
+    		<label>Proyecto</label><input type="text" name="proyecto" value="{{ form.proyecto.data }}" id="proyecto" readonly="true"/>
   		<p><input type=submit value=Guardar>
-  		<input type="button" value="Cancelar"  onClick="javascript:history.back()"> 
+  		<input type="button" value="Cancelar"  onClick="document.location.href='{{ url_for( 'administrarfase' ) }}';"> 
 	</form>
 </div>
 {% endblock %}

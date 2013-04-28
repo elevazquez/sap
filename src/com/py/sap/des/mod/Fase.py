@@ -26,5 +26,5 @@ class Fase (Base):
     
     def __repr__(self):
         return '<Fase %d %s %s %s %d %d %s>' % (self.nro_orden, self.nombre, self.descripcion, self.estado,
-        self.fecha_inicio, self.fecha_fin, self.usuario_lider)
+        self.fecha_inicio, self.fecha_fin, self.id_proyecto)
     
