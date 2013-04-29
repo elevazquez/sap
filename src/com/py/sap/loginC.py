@@ -29,6 +29,7 @@ from com.py.sap.adm.proyecto import *
 from com.py.sap.des.fase import *
 from com.py.sap.adm.usuario import *
 from com.py.sap.des.atributo import *
+from com.py.sap.des.tipoItem import *
 
 def get_resource_as_string(name, charset='utf-8'):
     with app.open_resource(name) as f:

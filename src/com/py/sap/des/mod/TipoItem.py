@@ -9,13 +9,13 @@ class TipoItem (Base):
     nombre = Column('nombre', String(50))
     descripcion = Column('descripcion', String(100))
     id_fase = Column(Integer, ForeignKey('fase.id'))
-    fase = relationship('Fase', backref=backref('fases', lazy='dynamic'))
+    fase = relationship('Fase', backref=backref('fasestipoitem', lazy='dynamic'))
     
-    def __init__(self, codigo=None, nombre=None, descripcion=None, fase=None):
+    def __init__(self, codigo=None, nombre=None, descripcion=None, id_fase=None):
         self.codigo = codigo
         self.nombre = nombre
         self.descripcion = descripcion
-        self.fase = fase
+        self.id_fase = id_fase
     
     def __repr__(self):
         return '<Tipo Item %s %s %s %s>' % (self.codigo, self.nombre, self.descripcion, self.fase)
