@@ -1,0 +1,28 @@
+{% extends "principal.html" %} 
+{% block content %}
+<div class="primary">
+	<h1>Modificar Atributo</h1>
+		{% with errors = get_flashed_messages(category_filter=["error"]) %} {%
+		if errors %}
+			<div class="block-message">
+				<a class="close" href="#"
+					dir="rtl">×</a>
+					<ul>
+						{%- for msg in errors %}
+							<li>{{ msg }}</li> {% endfor -%}
+					</ul>
+			</div>
+		{% endif %} 
+	{% endwith %}
+	<form id=editaratributo method=post action="/atributo/editaratributo">
+			<label>Código</label><input type="text" name="codigo" value="{{request.args.get('codigo')}}" id="codigo" readonly="true" />
+    		<label>Nombre</label><input type="text" name="nombre" value="{{request.args.get('nom')}}" id="nombre" />
+    		<label>Descripción</label><input type="text" name="descripcion" value="{{request.args.get('des')}}" id="descripcion"/>
+    		<label>Tipo</label><input type="text" name="id_tipo_atributo" value="{{request.args.get('id_tipo_atributo')}}" id="id_tipo_atributo" readonly="true"/>
+    		
+  		<p><input type=submit value=Guardar>
+  		<input type="button" value="Cancelar"  onClick="javascript:history.back()"> 
+	</form>
+</div>
+{% endblock %}
+

@@ -1,0 +1,31 @@
+{% extends "principal.html" %} 
+{% block content %}
+<div class="primary">
+
+
+	<h1>Modificar Tipo Item</h1>
+	{% with errors = get_flashed_messages(category_filter=["error"]) %} {%
+		if errors %}
+			<div class="block-message">
+				<a class="close" href="#"
+					dir="rtl">×</a>
+					<ul>
+						{%- for msg in errors %}
+							<li>{{ msg }}</li> {% endfor -%}
+					</ul>
+			</div>
+		{% endif %} 
+	{% endwith %}
+	
+	<form id=editartipoItem method=post action="/tipoItem/editartipoItem">
+			<label>Codigo</label><input type="text" name="codigo" value="{{request.args.get('cod')}}" id="codigo" readonly="true" />
+    		<label>Nombre</label><input type="text" name="nombre" value="{{request.args.get('nom')}}" id="nombre" />
+    		<label>Descripción</label><input type="text" name="descripcion" value="{{request.args.get('des')}}" id="descripcion"/>
+    		<label>Fase</label><input type="text" name="id_fase" value="{{request.args.get('fa')}}" id="id_fase" readonly="true"/>
+    		
+  		<p><input type=submit value=Guardar>
+  		<input type="button" value="Cancelar"  onClick="javascript:history.back()"> 
+	</form>
+</div>
+{% endblock %}
+

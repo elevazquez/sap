@@ -2,17 +2,28 @@
 {% block content %}
 <div class="primary">
 	<h1>Agregar Proyecto</h1>
+	{% with errors = get_flashed_messages(category_filter=["error"]) %} 
+		{% if errors %}
+			<div class="block-message">
+				<a class="close" href="#"
+					dir="rtl">×</a>
+					<ul>
+						{%- for msg in errors %}
+							<li>{{ msg }}</li> {% endfor -%}
+					</ul>
+			</div>
+		{% endif %} 
+	{% endwith %}
 	<form id=nuevoproyecto method=post action="/proyecto/nuevoproyecto">
     		<label>Nombre</label> {{ form.nombre()}}
     		<label>Descripción</label> {{ form.descripcion() }}
     		<label>Estado</label> {{ form.estado() }}
-    		<label>Cant Miembros</label> {{ form.cant_miembros()}}
-    		<label>Fecha Inicio</label> <input type="date" name="fecha_inicio" id="fecha_inicio"/>
-    		<label>Fecha Fin</label> <input type="date" name="fecha_fin" id="fecha_fin"/>
-    		<label>Fecha Ult Mod</label> <input type="date" name="fecha_ulima_mod" id="fecha_ulima_mod"/>
+    		<label>Cant Miembros</label> <input type="number" name="cant_miembros" value="{{ form.cant_miembros.data }}" id="cant_miembros"/>
+    		<label>Fecha Inicio</label> <input type="date" name="fecha_inicio" id="fecha_inicio" value="{{ form.fecha_inicio.data }}"/>
+    		<label>Fecha Fin</label> <input type="date" name="fecha_fin" id="fecha_fin" value="{{ form.fecha_fin.data }}"/>
     		<label>Líder de Proyecto</label> {{ form.usuario_lider() }}
     	<p><input type=submit value=Guardar>
-  		<input type="button" value="Cancelar"  onClick="javascript:history.back()"> 
+  		<input type="button" value="Cancelar"  onClick="document.location.href='{{ url_for( 'administrarproyecto' ) }}';"> 
 	</form>
 </div>
 {% endblock %}

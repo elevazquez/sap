@@ -4,7 +4,7 @@
 <div >
 <SCRIPT> 
 	function confirmar() { 
-		if(!confirm("¿Deseas eliminar esta proyecto?")) { 
+		if(!confirm("¿Deseas eliminar este proyecto?")) { 
 			return false; //no se borra 
 		} 
 		else { 
@@ -56,9 +56,7 @@
 	</TR>
 	{% for proyecto in proyectos %}
 	<TR>
-		<TD class="c1" width="100"><a href="{{ url_for('editarproyecto', nom=proyecto.nombre, des=proyecto.descripcion, 
-		es=proyecto.estado, cant=proyecto.cant_miembros, ini=proyecto.fecha_inicio, fin=proyecto.fecha_fin, 
-		mod=proyecto.fecha_ultima_mod, li=proyecto.id_usuario_lider) }}" ><img src="../static/images/e.png" alt="Editar" height="20" width="20" title="Editar" style="vertical-align: middle;"></a>
+		<TD class="c1" width="100"><a href="{{ url_for('editarproyecto', nom=proyecto.nombre) }}" ><img src="../static/images/e.png" alt="Editar" height="20" width="20" title="Editar" style="vertical-align: middle;"></a>
 		<a href="{{ url_for('eliminarproyecto', nom=proyecto.nombre) }}" onclick="javascript:return confirmar()"><img src="../static/images/b.png" alt="Eliminar" height="20" width="20" title="Eliminar" style="vertical-align: middle;"> </a></TD>
 		<TD class="c3"><SPAN>{{proyecto.nombre|e}}</SPAN></TD>
 		<TD class="c4"><SPAN>{{proyecto.descripcion|e}}</SPAN></TD>
