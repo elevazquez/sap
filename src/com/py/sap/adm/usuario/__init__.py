@@ -46,6 +46,12 @@ def nuevousuario():
         flash_errors(form) 
     return render_template('usuario/nuevousuario.html', form=form)
 
+
+#    init_db(db_session)
+#    r = db_session.query(Rol).filter_by(codigo=request.args.get('cod')).first()  
+#    form = RolFormulario(request.form,r)
+#    rol = db_session.query(Rol).filter_by(codigo=form.codigo.data).first()  
+#    
 @app.route('/usuario/editarusuario', methods=['GET', 'POST'])
 def editarusuario():
     init_db(db_session)
