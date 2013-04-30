@@ -4,9 +4,8 @@ from flask_principal import Principal, identity_changed, Identity, AnonymousIden
 from flask_login import LoginManager, login_user, logout_user, login_required
 from com.py.sap.util.database import init_db,engine
 from sqlalchemy.orm import scoped_session, sessionmaker
-from wtforms import Form
-from com.py.sap.adm.mod.Usuario import Usuario
 from com.py.sap.adm.mod.UsuarioRol import UsuarioRol
+from flask_principal import identity_loaded, RoleNeed, UserNeed
 
 app = Flask(__name__)
 app.secret_key="sap"
@@ -30,6 +29,23 @@ from com.py.sap.des.fase import *
 from com.py.sap.adm.usuario import *
 from com.py.sap.des.atributo import *
 from com.py.sap.des.tipoItem import *
+
+#===============================================================================
+# @identity_loaded.connect_via(app)
+# def on_identity_loaded(sender, identity):
+#    # Set the identity user object
+#    identity.user = current_user
+# 
+#    # Add the UserNeed to the identity
+#    if hasattr(current_user, 'id'):
+#        identity.provides.add(UserNeed(current_user.id))
+#    # Assuming the User model has a list of roles, update the
+#    # identity with the roles that the user provides
+#    print('prueba')
+#    roles = db_session.query(UsuarioRol).filter_by(id_usuario=current_user.id).all()
+#    for role in roles:
+#        identity.provides.add(RoleNeed(role.usuario.rol.codigo))
+#===============================================================================
 
 def get_resource_as_string(name, charset='utf-8'):
     with app.open_resource(name) as f:
@@ -120,7 +136,6 @@ def is_administrador(userid):
 app.add_url_rule('/',
                  view_func= Main.as_view('index'),
                  methods=["GET","POST"])
-
 
 if __name__ == "__main__":
     app.run(debug=True)

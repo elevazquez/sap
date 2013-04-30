@@ -33,11 +33,11 @@ def nuevafase():
     init_db(db_session)
     pro = db_session.query(Proyecto).filter_by(id=session['pry']).first()
     form.proyecto.data = pro.nombre
-    if form.fecha_inicio.data > form.fecha_fin.data :
-        flash('La fecha de inicio no puede ser mayor que la fecha de finalizacion','error')
-        return render_template('fase/nuevafase.html', form=form) 
     if request.method == 'POST' and form.validate():
         init_db(db_session)
+        if form.fecha_inicio.data > form.fecha_fin.data :
+            flash('La fecha de inicio no puede ser mayor que la fecha de finalizacion','error')
+            return render_template('fase/nuevafase.html', form=form) 
         try:
             fase = Fase(form.nro_orden.data, form.nombre.data, form.descripcion.data, 
                     form.estado.data, form.fecha_inicio.data, 
@@ -62,10 +62,10 @@ def editarfase():
     fase = db_session.query(Fase).filter_by(nro_orden=nro).filter_by(id_proyecto=pro.id).first()  
     form.proyecto.data = pro.nombre
     flash(fase,'error')
-    if form.fecha_inicio.data > form.fecha_fin.data :
-        flash('La fecha de inicio no puede ser mayor que la fecha de finalizacion','error')
-        return render_template('fase/editarfase.html', form=form) 
     if request.method == 'POST' and form.validate():
+        if form.fecha_inicio.data > form.fecha_fin.data :
+            flash('La fecha de inicio no puede ser mayor que la fecha de finalizacion','error')
+            return render_template('fase/editarfase.html', form=form) 
         try:
             form.populate_obj(fase)
             db_session.merge(fase)

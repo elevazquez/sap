@@ -7,6 +7,7 @@ from com.py.sap.adm.mod.Permiso import Permiso
 from com.py.sap.adm.mod.Recurso import Recurso
 from com.py.sap.adm.permiso.PermisoFormulario import PermisoFormulario
 import flask, flask.views
+from com.py.sap.UserPermission import *
 import os
 
 db_session = scoped_session(sessionmaker(autocommit=False,
@@ -27,15 +28,19 @@ def flash_errors(form):
 """ Funcion para agregar registros a la tabla Permiso""" 
 @app.route('/permiso/nuevopermiso', methods=['GET', 'POST'])
 def nuevopermiso():
-    form = PermisoFormulario(request.form)
-    if request.method == 'POST' and form.validate():
-        init_db(db_session)
-        permiso = Permiso(form.codigo.data, form.descripcion.data, form.id_recurso.data)
-        db_session.add(permiso)
-        db_session.commit()
-        flash('El permiso ha sido registrado con exito','info')
-        return redirect('/permiso/administrarpermiso')
-    return render_template('permiso/nuevopermiso.html', form=form)
+    permission = UserPermission('administrador')
+    if permission.can():
+        form = PermisoFormulario(request.form)
+        if request.method == 'POST' and form.validate():
+            init_db(db_session)
+            permiso = Permiso(form.codigo.data, form.descripcion.data, form.id_recurso.data)
+            db_session.add(permiso)
+            db_session.commit()
+            flash('El permiso ha sido registrado con exito','info')
+            return redirect('/permiso/administrarpermiso')
+        return render_template('permiso/nuevopermiso.html', form=form)
+    else:
+        return 'sin permisos'
 
 @app.route('/permiso/editarpermiso', methods=['GET', 'POST'])
 def editarpermiso():
