@@ -10,7 +10,7 @@ class UsuarioRol (Base):
     nombre = Column('nombre', String(50))
     descripcion = Column('descripcion', String(100))
     id_rol = Column(Integer, ForeignKey('rol.id'))
-    rol = relationship('Rol', backref=backref('roles', lazy='dynamic'))
+    rol = relationship('Rol', backref=backref('rolesusuarios', lazy='dynamic'))
     id_usuario = Column(Integer, ForeignKey('usuario.id'))
     usuario = relationship('Usuario', backref=backref('usuariosroles', lazy='dynamic'))
     
