@@ -31,11 +31,11 @@ def nuevoproyecto():
     """ Se obtiene la fecha actual para almacenar la fecha de ultima actualizacion """
     today = datetime.date.today()
     form = ProyFormulario(request.form)
-    if form.fecha_inicio.data > form.fecha_fin.data :
-        flash('La fecha de inicio no puede ser mayor que la fecha de finalizacion','error')
-        return render_template('proyecto/nuevoproyecto.html', form=form) 
     if request.method == 'POST' and form.validate():
         init_db(db_session)
+        if form.fecha_inicio.data > form.fecha_fin.data :
+            flash('La fecha de inicio no puede ser mayor que la fecha de finalizacion','error')
+            return render_template('proyecto/nuevoproyecto.html', form=form)  
         try:
             pry = Proyecto(form.nombre.data, form.descripcion.data, 
                     form.estado.data, form.cant_miembros.data, 
@@ -60,10 +60,10 @@ def editarproyecto():
     p = db_session.query(Proyecto).filter_by(nombre=request.args.get('nom')).first()  
     form = ProyFormulario(request.form,p)
     proyecto = db_session.query(Proyecto).filter_by(nombre=form.nombre.data).first()  
-    if form.fecha_inicio.data > form.fecha_fin.data :
-        flash('La fecha de inicio no puede ser mayor que la fecha de finalizacion','error')
-        return render_template('proyecto/editarproyecto.html', form=form) 
     if request.method == 'POST' and form.validate():
+        if form.fecha_inicio.data > form.fecha_fin.data :
+            flash('La fecha de inicio no puede ser mayor que la fecha de finalizacion','error')
+            return render_template('proyecto/editarproyecto.html', form=form) 
         try:
             form.populate_obj(proyecto)
             proyecto.fecha_ultima_mod = today
