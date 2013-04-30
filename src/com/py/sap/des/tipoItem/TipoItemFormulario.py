@@ -1,5 +1,6 @@
-from wtforms import Form, TextField, validators, SelectField
+from wtforms import Form, TextField, validators, SelectField, SelectMultipleField
 from com.py.sap.des.mod.Fase import Fase
+from com.py.sap.des.mod.Atributo import Atributo
 from com.py.sap.util.database import engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 
@@ -12,3 +13,5 @@ class TipoItemFormulario(Form):
     nombre = TextField('Nombre', [validators.Length(min=2, max=50), validators.Required()])
     descripcion = TextField('Descripcion', [validators.Length(min=2, max=100), validators.Required()])
     id_fase = SelectField('Fase', choices=[(f.id, f.nombre) for f in db_session.query(Fase).order_by(Fase.nombre).all()], coerce=int)
+    lista_atributo = SelectMultipleField('Atributo', choices=[(f.id, f.nombre) for f in db_session.query(Atributo).order_by(Atributo.nombre).all()], coerce=int)
+   # id_atributo= SelectField('Atributo', choices=[(f.id, f.nombre) for f in db_session.query(Atributo).order_by(Atributo.nombre).all()], coerce=int)

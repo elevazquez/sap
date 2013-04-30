@@ -7,7 +7,6 @@ from com.py.sap.des.mod.TipoItem import TipoItem
 from sqlalchemy.exc import DatabaseError
 from com.py.sap.des.tipoItem.TipoItemFormulario import TipoItemFormulario 
 from com.py.sap.des.mod.TItemAtributo import TItemAtributo
-from com.py.sap.des.mod.TipoAtributo import TipoAtributo
 from com.py.sap.des.mod.Atributo import Atributo
 import flask, flask.views
 import os
@@ -38,6 +37,11 @@ def nuevotipoItem():
                     form.id_fase.data)
             db_session.add(tipo)
             db_session.commit()
+            lista= form.lista_atributo.data
+            for atr in lista:
+                att = TItemAtributo(tipo.id,atr)
+                db_session.add(att)
+                db_session.commit()
             flash('El Tipo de Item ha sido registrado con exito','info')
             return redirect('/tipoItem/administrartipoItem') 
         except DatabaseError, e:
