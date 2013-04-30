@@ -19,6 +19,11 @@
     		<label>Nombre</label>  {{ form.nombre()}}
     		<label>Descripción</label> {{ form.descripcion() }}    		
     		<label>Fase</label> {{ form.id_fase() }}
+    		<label>Atributos</label> 
+    		{% for item in  form.lista_atributo %}
+            	<input type="checkbox" name="modList" value={{item}}><br>
+        	{% endfor %}
+    		 
     	<p><input type=submit value=Guardar>
   		<input type="button" value="Cancelar"  onClick="javascript:history.back()"> 
 	</form>
