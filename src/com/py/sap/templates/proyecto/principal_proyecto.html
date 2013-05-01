@@ -1,0 +1,16 @@
+{% extends "principal.html" %} 
+{% block content %}
+<div class="primary">
+	<h1>Proyecto</h1>
+	{% for proyecto in proyectos %}
+	<TR>
+		<TD class="c3"><SPAN><a href="{{ url_for('index') }}" >{{proyecto.nombre|e}}</a></TD></SPAN></TD>
+	</TR>
+	{% else %}
+  	<TR>
+		<em>Sin registro de proyectos</em>
+	</TR>
+	{% endfor %}
+	<a href="{{ url_for('nuevoproyecto') }}" ></a>
+</div>
+{% endblock %}

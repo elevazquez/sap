@@ -1,11 +1,10 @@
 from flask import Flask, views, current_app, request, session, flash, redirect, url_for, render_template
 import os
-from flask_principal import Principal, identity_changed, Identity, AnonymousIdentity
+from flask_principal import Principal, identity_changed, Identity, AnonymousIdentity, identity_loaded, RoleNeed, UserNeed
 from flask_login import LoginManager, login_user, logout_user, login_required
 from com.py.sap.util.database import init_db,engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from com.py.sap.adm.mod.UsuarioRol import UsuarioRol
-from flask_principal import identity_loaded, RoleNeed, UserNeed
 
 app = Flask(__name__)
 app.secret_key="sap"
@@ -30,23 +29,6 @@ from com.py.sap.adm.usuario import *
 from com.py.sap.des.atributo import *
 from com.py.sap.des.tipoItem import *
 
-#===============================================================================
-# @identity_loaded.connect_via(app)
-# def on_identity_loaded(sender, identity):
-#    # Set the identity user object
-#    identity.user = current_user
-# 
-#    # Add the UserNeed to the identity
-#    if hasattr(current_user, 'id'):
-#        identity.provides.add(UserNeed(current_user.id))
-#    # Assuming the User model has a list of roles, update the
-#    # identity with the roles that the user provides
-#    print('prueba')
-#    roles = db_session.query(UsuarioRol).filter_by(id_usuario=current_user.id).all()
-#    for role in roles:
-#        identity.provides.add(RoleNeed(role.usuario.rol.codigo))
-#===============================================================================
-
 def get_resource_as_string(name, charset='utf-8'):
     with app.open_resource(name) as f:
         return f.read().decode(charset)
@@ -56,6 +38,24 @@ app.jinja_env.globals['get_resource_as_string'] = get_resource_as_string
 db_session = scoped_session(sessionmaker(autocommit=False,
                                          autoflush=False,
                                          bind=engine))
+
+#===============================================================================
+# Se define la carga de la identidad del usuario y los roles del usuario 
+# para las cuestiones de permisos y roles
+#===============================================================================
+@identity_loaded.connect_via(app)
+def on_identity_loaded(sender, identity):
+    # Set the identity user object
+    identity.user = current_user
+    
+    # Add the UserNeed to the identity
+    if hasattr(current_user, 'id'):
+        identity.provides.add(UserNeed(current_user.id))
+    # Assuming the User model has a list of roles, update the
+    # identity with the roles that the user provides
+        roles = db_session.query(UsuarioRol).filter_by(id_usuario=current_user.id).all()
+        for role in roles:
+            identity.provides.add(RoleNeed(role.rol.codigo))
 
 
 #===============================================================================
