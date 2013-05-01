@@ -1,0 +1,21 @@
+{% extends "principal.html" %} 
+{% block content %}
+<div class="primary">
+	<h1>Agregar Item</h1>
+	<form id=nuevoitem method=post action="/nuevoitem">
+	
+    		<label>Código</label> {{ form.codigo}}
+    		<label>Nombre</label> {{ form.nombre()}}
+    		<label>Descripción</label> {{ form.descripcion() }}
+    		<label>Estado</label> {{ form.estado() }}
+    		<label>Fecha </label> <input type="date" name="fecha" id="fecha"/>
+    		<label>Complejidad</label> {{ form.complejidad() }}
+    		<label>Costo</label> {{ form.costo() }}
+    		<label>Versión</label> {{ form.version() }}
+    		<label>Fase</label> {{ form.id_fase() }}
+    		<label>Tipo Item</label> {{ form.id_tipo_item() }}
+    			<p><input type=submit value=Guardar>
+  		<input type="button" value="Cancelar"  onClick="javascript:history.back()"> 
+	</form>
+</div>
+{% endblock %}

@@ -12,15 +12,15 @@ class Item (Base):
     complejidad = Column('complejidad', Integer)  
     fecha = Column('fecha', Date)
     costo = Column('costo', Numeric(10,2))
-    archivo = Column('archivo', bytearray)
-    mime = Column('mime', String(15), unique=True)
+   # archivo = Column('archivo', bytearray)
+   # mime = Column('mime', String(15), unique=True)
     version = Column('version', Integer)
     id_usuario = Column(Integer, ForeignKey('usuario.id'))
-    usuario = relationship('Usuario', backref=backref('usuarios', lazy='dynamic'))
+    usuario = relationship('Usuario', backref=backref('usuariositem', lazy='dynamic'))
     id_fase = Column(Integer, ForeignKey('fase.id'))
-    fase = relationship('Fase', backref=backref('fases', lazy='dynamic'))
+    fase = relationship('Fase', backref=backref('fasesitem', lazy='dynamic'))
     id_tipo_item = Column(Integer, ForeignKey('tipo_item.id'))
-    tipo_item = relationship('TipoItem', backref=backref('tipo_items', lazy='dynamic'))
+    tipo_item = relationship('TipoItem', backref=backref('tipoitem_item', lazy='dynamic'))
     
     def __init__(self, codigo=None, nombre=None, descripcion=None, estado=None, complejidad=None, 
                  fecha=None, costo=None, archivo=None, mime=None, usuario=None, version=None,
