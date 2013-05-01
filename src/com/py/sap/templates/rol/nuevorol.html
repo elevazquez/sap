@@ -2,11 +2,23 @@
 {% block content %}
 <div class="primary">
 	<h1>Agregar Rol</h1>
+	{% with errors = get_flashed_messages(category_filter=["error"]) %} 
+		{% if errors %}
+			<div class="block-message">
+				<a class="close" href="#"
+					dir="rtl">×</a>
+					<ul>
+						{%- for msg in errors %}
+							<li>{{ msg }}</li> {% endfor -%}
+					</ul>
+			</div>
+		{% endif %} 
+	{% endwith %}
 	<form id=add method=post action="/add">
-    		<label>Código</label> {{ form.codigo()}}
+    		<label>Código</label> {{ form.codigo() }}
     		<label>Descripción</label> {{ form.descripcion() }}
   		<p><input type=submit value=Guardar>
-  		<input type="button" value="Cancelar"  onClick="javascript:history.back()"> 
+  		<input type="button" value="Cancelar"  onClick="document.location.href='{{ url_for( 'administrarrol' ) }}';"> 
 	</form>
 </div>
 {% endblock %}

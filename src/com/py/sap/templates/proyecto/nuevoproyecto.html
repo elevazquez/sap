@@ -15,7 +15,7 @@
 		{% endif %} 
 	{% endwith %}
 	<form id=nuevoproyecto method=post action="/proyecto/nuevoproyecto">
-    		<label>Nombre</label> {{ form.nombre()}}
+    		<label>Nombre</label> {{ form.nombre() }}
     		<label>Descripción</label> {{ form.descripcion() }}
     		<label>Estado</label> {{ form.estado() }}
     		<label>Cant Miembros</label> <input type="number" name="cant_miembros" value="{{ form.cant_miembros.data }}" id="cant_miembros"/>
