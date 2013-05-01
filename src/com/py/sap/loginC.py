@@ -5,6 +5,7 @@ from flask_login import LoginManager, login_user, logout_user, login_required
 from com.py.sap.util.database import init_db,engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from com.py.sap.adm.mod.UsuarioRol import UsuarioRol
+import md5
 
 app = Flask(__name__)
 app.secret_key="sap"
@@ -86,6 +87,11 @@ class Main(views.MethodView):
                 return redirect(url_for('index'))
         username = request.form['username']
         passwd = request.form['passwd'] 
+
+        """ Se un objeto md5 para encriptar la contrasenha del usuario """    
+        con = md5.new()    
+        con.update(request.form['passwd'])
+        passwd = con.hexdigest()
         
         user = db_session.query(Usuario).filter_by(usuario=username,password= passwd ).first() 
         if user == None :
