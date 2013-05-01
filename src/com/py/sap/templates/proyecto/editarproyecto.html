@@ -17,7 +17,7 @@
 	<form id=editarproyecto method=post action="/proyecto/editarproyecto">
   			<label>Nombre</label><input type="text" name="nombre" value="{{ form.nombre.data }}" id="nombre" readonly="true"/>
     		<label>Descripción</label> {{ form.descripcion() }} 
-    		<label>Estado</label> {{ form.estado() }}
+    		<label>Estado</label><input type="text" name="estado" value="{{ form.estado.data }}" id="estado" readonly="true"/>
     		<label>Cant Miembros</label><input type="number" name="cant_miembros" value="{{ form.cant_miembros.data }}" id="cant_miembros"/>
     		<label>Fecha Inicio</label><input type="date" name="fecha_inicio" value="{{ form.fecha_inicio.data }}" id="fecha_inicio"/>
     		<label>Fecha Fin</label><input type="date" name="fecha_fin" value="{{ form.fecha_fin.data }}" id="fecha_fin"/>

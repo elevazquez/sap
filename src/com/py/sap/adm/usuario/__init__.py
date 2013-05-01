@@ -47,6 +47,9 @@ def nuevousuario():
         if form.fecha_nac.data > today :
             flash('Ingrese una fecha de nacimiento valida','error')
             return render_template('usuario/nuevousuario.html', form=form)  
+        if form.password.data != form.confirmar.data :
+            flash('Las contrasenhas deben coincidir','error')
+            return render_template('usuario/nuevousuario.html', form=form)  
         try:
             con.update(form.password.data)
             usu = Usuario(form.usuario.data, con.hexdigest(), 
@@ -69,7 +72,8 @@ def editarusuario():
     """ Se obtiene la fecha actual para almacenar la fecha de ultima actualizacion """
     today = datetime.date.today()
     """ Se un objeto md5 para encriptar la contrasenha del usuario """    
-    con = md5.new()    
+    con = md5.new()
+    conf = md5.new()    
     init_db(db_session)
     p = db_session.query(Usuario).filter_by(usuario=request.args.get('usu')).first()  
     form = UsuarioFormulario(request.form,p)
@@ -77,7 +81,13 @@ def editarusuario():
     if request.method == 'POST' and form.validate():
         if form.fecha_nac.data > today :
             flash('Ingrese una fecha de nacimiento valida','error')
-            return render_template('usuario/nuevousuario.html', form=form)  
+            return render_template('usuario/editarusuario.html', form=form)  
+        if form.password.data != form.confirmar.data :
+            conf.update(form.confirmar.data)
+            confir = conf.hexdigest()
+            if form.password.data != confir :
+                flash('Las contrasenhas deben coincidir','error')
+                return render_template('usuario/editarusuario.html', form=form)  
         try:
             con.update(form.password.data)
             form.populate_obj(usuario)

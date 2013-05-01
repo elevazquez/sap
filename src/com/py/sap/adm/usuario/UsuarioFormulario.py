@@ -10,6 +10,7 @@ db_session = scoped_session(sessionmaker(autocommit=False,
 class UsuarioFormulario(Form):
     usuario = TextField('Usuario', [validators.Length(min=2, max=50), validators.Required()])
     password = PasswordField('Contrasenha', [validators.Length(min=2, max=100), validators.Required()])
+    confirmar = PasswordField('Confirmar', [validators.Length(min=2, max=100), validators.Required()])
     nombre = TextField('Nombre', [validators.Length(min=2, max=100), validators.Required()])
     apellido = TextField('Apellido', [validators.Length(min=2, max=100), validators.Required()])
     correo = TextField('Correo', [validators.Length(min=2, max=100), validators.Required(), validators.Email()])

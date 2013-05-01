@@ -10,7 +10,8 @@ db_session = scoped_session(sessionmaker(autocommit=False,
 class ProyFormulario(Form):
     nombre = TextField('Nombre', [validators.Length(min=2, max=50), validators.Required()])
     descripcion = TextField('Descripcion', [validators.Length(min=2, max=100), validators.Required()])
-    estado = SelectField('Estado', choices=[('N', 'Nuevo'), ('P', 'En Progreso'), ('A', 'Anulado'), ('F', 'Finalizado')])
+    estado = TextField('Estado', default='Nuevo')
+    #estado = SelectField('Estado', choices=[('N', 'Nuevo'), ('P', 'En Progreso'), ('A', 'Anulado'), ('F', 'Finalizado')])
     cant_miembros = IntegerField('Cantidad Miembros', [validators.Required()]) 
     fecha_inicio = DateField('Fecha Inicio', format='%Y-%m-%d' )
     fecha_fin = DateField('Fecha Fin', format='%Y-%m-%d' )

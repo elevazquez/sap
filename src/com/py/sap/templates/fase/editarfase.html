@@ -16,7 +16,7 @@
 	{% endwith %}
 	<form id=editar method=post action="/fase/editarfase">
   			<label>Número</label><input type="text" name="nro_orden" value="{{ form.nro_orden.data }}" id="nro_orden" readonly="true"/>
-  			<label>Nombre</label> {{ form.nro_orden() }}
+  			<label>Nombre</label> {{ form.nombre() }}
     		<label>Descripción</label> {{ form.descripcion() }}
     		<label>Estado</label> {{ form.estado() }}
     		<label>Fecha Inicio</label><input type="date" name="fecha_inicio" value="{{ form.fecha_inicio.data }}" id="fecha_inicio"/>
