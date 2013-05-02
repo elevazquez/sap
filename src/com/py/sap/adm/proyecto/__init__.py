@@ -5,6 +5,10 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.exc import DatabaseError
 from flask import Flask, render_template, request, redirect, url_for, flash 
 from com.py.sap.adm.mod.Proyecto import Proyecto
+from com.py.sap.adm.mod.UsuarioRol import UsuarioRol
+from com.py.sap.adm.mod.Recurso import Recurso
+from com.py.sap.adm.mod.Permiso import Permiso
+from com.py.sap.adm.mod.RolPermiso import RolPermiso
 from com.py.sap.adm.proyecto.ProyFormulario import ProyFormulario
 import flask, flask.views
 import os
@@ -128,3 +132,6 @@ def page_not_found(error):
 def shutdown_session(response):
     db_session.remove()
     return response
+
+def getProyectoByUsuario(id_usuario):
+    return db_session.query(Proyecto).join(Recurso, Proyecto.id == Recurso.id_proyecto).join(Permiso, Permiso.id_recurso == Recurso.id).join(RolPermiso, RolPermiso.id_permiso == Permiso.id).join(UsuarioRol, UsuarioRol.id_rol == RolPermiso.id_rol).filter(UsuarioRol.id_usuario == 1)
