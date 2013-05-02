@@ -1,15 +1,15 @@
 from com.py.sap.loginC import app
-from flask import render_template, session
 
 from com.py.sap.util.database import init_db, engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.exc import DatabaseError
-from flask import Flask, render_template, request, redirect, url_for, flash 
-from com.py.sap.des.mod.Fase import Fase
+from flask import Flask, render_template, request, redirect, url_for, flash, session 
 from com.py.sap.adm.mod.Proyecto import Proyecto
+from com.py.sap.des.mod.Fase import Fase
 from com.py.sap.des.fase.FaseFormulario import FaseFormulario
 import flask, flask.views
 import os
+import datetime
 
 db_session = scoped_session(sessionmaker(autocommit=False,
                                          autoflush=False,
@@ -33,6 +33,9 @@ def nuevafase():
     init_db(db_session)
     pro = db_session.query(Proyecto).filter_by(id=session['pry']).first()
     form.proyecto.data = pro.nombre
+    if pro.estado != 'N' :
+        flash('No se pueden agregar Fases al Proyecto','info')
+        return render_template('fase/administrarfase.html') 
     if request.method == 'POST' and form.validate():
         init_db(db_session)
         if form.fecha_inicio.data > form.fecha_fin.data :
@@ -55,19 +58,22 @@ def nuevafase():
 
 @app.route('/fase/editarfase', methods=['GET', 'POST'])
 def editarfase():
-    form = FaseFormulario(request.form)
-    nro = request.args.get('nro')
     init_db(db_session)
     pro = db_session.query(Proyecto).filter_by(id=session['pry']).first()
-    fase = db_session.query(Fase).filter_by(nro_orden=nro).filter_by(id_proyecto=pro.id).first()  
+    f = db_session.query(Fase).filter_by(nro_orden=request.args.get('nro')).filter_by(id_proyecto=pro.id).first()  
+    form = FaseFormulario(request.form,f)
+    fase = db_session.query(Fase).filter_by(nro_orden=form.nro_orden.data).filter_by(id_proyecto=pro.id).first()  
     form.proyecto.data = pro.nombre
-    flash(fase,'error')
+    if pro.estado != 'N' :
+        flash('No se pueden modificar Fases del Proyecto','info')
+        return render_template('fase/administrarfase.html') 
     if request.method == 'POST' and form.validate():
         if form.fecha_inicio.data > form.fecha_fin.data :
             flash('La fecha de inicio no puede ser mayor que la fecha de finalizacion','error')
             return render_template('fase/editarfase.html', form=form) 
         try:
             form.populate_obj(fase)
+            fase.id_proyecto = pro.id
             db_session.merge(fase)
             db_session.commit()
             return redirect('/fase/administrarfase')
@@ -80,6 +86,11 @@ def editarfase():
 
 @app.route('/fase/eliminarfase', methods=['GET', 'POST'])
 def eliminarfase():
+    init_db(db_session)
+    pro = db_session.query(Proyecto).filter_by(id=session['pry']).first()
+    if pro.estado != 'N' :
+        flash('No se pueden eliminar Fases del Proyecto','info')
+        return render_template('fase/administrarfase.html') 
     try:
         nro = request.args.get('nro')
         init_db(db_session)

@@ -1,0 +1,72 @@
+{% extends "principal.html" %} 
+{% block content %}
+<div class="primary">
+<div >
+<SCRIPT> 
+	function confirmar() { 
+		if(!confirm("¿Deseas eliminar este Item?")) { 
+			return false; //no se borra 
+		} 
+		else { 
+			return true;//si se borra  
+		} 
+	} 
+</SCRIPT> 
+	
+<h1>Item</h1>		
+<form id=buscar method=get action="">
+			<input type="text" name="patron" /> 
+			<select name=parametro>
+				<option value="nombre">Nombre</option>
+				<option value="descripcion">Descripción</option>
+				<option value="estado">Estado</option>
+			</select> 
+			<input type=submit name="Buscar" value=Buscar /> 			
+		<a href="{{ url_for('nuevoitem') }}" ><img src="../static/images/a.png" alt="Agregar" height="30" width="30" title="Agregar" ></a>
+</form>
+<p></p>
+{% with errors = get_flashed_messages(category_filter=["info"]) %}
+{% if errors %}
+<div class="block-message">
+  <a class="close" href="{{ url_for( 'administraritem' ) }}" dir="rtl">×</a>
+  <ul>
+    {%- for msg in errors %}
+    <li>{{ msg }}</li>
+    {% endfor -%}
+  </ul>
+</div>
+{% endif %}
+{% endwith %}
+<table border="1">
+	<TR>
+		<TH class="c1"></TH>
+		<TH class="c2">Codigo</TH>
+		<TH class="c3">Nombre</TH>
+		<TH class="c4">Descripción</TH>
+		<TH class="c5">Estado</TH>
+		<TH class="c6">Fecha </TH>
+		<TH class="c7">Complejidad</TH>
+		<TH class="c8">Costo</TH>
+		<TH class="c9">Version</TH>
+	</TR>
+	{% for item in items %}
+	<TR>
+		<TD class="c1"></TD>
+		<TD class="c2"><SPAN>{{item.codigo|e}}</SPAN></TD>
+		<TD class="c3"><SPAN>{{item.nombre|e}}</SPAN></TD>
+		<TD class="c4"><SPAN>{{item.descripcion|e}}</SPAN></TD>
+		<TD class="c5"><SPAN>{{item.estado|e}}</SPAN></TD>
+		<TD class="c6"><SPAN>{{item.fecha|e}}</SPAN></TD>
+		<TD class="c7"><SPAN>{{item.complejidad|e}}</SPAN></TD>
+		<TD class="c8"><SPAN>{{item.costo|e}}</SPAN></TD>
+		<TD class="c9"><SPAN>{{item.version|e}}</SPAN></TD>
+	</TR>
+	{% else %}
+  	<TR>add
+		<em>Sin registro de Items</em>
+	</TR>
+	{% endfor %}
+</table>
+</div>
+</div>
+{% endblock %}

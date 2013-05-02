@@ -16,7 +16,8 @@
 	{% endwith %}
 	<form id=editarusuario method=post action="/usuario/editarusuario">
   			<label>Usuario</label><input type="text" name="usuario" value="{{ form.usuario.data }}" id="usuario" readonly="true"/>
-    		<label>Contraseña</label> {{ form.password() }}
+    		<label>Contraseña</label><input type="password" name="password" value="{{ form.password.data }}" id="password"/>
+    		<label>Contraseña</label> {{ form.confirmar() }}
     		<label>Nombre</label> {{ form.nombre() }}
     		<label>Apellido</label> {{ form.apellido() }} 
     		<label>Correo</label> {{ form.correo() }}
