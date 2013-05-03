@@ -4,7 +4,7 @@
 <div >
 <SCRIPT> 
 	function confirmar() { 
-		if(!confirm("¿Deseas eliminar esta fase?")) { 
+		if(!confirm("¿Deseas eliminar esta fase ?")) { 
 			return false; //no se borra 
 		} 
 		else { 
@@ -13,7 +13,7 @@
 	} 
 </SCRIPT> 
 	
-<h1>Fases</h1>		
+<h1>Fases</h1>
 <form id=buscar method=get action="/fase/buscarfase">
 			<input type="text" name="patron" /> 
 			<select name=parametro>
@@ -26,6 +26,7 @@
 			</select> 
 			<input type=submit name="Buscar" value=Buscar /> 			
 		<a href="{{ url_for('nuevafase') }}" ><img src="../static/images/a.png" alt="Agregar" height="30" width="30" title="Agregar" ></a>
+		<a href="{{ url_for('listarfase') }}" ><img src="../static/images/i.png" alt="Importar" height="30" width="30" title="Importar" ></a>
 </form>
 <p></p>
 {% with errors = get_flashed_messages(category_filter=["info"]) %}
@@ -40,6 +41,7 @@
 </div>
 {% endif %}
 {% endwith %}
+<div style="height:250px;width:800px;overflow:auto;">
 <table border="1">
 	<TR>
 		<TH class="c1"></TH>
@@ -69,6 +71,7 @@
 	</TR>
 	{% endfor %}
 </table>
+</div>
 </div>
 </div>
 {% endblock %}

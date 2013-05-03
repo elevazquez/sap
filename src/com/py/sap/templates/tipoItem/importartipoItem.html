@@ -1,7 +1,7 @@
 {% extends "principal.html" %} 
 {% block content %}
 <div class="primary">
-	<h1>Modificar Tipo Item</h1>
+	<h1>Importar Tipo Item</h1>
 	{% with errors = get_flashed_messages(category_filter=["error"]) %} {%
 		if errors %}
 			<div class="block-message">
@@ -14,11 +14,11 @@
 			</div>
 		{% endif %} 
 	{% endwith %}
-	<form id=editartipoItem method=post action="/tipoItem/editartipoItem">
-			<label>Código</label><input type="text" name="codigo" value="{{ form.codigo.data }}" id="codigo" readonly="true" />
-    		<label>Nombre</label>{{ form.nombre() }}
+	<form id=importartipoItem method=post action="/tipoItem/importartipoItem">
+			<label>Código</label> {{ form.codigo() }}
+    		<label>Nombre</label> {{ form.nombre() }}
     		<label>Descripción</label> {{ form.descripcion() }}
-    		<label>Fase</label><input type="text" name="id_fase" value="{{ form.id_fase.data }} " id="id_fase" readonly="true"/>
+    		<label>Fase</label> {{ form.id_fase() }}
     		<label>Atributos</label> {{ form.lista_atributo() }}
 	<p><input type=submit value=Guardar>
   		<input type="button" value="Cancelar"  onClick="document.location.href='{{ url_for( 'administrartipoItem' ) }}';"> 

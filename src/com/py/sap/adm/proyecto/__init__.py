@@ -4,7 +4,12 @@ from com.py.sap.util.database import init_db, engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.exc import DatabaseError
 from flask import Flask, render_template, request, redirect, url_for, flash 
+from com.py.sap.des.mod.Fase import Fase
 from com.py.sap.adm.mod.Proyecto import Proyecto
+from com.py.sap.adm.mod.UsuarioRol import UsuarioRol
+from com.py.sap.adm.mod.Recurso import Recurso
+from com.py.sap.adm.mod.Permiso import Permiso
+from com.py.sap.adm.mod.RolPermiso import RolPermiso
 from com.py.sap.adm.proyecto.ProyFormulario import ProyFormulario
 import flask, flask.views
 import os
@@ -38,7 +43,7 @@ def nuevoproyecto():
             return render_template('proyecto/nuevoproyecto.html', form=form)  
         try:
             pry = Proyecto(form.nombre.data, form.descripcion.data, 
-                    form.estado.data, form.cant_miembros.data, 
+                    'N', form.cant_miembros.data, 
                     form.fecha_inicio.data, form.fecha_fin.data, 
                     today, form.usuario_lider.data)
             db_session.add(pry)
@@ -59,7 +64,15 @@ def editarproyecto():
     init_db(db_session)
     p = db_session.query(Proyecto).filter_by(nombre=request.args.get('nom')).first()  
     form = ProyFormulario(request.form,p)
-    proyecto = db_session.query(Proyecto).filter_by(nombre=form.nombre.data).first()  
+    proyecto = db_session.query(Proyecto).filter_by(nombre=form.nombre.data).first()
+    if proyecto.estado == 'N' :
+        form.estado.data = 'Nuevo'
+    elif proyecto.estado == 'P' :
+        form.estado.data = 'En Progreso'
+    elif proyecto.estado == 'A' :
+        form.estado.data = 'Anulado'
+    elif proyecto.estado == 'F' :
+        form.estado.data = 'Finalizado'
     if request.method == 'POST' and form.validate():
         if form.fecha_inicio.data > form.fecha_fin.data :
             flash('La fecha de inicio no puede ser mayor que la fecha de finalizacion','error')
@@ -67,6 +80,14 @@ def editarproyecto():
         try:
             form.populate_obj(proyecto)
             proyecto.fecha_ultima_mod = today
+            if form.estado.data == 'Nuevo' :
+                proyecto.estado = 'N'
+            elif form.estado.data == 'En Progreso' :
+                proyecto.estado = 'P'
+            elif form.estado.data == 'Anulado' :
+                proyecto.estado = 'A'
+            elif form.estado.data == 'Finalizado' :
+                proyecto.estado = 'F'
             db_session.merge(proyecto)
             db_session.commit()
             return redirect('/proyecto/administrarproyecto')
@@ -82,7 +103,10 @@ def eliminarproyecto():
     try:
         nom = request.args.get('nom')
         init_db(db_session)
-        proyecto = db_session.query(Proyecto).filter_by(nombre=nom).first()  
+        proyecto = db_session.query(Proyecto).filter_by(nombre=nom).first()
+        if proyecto.estado != 'N' :
+            flash('No se puede eliminar el Proyecto','info')
+            return render_template('proyecto/administrarproyecto.html')
         init_db(db_session)
         db_session.delete(proyecto)
         db_session.commit()
@@ -128,3 +152,6 @@ def page_not_found(error):
 def shutdown_session(response):
     db_session.remove()
     return response
+
+def getProyectoByUsuario(id_usuario):
+    return db_session.query(Proyecto).join(Recurso, Proyecto.id == Recurso.id_proyecto).join(Permiso, Permiso.id_recurso == Recurso.id).join(RolPermiso, RolPermiso.id_permiso == Permiso.id).join(UsuarioRol, UsuarioRol.id_rol == RolPermiso.id_rol).filter(UsuarioRol.id_usuario == 1)

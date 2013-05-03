@@ -17,13 +17,14 @@
 <form id=buscartipoItem method=get action="/tipoItem/buscartipoItem">
 			<input type="text" name="patron" /> 
 			<select name=parametro>
-				<option value="codigo">Codigo</option>
+				<option value="codigo">Código</option>
 				<option value="nombre">Nombre</option>
 				<option value="descripcion">Descripción</option>				
 				<option value="id_fase">Fase</option>
 			</select> 
 			<input type=submit name="Buscar" value=Buscar /> 			
 		<a href="{{ url_for('nuevotipoItem') }}" ><img src="../static/images/a.png" alt="Agregar" height="30" width="30" title="Agregar" ></a>
+		<a href="{{ url_for('listartipoItem') }}" ><img src="../static/images/i.png" alt="Importar" height="30" width="30" title="Importar" ></a>
 </form>
 <p></p>
 {% with errors = get_flashed_messages(category_filter=["info"]) %}
@@ -38,10 +39,11 @@
 </div>
 {% endif %}
 {% endwith %}
+<div style="height:250px;width:470px;overflow:auto;">
 <table border="1">
 	<TR>
 		<TH class="c1"></TH>
-		<TH class="c3">Codigo</TH>
+		<TH class="c3">Código</TH>
 		<TH class="c4">Nombre</TH>
 		<TH class="c5">Descripción</TH>		
 		<TH class="c6">Fase</TH>
@@ -61,6 +63,7 @@
 	</TR>
 	{% endfor %}
 </table>
+</div>
 </div>
 </div>
 {% endblock %}

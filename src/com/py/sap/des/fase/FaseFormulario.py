@@ -1,5 +1,11 @@
 from wtforms import Form, TextField, validators, IntegerField, SelectField, DateField
 from com.py.sap.adm.mod.Proyecto import Proyecto
+from com.py.sap.util.database import engine
+from sqlalchemy.orm import scoped_session, sessionmaker
+
+db_session = scoped_session(sessionmaker(autocommit=False,
+                                       autoflush=False,
+                                       bind=engine))
 
 class FaseFormulario(Form):
     nro_orden = IntegerField('Numero Orden', [validators.Required()]) 
@@ -8,5 +14,5 @@ class FaseFormulario(Form):
     estado = SelectField('Estado', choices=[('I', 'Inicial'), ('P', 'En Progreso'), ('L', 'En Linea Base'), ('A', 'Aprobado')])
     fecha_inicio = DateField('Fecha Inicio', format='%Y-%m-%d')
     fecha_fin = DateField('Fecha Fin', format='%Y-%m-%d' )
-    proyecto = TextField('Proyecto')
+    id_proyecto = TextField('Proyecto')
 #,coerce=int

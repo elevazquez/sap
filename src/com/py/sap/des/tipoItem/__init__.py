@@ -142,6 +142,52 @@ def administrartipoItem():
     tipoItems = db_session.query(TipoItem).order_by(TipoItem.nombre)
     return render_template('tipoItem/administrartipoItem.html', tipoItems = tipoItems)
 
+
+@app.route('/tipoItem/listartipoItem')
+def listartipoItem():
+    init_db(db_session)
+    tipoItems2 = db_session.query(TipoItem).order_by(TipoItem.nombre)
+    return render_template('tipoItem/listartipoItem.html', tipoItems2 = tipoItems2)
+
+""" Funcion para importar registros a la tabla de Tipo de Item""" 
+@app.route('/tipoItem/importartipoItem', methods=['GET', 'POST'])
+def importartipoItem():
+    init_db(db_session)   
+    tipoItem = db_session.query(TipoItem).filter_by(codigo=request.args.get('codigo')).first() 
+    form = TipoItemFormulario(request.form,tipoItem)  
+    fase_selected= db_session.query(Fase).filter_by(id=request.args.get('fase') ).first()      
+    form.id_fase.data= fase_selected.nombre
+    atributos= db_session.query(Atributo).from_statement("Select a.* from atributo a , tipo_item ti, titem_atributo ta where ta.id_atributo= a.id and ta.id_tipo_item = ti.id and ti.id = "+request.args.get('id')).all()
+    form.lista_atributo.choices = [(f.id, f.nombre) for f in atributos ]
+    if request.method == 'POST' :        
+        try:
+            """verifica si la fase esta en un estado inicial la cambia en progreso"""   
+            fase_selected = db_session.query(Fase).filter_by(id=form.id_fase.data).first()
+            if fase_selected.estado == "I" :
+                fase_selected.estado = "P"
+                db_session.merge(fase_selected)
+                db_session.commit()     
+                  
+            tipo = TipoItem( form.codigo.data, form.nombre.data, form.descripcion.data, 
+                    form.id_fase.data)
+            db_session.add(tipo)
+            db_session.commit()
+            
+            """almacena los atributos del tipo Item"""
+            lista= form.lista_atributo.data
+            for atr in lista:
+                att = TItemAtributo(tipo.id,atr)
+                db_session.add(att)
+                db_session.commit()
+            flash('El Tipo de Item ha sido importado con exito','info')
+            return redirect('/tipoItem/importartipoItem') 
+        except DatabaseError, e:
+                flash('Error en la Base de Datos' + e.args[0],'error')
+                return render_template('tipoItem/importartipoItem.html', form=form)
+    else:
+        flash_errors(form) 
+        return render_template('tipoItem/importartipoItem.html', form=form)
+
 """Lanza un mensaje de error en caso de que la pagina solicitada no exista"""
 @app.errorhandler(404)
 def page_not_found(error):

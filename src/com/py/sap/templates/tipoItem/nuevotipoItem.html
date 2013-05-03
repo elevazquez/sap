@@ -5,7 +5,7 @@
 	{% with errors = get_flashed_messages(category_filter=["error"]) %} 
 		{% if errors %}
 			<div class="block-message">
-				<a class="close" href="{{ url_for( 'nuevotipoItem' ) }}"
+				<a class="close" href="#"
 					dir="rtl">×</a>
 					<ul>
 						{%- for msg in errors %}
@@ -15,14 +15,13 @@
 		{% endif %} 
 	{% endwith %}
 	<form id=nuevotipoItem method=post action="/tipoItem/nuevotipoItem">
-			<label>Codigo</label> {{ form.codigo()}}
+			<label>Código</label> {{ form.codigo()}}
     		<label>Nombre</label>  {{ form.nombre()}}
     		<label>Descripción</label> {{ form.descripcion() }}    		
     		<label>Fase</label> {{ form.id_fase() }}
     		<label>Atributos</label> {{ form.lista_atributo() }}
-    		
     	<p><input type=submit value=Guardar>
-  		<input type="button" value="Cancelar"  onClick="javascript:history.back()"> 
+  		<input type="button" value="Cancelar"  onClick="document.location.href='{{ url_for( 'administrartipoItem' ) }}';"> 
 	</form>
 </div>
 {% endblock %}
