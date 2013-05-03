@@ -93,7 +93,7 @@ class Main(views.MethodView):
         """ Se un objeto md5 para encriptar la contrasenha del usuario """    
         con = md5.new()    
         con.update(request.form['passwd'])
-        passwd = con.hexdigest()
+        #passwd = con.hexdigest()
         
         user = db_session.query(Usuario).filter_by(usuario=username,password= passwd ).first() 
         if user == None :
@@ -106,7 +106,7 @@ class Main(views.MethodView):
                                  identity=Identity(user.id))
             
             is_administrador(user.id)
-            session['pry'] = 1
+            #session['pry'] = 1
             #===================================================================
             # session['username'] = username
             #===================================================================
