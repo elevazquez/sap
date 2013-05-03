@@ -4,11 +4,12 @@ from com.py.sap.des.mod.Fase import Fase
 from com.py.sap.des.mod.TipoItem import TipoItem
 from sqlalchemy.orm import scoped_session, sessionmaker
 from com.py.sap.util.database import engine
+
 db_session = scoped_session(sessionmaker(autocommit=False,
                                        autoflush=False,
                                        bind=engine))
 
-class ItemFormulario(Form):
+class ItemEditarFormulario(Form):
     codigo = TextField('Codigo', [validators.Length(min=2, max=50), validators.Required()])    
     nombre = TextField('Nombre', [validators.Length(min=2, max=50), validators.Required()])
     descripcion = TextField('Descripcion', [validators.Length(min=2, max=100), validators.Required()])
@@ -19,11 +20,5 @@ class ItemFormulario(Form):
     costo = IntegerField('Costo', [validators.Required()]) 
     version = IntegerField('Version', [validators.Required()]) 
     usuario = IntegerField('Usuario', [validators.Required()]) 
-    fase = SelectField('Fase', choices=[(f.id,f.nombre) for f in db_session.query(Fase).order_by(Fase.nombre).all()], coerce=int)   
-    tipo_item = SelectField('Tipo Item', choices=[(f.id, f.nombre) for f in db_session.query(TipoItem).order_by(TipoItem.nombre).all()],coerce=int) 
-   
-   # archivo= bytearray('Archivo',[validators.Required()] )
-   # mime= TextField('Mime',[validators.Length(min=2, max=15), validators.Required()])
-    
-    
-    
+    fase = TextField('Fase',[validators.Required()])   
+    tipo_item = TextField('Tipo Item',[validators.Required()]) 

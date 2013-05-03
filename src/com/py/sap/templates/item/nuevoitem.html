@@ -2,8 +2,21 @@
 {% block content %}
 <div class="primary">
 	<h1>Agregar Item</h1>
-	<form id=nuevoitem method=post action="/nuevoitem">
-	
+	{% with errors = get_flashed_messages(category_filter=["error"]) %} 
+		{% if errors %}
+			<div class="block-message">
+				<a class="close" href="{{ url_for( 'nuevoitem' ) }}"
+					dir="rtl">×</a>
+					<ul>
+						{%- for msg in errors %}
+							<li>{{ msg }}</li> {% endfor -%}
+					</ul>
+			</div>
+		{% endif %} 
+	{% endwith %}
+	<form id=nuevoitem method=post action="/item/nuevoitem">
+			<label>Fase</label> {{ form.fase() }} 
+    		<label>Tipo Item</label> {{ form.tipo_item() }}
     		<label>Código</label> {{ form.codigo}}
     		<label>Nombre</label> {{ form.nombre()}}
     		<label>Descripción</label> {{ form.descripcion() }}
@@ -11,11 +24,10 @@
     		<label>Fecha </label> <input type="date" name="fecha" id="fecha"/>
     		<label>Complejidad</label> {{ form.complejidad() }}
     		<label>Costo</label> {{ form.costo() }}
-    		<label>Versión</label> {{ form.version() }}
-    		<label>Fase</label> {{ form.id_fase() }}
-    		<label>Tipo Item</label> {{ form.id_tipo_item() }}
-    			<p><input type=submit value=Guardar>
-  		<input type="button" value="Cancelar"  onClick="javascript:history.back()"> 
+    		<label>Versión</label><input type="number" name="version" value="{{ form.version.data }}" id="version" readonly="true" /> 
+    		
+    	<p><input type=submit value=Guardar>
+  		<input type="button" value="Cancelar"  onClick="document.location.href='{{ url_for( 'administraritem' ) }}';"> 
 	</form>
 </div>
 {% endblock %}

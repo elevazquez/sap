@@ -31,6 +31,7 @@ from com.py.sap.des.atributo import *
 from com.py.sap.des.tipoItem import *
 from com.py.sap.des.item import *
 
+
 def get_resource_as_string(name, charset='utf-8'):
     with app.open_resource(name) as f:
         return f.read().decode(charset)
@@ -90,9 +91,9 @@ class Main(views.MethodView):
         passwd = request.form['passwd'] 
 
         """ Se un objeto md5 para encriptar la contrasenha del usuario """    
-        con = md5.new()    
-        con.update(request.form['passwd'])
-        passwd = con.hexdigest()
+#        con = md5.new()    
+#        con.update(request.form['passwd'])
+#        passwd = con.hexdigest()
         
         user = db_session.query(Usuario).filter_by(usuario=username,password= passwd ).first() 
         if user == None :

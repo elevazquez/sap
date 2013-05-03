@@ -103,7 +103,12 @@ def eliminartipoItem():
         cod = request.args.get('cod')
         init_db(db_session)
         tipoItem = db_session.query(TipoItem).filter_by(codigo=cod).first()  
-        init_db(db_session)
+        items= db_session.query(Item).filter_by(id_tipo_item= tipoItem.id).first()
+       #se verifica si el tipo de item esta siendo utilizado, en tal caso no podra ser editado 
+        if items !=  None :
+          flash('El Tipo de Item no puede ser eliminado, ya que esta siendo utilizado por algun recurso!','error')
+          return render_template('tipoItem/eliminartipoItem.html')
+        
         db_session.delete(tipoItem)
         db_session.commit()
         return redirect('/tipoItem/administrartipoItem')
@@ -119,7 +124,7 @@ def buscartipoItem():
     if valor == "" : 
         administrartipoItem()
     if parametro == 'id_fase':
-        ti = db_session.query(TipoItem).from_statement("SELECT t.* FROM tipo_item t, fase f where  f.nombre  ilike '%"+valor+"%' and t.id_fase= f.id").all()
+        ti = db_session.query(TipoItem).from_statement("SELECT t.* FROM tipo_item t, fase f where lower(f.nombre)  ilike lower('%"+valor+"%') and t.id_fase= f.id").all()
     else:
         ti = db_session.query(TipoItem).from_statement("SELECT * FROM tipo_item where "+parametro+" ilike '%"+valor+"%'").all()
     return render_template('tipoItem/administrartipoItem.html', tipoItems = ti)    
