@@ -1,7 +1,7 @@
 {% extends "principal.html" %} 
 {% block content %}
 <div class="primary">
-	<h1>Modificar Fase</h1>
+	<h1>Importar Fase</h1>
 	{% with errors = get_flashed_messages(category_filter=["error"]) %} 
 			{% if errors %}
 			<div class="block-message">
@@ -14,8 +14,8 @@
 			</div>
 		{% endif %} 
 	{% endwith %}
-	<form id=editar method=post action="/fase/editarfase">
-  			<label>Número</label><input type="text" name="nro_orden" value="{{ form.nro_orden.data }}" id="nro_orden" readonly="true"/>
+	<form id=importar method=post action="/fase/importarfase">
+  			<label>Número</label> {{ form.nro_orden() }}
   			<label>Nombre</label> {{ form.nombre() }}
     		<label>Descripción</label> {{ form.descripcion() }}
     		<label>Estado</label> {{ form.estado() }}

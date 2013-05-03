@@ -20,7 +20,7 @@
 				<option value="nombre">Nombre</option>
 				<option value="descripcion">Descripción</option>
 				<option value="estado">Estado</option>
-				<option value="cant_miembros">Cantidad Miembros</option>
+				<option value="cant_miembros">Cantidad Miembros Comité</option>
 				<option value="fecha_inicio">Fecha Inicio</option>
 				<option value="fecha_fin">Fecha Fin</option>
 				<option value="fecha_ultima_mod">Fecha Ult Mod</option>
@@ -42,6 +42,7 @@
 </div>
 {% endif %}
 {% endwith %}
+<div style="height:250px;width:850px;overflow:auto;">
 <table border="1">
 	<TR>
 		<TH class="c1"></TH>
@@ -73,6 +74,7 @@
 	</TR>
 	{% endfor %}
 </table>
+</div>
 </div>
 </div>
 {% endblock %}

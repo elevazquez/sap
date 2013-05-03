@@ -1,0 +1,51 @@
+{% extends "principal.html" %} 
+{% block content %}
+<div class="primary">
+<div >
+<h1>Importar Fases</h1>		
+<p></p>
+{% with errors = get_flashed_messages(category_filter=["info"]) %}
+{% if errors %}
+<div class="block-message">
+  <a class="close" href="{{ url_for( 'listarfase' ) }}" dir="rtl">×</a>
+  <ul>
+    {%- for msg in errors %}
+    <li>{{ msg }}</li>
+    {% endfor -%}
+  </ul>
+</div>
+{% endif %}
+{% endwith %}
+<div style="height:250px;width:800px;overflow:auto;">
+<table border="1">
+	<TR>
+		<TH class="c1"></TH>
+		<TH class="c2">Número</TH>
+		<TH class="c3">Nombre</TH>
+		<TH class="c4">Descripción</TH>
+		<TH class="c5">Estado</TH>
+		<TH class="c6">Fecha Inicio</TH>
+		<TH class="c7">Fecha Fin</TH>
+		<TH class="c8">Proyecto</TH>
+	</TR>
+	{% for fase2 in fases2 %}
+	<TR>
+		<TD class="c1"><a href="{{ url_for('importarfase', nro=fase2.nro_orden, py=fase2.id_proyecto) }}" ><img src="../static/images/s.png" alt="Importar" height="20" width="20" title="Importar" style="vertical-align: middle;"></a></TD>
+		<TD class="c2"><SPAN>{{fase2.nro_orden|e}}</SPAN></TD>
+		<TD class="c3"><SPAN>{{fase2.nombre|e}}</SPAN></TD>
+		<TD class="c4"><SPAN>{{fase2.descripcion|e}}</SPAN></TD>
+		<TD class="c5"><SPAN>{{fase2.estado|e}}</SPAN></TD>
+		<TD class="c6"><SPAN>{{fase2.fecha_inicio|e}}</SPAN></TD>
+		<TD class="c7"><SPAN>{{fase2.fecha_fin|e}}</SPAN></TD>
+		<TD class="c8"><SPAN>{{fase2.proyecto.nombre|e}}</SPAN></TD>
+	</TR>
+	{% else %}
+  	<TR>
+		<em>Sin registro de fases</em>
+	</TR>
+	{% endfor %}
+</table>
+</div>
+</div>
+</div>
+{% endblock %}

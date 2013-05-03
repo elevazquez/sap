@@ -18,7 +18,7 @@
     		<label>Nombre</label> {{ form.nombre() }}
     		<label>Descripción</label> {{ form.descripcion() }}
     		<label>Estado</label><input type="text" name="estado" value="{{ form.estado.data }}" id="estado" readonly="true"/>
-    		<label>Cant Miembros</label> <input type="number" name="cant_miembros" value="{{ form.cant_miembros.data }}" id="cant_miembros"/>
+    		<label>Cant Miembros Comité</label> <input type="number" name="cant_miembros" value="{{ form.cant_miembros.data }}" id="cant_miembros"/>
     		<label>Fecha Inicio</label> <input type="date" name="fecha_inicio" id="fecha_inicio" value="{{ form.fecha_inicio.data }}"/>
     		<label>Fecha Fin</label> <input type="date" name="fecha_fin" id="fecha_fin" value="{{ form.fecha_fin.data }}"/>
     		<label>Líder de Proyecto</label> {{ form.usuario_lider() }}
