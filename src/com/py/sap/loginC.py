@@ -94,7 +94,7 @@ class Main(views.MethodView):
         """ Se un objeto md5 para encriptar la contrasenha del usuario """    
         con = md5.new()    
         con.update(request.form['passwd'])
-        passwd = con.hexdigest()
+        #passwd = con.hexdigest()
         
         user = db_session.query(Usuario).filter_by(usuario=username,password= passwd ).first() 
         if user == None :
@@ -111,9 +111,9 @@ class Main(views.MethodView):
             #===================================================================
             # session['username'] = username
             #===================================================================
-            if 'is_administrador' in session:
-                if not session['is_administrador']:
-                    return redirect(url_for('getProyectoByUsuario', id_usuario = current_user.id))
+            #if 'is_administrador' in session:
+            #   if not session['is_administrador']:
+            return redirect(url_for('getProyectoByUsuario', id_usuario = current_user.id))
         return redirect(url_for('index'))
 
 """ funcion llamada cuando el usuario cierra sesion"""
@@ -132,6 +132,7 @@ def logout():
                          identity=AnonymousIdentity())
 
     session.pop('is_administrador', None)
+    session.pop('pry', None)
     return redirect(url_for('index'))
 
 def is_administrador(userid):
