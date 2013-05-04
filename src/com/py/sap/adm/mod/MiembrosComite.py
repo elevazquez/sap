@@ -6,14 +6,14 @@ class MiembrosComite (Base):
     __tablename__ = 'miembros_comite'
     id = Column('id', Integer, Sequence('miembros_comite_id_seq'), primary_key=True)
     id_proyecto = Column(Integer, ForeignKey('proyecto.id'))
-    proyecto = relationship('Proyecto', backref=backref('proyectos', lazy='dynamic'))
+    proyecto = relationship('Proyecto', backref=backref('proyectosMiembro', lazy='dynamic'))
     id_usuario = Column(Integer, ForeignKey('usuario.id'))
-    usuario = relationship('Usuario', backref=backref('usuarios', lazy='dynamic'))
+    usuario = relationship('Usuario', backref=backref('usuariosMiembro', lazy='dynamic'), order_by='Usuario.usuario')
     
-    def __init__(self, proyecto=None, usuario=None):
-        self.proyecto = proyecto
-        self.usuario = usuario
+    def __init__(self, id_proyecto=None, id_usuario=None):
+        self.id_proyecto = id_proyecto
+        self.id_usuario = id_usuario
         
     def __repr__(self):
-        return '<MiembrosComite %s %s>' % (self.proyecto, self.usuario)
+        return '<MiembrosComite %s %s>' % (self.id_proyecto, self.id_usuario)
     

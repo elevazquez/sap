@@ -25,13 +25,13 @@ login_manager.setup_app(app)
 from com.py.sap.adm.rol import *
 from com.py.sap.adm.permiso import *
 from com.py.sap.adm.proyecto import *
-from com.py.sap.des.fase import *
 from com.py.sap.adm.usuario import *
+from com.py.sap.adm.miembrosComite import *
+from com.py.sap.des.fase import *
 from com.py.sap.des.atributo import *
 from com.py.sap.des.tipoItem import *
 from com.py.sap.des.item import *
 from com.py.sap.ges.relacion import *
-
 
 def get_resource_as_string(name, charset='utf-8'):
     with app.open_resource(name) as f:
@@ -111,8 +111,9 @@ class Main(views.MethodView):
             #===================================================================
             # session['username'] = username
             #===================================================================
-            if not session['is_administrador']:
-                return redirect(url_for('getProyectoByUsuario', id_usuario = current_user.id))
+            if 'is_administrador' in session:
+                if not session['is_administrador']:
+                    return redirect(url_for('getProyectoByUsuario', id_usuario = current_user.id))
         return redirect(url_for('index'))
 
 """ funcion llamada cuando el usuario cierra sesion"""
