@@ -17,7 +17,7 @@
 				<div class="subscribe">
 					 {# {% if 'username' in session %} #}
 					 {% if current_user.is_authenticated() %}
-					 	{% if 'proyecto_actual' in session %}
+					 	{% if 'pry' in session %}
 					 		{{session['proyecto_nombre']}}
 					 	{% endif %}
 						<!-- <a href="#">{{session['username']}}</a> | <a href="{{ url_for('logout') }}">Salir</a>  -->
