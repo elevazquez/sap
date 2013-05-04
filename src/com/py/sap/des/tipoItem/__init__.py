@@ -74,7 +74,7 @@ def editartipoItem():
     form = TipoItemFormularioEd(request.form,ti)  
     tipoItem = db_session.query(TipoItem).filter_by(codigo=form.codigo.data).first()
     fase_selected= db_session.query(Fase).filter_by(id=tipoItem.id_fase ).first()       
-    form.id_fase.data= fase_selected.nombre
+    #form.id_fase.data= fase_selected.nombre
     atributos= db_session.query(Atributo).from_statement("Select a.* from atributo a , tipo_item ti, titem_atributo ta where ta.id_atributo= a.id and ta.id_tipo_item = ti.id and ti.id = '"+tipoItem.id.__repr__()+"'").all()
     form.lista_atributo.choices = [(f.id, f.nombre) for f in atributos ]
     if request.method == 'POST' and form.validate():
@@ -163,9 +163,10 @@ def importartipoItem():
     ti = db_session.query(TipoItem).filter_by(codigo=request.args.get('codigo')).first() 
     form = TipoItemFormulario(request.form,ti)  
     tipoItem = db_session.query(TipoItem).filter_by(codigo=form.codigo.data).first()
-    fase_selected= db_session.query(Fase).filter_by(id=form.fase.data).first()       
+    fase_selected= db_session.query(Fase).filter_by(id=form.fase.data).first()  
     #form.id_fase.data= fase_selected.nombre
-    atributos= db_session.query(Atributo).from_statement("Select a.* from atributo a , tipo_item ti, titem_atributo ta where ta.id_atributo= a.id and ta.id_tipo_item = ti.id and ti.id = '"+form.fase.data+"'").all()
+    #atributos= db_session.query(Atributo).from_statement("Select a.* from atributo a , tipo_item ti, titem_atributo ta where ta.id_atributo= a.id and ta.id_tipo_item = ti.id and ti.id = '"+session['tip']+"'").all()
+    atributos= db_session.query(Atributo).from_statement("Select a.* from atributo a").all()
     form.lista_atributo.choices = [(f.id, f.nombre) for f in atributos ]
     if request.method == 'POST' and form.validate():        
         try:
