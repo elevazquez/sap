@@ -111,8 +111,9 @@ class Main(views.MethodView):
             #===================================================================
             # session['username'] = username
             #===================================================================
-            if not session['is_administrador']:
-                return redirect(url_for('getProyectoByUsuario', id_usuario = current_user.id))
+            if 'is_administrador' in session:
+                if not session['is_administrador']:
+                    return redirect(url_for('getProyectoByUsuario', id_usuario = current_user.id))
         return redirect(url_for('index'))
 
 """ funcion llamada cuando el usuario cierra sesion"""
