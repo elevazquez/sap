@@ -15,8 +15,8 @@
 		{% endif %} 
 	{% endwith %}
 	<form id=editaritem method=post action="/item/editaritem">
-			<label>Fase</label> <input type="text" name="id_fase" value="{{ form.fase.data }} " id="id_fase" readonly="true"/> 
-    		<label>Tipo Item</label> <input type="text" name="id_tipo_item" value="{{ form.tipo_item.data }} " id="id_tipo_item" readonly="true"/> 
+			<label>Fase</label> <input type="text" name="fase" value="{{ form.fase.data }} " id="fase" readonly="true"/> 
+    		<label>Tipo Item</label> <input type="text" name="tipo_item" value="{{ form.tipo_item.data }} " id="tipo_item" readonly="true"/> 
     		<label>Código</label> <input type="text" name="codigo" value="{{ form.codigo.data }}" id="codigo" readonly="true" />
     		<label>Nombre</label> {{ form.nombre()}}
     		<label>Descripción</label> {{ form.descripcion() }}
