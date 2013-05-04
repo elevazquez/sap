@@ -165,5 +165,4 @@ def proyectoActual():
     session['pry'] = proyecto
     p = db_session.query(Proyecto).filter_by(id= proyecto).first()
     session['proyecto_nombre'] = p.nombre
-    
     return redirect(url_for('index'))

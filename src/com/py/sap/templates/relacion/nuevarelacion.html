@@ -13,10 +13,10 @@
 			<TH class="c3">Tipo item</TH>
 		</TR>
 		{% for item in items %}
-		<form name="input" action="html_form_action.asp" method="get">
+		<form name="nuevarelacion" action="" method="get">
 			<TR>
 				<TD class="c4">
-				<input type="radio" name="codigo_item" value="{{ item.id }}">
+				<input type="radio" name="item_duenho" value="{{ item.id }}">
 				</TD>
 				<TD class="c4"><SPAN>{{item.nombre|e}}</SPAN></TD>
 				<TD class="c4"><SPAN>{{item.descripcion|e}}</SPAN></TD>
