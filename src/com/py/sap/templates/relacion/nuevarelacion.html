@@ -2,10 +2,12 @@
 {% block content %}
 <div class="primary">
 	<h1>Agregar Relación</h1>
-	<p>Seleccionar item, dueño de la relación </p>
+	<br>Seleccionar item:
+	</br>
 	<table id="tablanuevarelacion" border="1">
 		<TR>
 			<TH class="c3"></TH>
+			<TH class="c3">Item código</TH>
 			<TH class="c3">Item nombre</TH>
 			<TH class="c3">Item descripción</TH>
 			<TH class="c3">Usuario del item</TH>
@@ -13,21 +15,18 @@
 			<TH class="c3">Tipo item</TH>
 		</TR>
 		{% for item in items %}
-		<form name="nuevarelacion" action="/relacion/nuevarelacion" method="get">
 			<TR>
-				<TD class="c4">
-				<input type="radio" name="item_duenho" value="{{ item.id }}">
-				</TD>
+				<TD class="c4" width="200"><a href="{{ url_for('nuevarelacion', id_item=item.id) }}">Seleccionar</a></TD>
+				<TD class="c4"><SPAN>{{item.codigo|e}}</SPAN></TD>
 				<TD class="c4"><SPAN>{{item.nombre|e}}</SPAN></TD>
 				<TD class="c4"><SPAN>{{item.descripcion|e}}</SPAN></TD>
 				<TD class="c4"><SPAN>{{item.usuario|e}}</SPAN></TD>
 				<TD class="c4"><SPAN>{{item.fase.nombre|e}}</SPAN></TD>
 				<TD class="c4"><SPAN>{{item.tipo_item.nombre|e}}</SPAN></TD>
-			</TR>
-			</form> 
+			</TR> 
 		{% else %}
 			<TR>
-				<em>Sin registro de items</em>
+				<em><b>Sin registro de items</b></em>
 			</TR>
 		{% endfor %}
 	</table>
