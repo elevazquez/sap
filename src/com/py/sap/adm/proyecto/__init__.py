@@ -10,6 +10,7 @@ from com.py.sap.adm.mod.UsuarioRol import UsuarioRol
 from com.py.sap.adm.mod.Recurso import Recurso
 from com.py.sap.adm.mod.Permiso import Permiso
 from com.py.sap.adm.mod.RolPermiso import RolPermiso
+from com.py.sap.adm.mod.MiembrosComite import MiembrosComite
 from com.py.sap.adm.proyecto.ProyFormulario import ProyFormulario
 import flask, flask.views
 import os
@@ -40,13 +41,19 @@ def nuevoproyecto():
         init_db(db_session)
         if form.fecha_inicio.data > form.fecha_fin.data :
             flash('La fecha de inicio no puede ser mayor que la fecha de finalizacion','error')
-            return render_template('proyecto/nuevoproyecto.html', form=form)  
+            return render_template('proyecto/nuevoproyecto.html', form=form)
+        if form.cant_miembros.data %2 == 0 :
+            flash('La cantidad maxima de miembros debe ser impar','error')
+            return render_template('proyecto/nuevoproyecto.html', form=form)
         try:
             pry = Proyecto(form.nombre.data, form.descripcion.data, 
                     'N', form.cant_miembros.data, 
                     form.fecha_inicio.data, form.fecha_fin.data, 
                     today, form.usuario_lider.data)
             db_session.add(pry)
+            db_session.commit()
+            mc = MiembrosComite(pry.id, form.usuario_lider.data)
+            db_session.add(mc)
             db_session.commit()
             flash('El Proyecto ha sido registrado con exito','info')
             return redirect('/proyecto/administrarproyecto')
@@ -65,6 +72,7 @@ def editarproyecto():
     p = db_session.query(Proyecto).filter_by(nombre=request.args.get('nom')).first()  
     form = ProyFormulario(request.form,p)
     proyecto = db_session.query(Proyecto).filter_by(nombre=form.nombre.data).first()
+    mc = proyecto.id_usuario_lider
     if proyecto.estado == 'N' :
         form.estado.data = 'Nuevo'
     elif proyecto.estado == 'P' :
@@ -76,6 +84,9 @@ def editarproyecto():
     if request.method == 'POST' and form.validate():
         if form.fecha_inicio.data > form.fecha_fin.data :
             flash('La fecha de inicio no puede ser mayor que la fecha de finalizacion','error')
+            return render_template('proyecto/editarproyecto.html', form=form)
+        if form.cant_miembros.data %2 == 0 :
+            flash('La cantidad maxima de miembros debe ser impar','error')
             return render_template('proyecto/editarproyecto.html', form=form) 
         try:
             form.populate_obj(proyecto)
@@ -90,6 +101,16 @@ def editarproyecto():
                 proyecto.estado = 'F'
             db_session.merge(proyecto)
             db_session.commit()
+            
+#            miembrosComite = db_session.query(MiembrosComite).filter_by(id_usuario=mc).filter_by(id_proyecto=proyecto.id).first()  
+#            init_db(db_session)
+#            db_session.delete(miembrosComite)
+#            db_session.commit()
+#        
+            miembro = MiembrosComite(proyecto.id, proyecto.id_usuario_lider)
+            db_session.add(miembro)
+            db_session.commit()
+            
             return redirect('/proyecto/administrarproyecto')
         except DatabaseError, e:
             flash('Error en la Base de Datos' + e.args[0],'error')
@@ -112,7 +133,7 @@ def eliminarproyecto():
         db_session.commit()
         return redirect('/proyecto/administrarproyecto')
     except DatabaseError, e:
-            flash('Error en la Base de Datos' + e.args[0],'error')
+            flash('Error en la Base de Datos' + e.args[0],'info')
             return render_template('proyecto/administrarproyecto.html')
     
 @app.route('/proyecto/buscarproyecto', methods=['GET', 'POST'])

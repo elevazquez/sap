@@ -113,7 +113,7 @@ def eliminarusuario():
         db_session.commit()
         return redirect('/usuario/administrarusuario')
     except DatabaseError, e:
-            flash('Error en la Base de Datos' + e.args[0],'error')
+            flash('Error en la Base de Datos' + e.args[0],'info')
             return render_template('usuario/administrarusuario.html')
     
 @app.route('/usuario/buscarusuario', methods=['GET', 'POST'])
