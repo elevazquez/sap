@@ -94,7 +94,7 @@ class Main(views.MethodView):
         """ Se un objeto md5 para encriptar la contrasenha del usuario """    
         con = md5.new()    
         con.update(request.form['passwd'])
-        #passwd = con.hexdigest()
+        passwd = con.hexdigest()
         
         user = db_session.query(Usuario).filter_by(usuario=username,password= passwd ).first() 
         if user == None :
