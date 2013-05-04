@@ -34,7 +34,14 @@ def nuevarelacion():
     # permission = UserPermission('administrador')
     # if permission.can():
     #===========================================================================
-    items = getItemByProyecto()
+    idItem = request.args.get('id_item')
+    if idItem == None or idItem == '':
+        items = getItemByProyecto()
+    else:
+        items = getItemByProyectoBeforeFase(idItem)
+        if items != None or items != '':
+            session['itemduenho'] = idItem
+        
     return render_template('relacion/nuevarelacion.html', items = items)
     #===========================================================================
     # else:
@@ -101,4 +108,9 @@ def shutdown_session(response):
 def getItemByProyecto():
     id_proy =  session['pry']
     items = db_session.query(Item).join(Fase, Fase.id == Item.id_fase).join(Proyecto, Proyecto.id == Fase.id_proyecto).filter(Proyecto.id == id_proy).all()
+    return items
+
+def getItemByProyectoBeforeFase(id_item):
+    id_proy = session['pry']
+    items = db_session.query(Item).join(Fase, Fase.id == Item.id_fase).join(Proyecto, Proyecto.id == Fase.id_proyecto).filter(Proyecto.id == id_proy).filter(Item.id < id_item).all()
     return items

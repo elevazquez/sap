@@ -1,14 +1,27 @@
 from flask import Flask, views, current_app, request, session, flash, redirect, url_for, render_template
 import os
 from flask_principal import Principal, identity_changed, Identity, AnonymousIdentity, identity_loaded, RoleNeed, UserNeed
-from flask_login import LoginManager, login_user, logout_user, login_required
-from com.py.sap.util.database import init_db,engine
+from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+from com.py.sap.util.database import init_db, engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from com.py.sap.adm.mod.UsuarioRol import UsuarioRol
+from com.py.sap.adm.mod.Usuario import Usuario
 import md5
 
 app = Flask(__name__)
 app.secret_key="sap"
+
+from com.py.sap.adm.rol import *
+from com.py.sap.adm.permiso import *
+from com.py.sap.adm.proyecto import *
+from com.py.sap.adm.usuario import *
+from com.py.sap.adm.miembrosComite import *
+from com.py.sap.des.fase import *
+from com.py.sap.des.atributo import *
+from com.py.sap.des.tipoItem import *
+from com.py.sap.des.item import *
+from com.py.sap.ges.relacion import *
+
 
 #load the extension
 principal = Principal(app)
@@ -21,17 +34,6 @@ principal = Principal(app)
 login_manager = LoginManager()
 # configurarlo para la aplicacion
 login_manager.setup_app(app)
-
-from com.py.sap.adm.rol import *
-from com.py.sap.adm.permiso import *
-from com.py.sap.adm.proyecto import *
-from com.py.sap.adm.usuario import *
-from com.py.sap.adm.miembrosComite import *
-from com.py.sap.des.fase import *
-from com.py.sap.des.atributo import *
-from com.py.sap.des.tipoItem import *
-from com.py.sap.des.item import *
-from com.py.sap.ges.relacion import *
 
 def get_resource_as_string(name, charset='utf-8'):
     with app.open_resource(name) as f:
