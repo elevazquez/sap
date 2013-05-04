@@ -1,0 +1,34 @@
+{% extends "principal.html" %} 
+{% block content %}
+<div class="primary">
+	<h1>Agregar Relación</h1>
+	Seleccionar item, dueño de la relación:
+	<table id="tablanuevarelacion" border="1">
+		<TR>
+			<TH class="c3"></TH>
+			<TH class="c3">Item nombre</TH>
+			<TH class="c3">Item descripción</TH>
+			<TH class="c3">Usuario del item</TH>
+			<TH class="c3">Fase</TH>
+			<TH class="c3">Tipo item</TH>
+		</TR>
+		{% for item in items %}
+		<form name="input" action="html_form_action.asp" method="get">
+			<TR>
+				<TD class="c4">
+				<input type="radio" name="codigo_item" value="{{ item.id }}">
+				</TD>
+				<TD class="c4"><SPAN>{{item.nombre|e}}</SPAN></TD>
+				<TD class="c4"><SPAN>{{item.descripcion|e}}</SPAN></TD>
+				<TD class="c4"><SPAN>{{item.usuario|e}}</SPAN></TD>
+				<TD class="c4"><SPAN>{{item.fase.nombre|e}}</SPAN></TD>
+				<TD class="c4"><SPAN>{{item.tipo_item.nombre|e}}</SPAN></TD>
+			</TR>
+			</form> 
+		{% else %}
+			<TR>
+				<em>Sin registro de items</em>
+			</TR>
+		{% endfor %}
+</div>
+{% endblock %}

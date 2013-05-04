@@ -30,6 +30,8 @@ from com.py.sap.adm.usuario import *
 from com.py.sap.des.atributo import *
 from com.py.sap.des.tipoItem import *
 from com.py.sap.des.item import *
+from com.py.sap.ges.relacion import *
+
 
 def get_resource_as_string(name, charset='utf-8'):
     with app.open_resource(name) as f:
@@ -105,10 +107,13 @@ class Main(views.MethodView):
                                  identity=Identity(user.id))
             
             is_administrador(user.id)
-            session['pry'] = 1
+            #session['pry'] = 1
             #===================================================================
             # session['username'] = username
             #===================================================================
+            if 'is_administrador' in session:
+                if not session['is_administrador']:
+                    return redirect(url_for('getProyectoByUsuario', id_usuario = current_user.id))
         return redirect(url_for('index'))
 
 """ funcion llamada cuando el usuario cierra sesion"""

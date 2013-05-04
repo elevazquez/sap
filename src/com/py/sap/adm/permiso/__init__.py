@@ -71,14 +71,16 @@ def buscarpermiso():
     valor = request.args['patron']
     parametro = request.args['parametro']
     init_db(db_session)
-    if valor=='':
-        administrarpermiso()
-    if parametro == 'id_recurso':
-        p = db_session.query(Permiso).from_statement("SELECT * FROM permiso where "+parametro+" = CAST("+valor+" AS Int)").all()
+    if valor=='' or valor == None:
+        return administrarpermiso()
     else:
-        p = db_session.query(Permiso).from_statement("SELECT * FROM permiso where "+parametro+" ilike '%"+valor+"%'").all()
+        if parametro == 'id_recurso':
+            p = db_session.query(Permiso).from_statement("SELECT * FROM permiso where to_char("+parametro+", '99999') ilike '%"+valor+"%'").all()
+            #p = db_session.query(Permiso).from_statement("SELECT * FROM permiso where "+parametro+" = CAST("+valor+" AS Int)").all()
+        else:
+            p = db_session.query(Permiso).from_statement("SELECT * FROM permiso where "+parametro+" ilike '%"+valor+"%'").all()
     #p = db_session.query(Permiso).filter(Permiso.codigo.like('%'+valor+'%'))
-    return render_template('permiso/administrarpermiso.html', permisos = p)
+        return render_template('permiso/administrarpermiso.html', permisos = p)
 
 @app.route('/permiso/administrarpermiso')
 def administrarpermiso():

@@ -3,7 +3,7 @@ from com.py.sap.loginC import app
 from com.py.sap.util.database import init_db, engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.exc import DatabaseError
-from flask import Flask, render_template, request, redirect, url_for, flash 
+from flask import Flask, render_template, request, redirect, url_for, flash, session
 from com.py.sap.des.mod.Fase import Fase
 from com.py.sap.adm.mod.Proyecto import Proyecto
 from com.py.sap.adm.mod.UsuarioRol import UsuarioRol
@@ -153,5 +153,17 @@ def shutdown_session(response):
     db_session.remove()
     return response
 
-def getProyectoByUsuario(id_usuario):
-    return db_session.query(Proyecto).join(Recurso, Proyecto.id == Recurso.id_proyecto).join(Permiso, Permiso.id_recurso == Recurso.id).join(RolPermiso, RolPermiso.id_permiso == Permiso.id).join(UsuarioRol, UsuarioRol.id_rol == RolPermiso.id_rol).filter(UsuarioRol.id_usuario == 1)
+@app.route('/inicioproyecto')
+def getProyectoByUsuario():
+    usuario = request.args['id_usuario']
+    p = db_session.query(Proyecto).join(Recurso, Proyecto.id == Recurso.id_proyecto).join(Permiso, Permiso.id_recurso == Recurso.id).join(RolPermiso, RolPermiso.id_permiso == Permiso.id).join(UsuarioRol, UsuarioRol.id_rol == RolPermiso.id_rol).filter(UsuarioRol.id_usuario == usuario)
+    return render_template('proyecto/principal_proyecto.html', proyectos = p)
+
+@app.route('/proyectoActual')
+def proyectoActual():
+    proyecto = request.args['pyo']
+    session['pry'] = proyecto
+    p = db_session.query(Proyecto).filter_by(id= proyecto).first()
+    session['proyecto_nombre'] = p.nombre
+    
+    return redirect(url_for('index'))

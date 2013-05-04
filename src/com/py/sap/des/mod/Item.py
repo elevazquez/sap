@@ -23,8 +23,8 @@ class Item (Base):
     tipo_item = relationship('TipoItem', backref=backref('tipoitem_item', lazy='dynamic'))
     
     def __init__(self, codigo=None, nombre=None, descripcion=None, estado=None, complejidad=None, 
-                 fecha=None, costo=None, archivo=None, mime=None, usuario=None, version=None,
-                 fase=None, tipo_item=None):
+                 fecha=None, costo=None , id_usuario=None, version=None,
+                 id_fase=None, id_tipo_item=None):
         self.codigo = codigo
         self.nombre = nombre
         self.descripcion = descripcion
@@ -32,15 +32,15 @@ class Item (Base):
         self.complejidad = complejidad
         self.fecha = fecha
         self.costo = costo
-        self.archivo = archivo
-        self.mime = mime
-        self.usuario = usuario
+        #self.archivo = archivo
+        #self.mime = mime
+        self.id_usuario = id_usuario
         self.version = version
-        self.fase = fase
-        self.tipo_item = tipo_item
+        self.id_fase = id_fase
+        self.id_tipo_item = id_tipo_item
         
     def __repr__(self):
-        return '<Item %s %s %s %s %i %d %f %s %s %s %s %s %s>' % (self.codigo, self.nombre, self.descripcion, 
-        self.estado, self.complejidad, self.fecha, self.costo, self.archivo, self.mime, self.usuario,
+        return '<Item %s %s %s %s %i %d %f %s %s  %s %s>' % (self.codigo, self.nombre, self.descripcion, 
+        self.estado, self.complejidad, self.fecha, self.costo,  self.usuario,
         self.version, self.fase, self.tipo_item)
     

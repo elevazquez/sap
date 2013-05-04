@@ -17,6 +17,9 @@
 				<div class="subscribe">
 					 {# {% if 'username' in session %} #}
 					 {% if current_user.is_authenticated() %}
+					 	{% if 'proyecto_actual' in session %}
+					 		{{session['proyecto_nombre']}}
+					 	{% endif %}
 						<!-- <a href="#">{{session['username']}}</a> | <a href="{{ url_for('logout') }}">Salir</a>  -->
 						 <a href="#">{{ current_user.getUserName() }}</a> | <a href="{{ url_for('logout') }}">Salir</a>   
 					 {% else %}
@@ -53,7 +56,7 @@
 							<li><a href="{{ url_for('administrarrol') }}">Relacion Entre Ítem   </a></li>
 							<li><a href="{{ url_for('administrarrol') }}">Comité de Cambio   </a></li>
 							<li><a href="{{ url_for('administrarrol') }}">Solicitud de Cambio   </a></li>
-							
+							<li><a href="{{ url_for('administrarrelacion') }}">Administrar Relación   </a></li>
 						</ul>			
 					</div>
 				 {% endif %}	

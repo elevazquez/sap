@@ -14,12 +14,14 @@
 </SCRIPT> 
 	
 <h1>Item</h1>		
-<form id=buscar method=get action="">
+<form id=buscartipoItem method=get action="/item/buscarItem">
 			<input type="text" name="patron" /> 
 			<select name=parametro>
+				<option value="codigo">Codigo</option>
 				<option value="nombre">Nombre</option>
-				<option value="descripcion">Descripción</option>
-				<option value="estado">Estado</option>
+				<option value="descripcion">Descripción</option>				
+				<option value="id_fase">Fase</option>
+				<option value="id_tipo_item">Tipo</option>
 			</select> 
 			<input type=submit name="Buscar" value=Buscar /> 			
 		<a href="{{ url_for('nuevoitem') }}" ><img src="../static/images/a.png" alt="Agregar" height="30" width="30" title="Agregar" ></a>
@@ -37,6 +39,7 @@
 </div>
 {% endif %}
 {% endwith %}
+<div style="height:350px;width:850px;overflow:auto;">
 <table border="1">
 	<TR>
 		<TH class="c1"></TH>
@@ -48,10 +51,13 @@
 		<TH class="c7">Complejidad</TH>
 		<TH class="c8">Costo</TH>
 		<TH class="c9">Version</TH>
+		<TH class="c10">Fase</TH>
+		<TH class="c11">Tipo</TH>
 	</TR>
 	{% for item in items %}
 	<TR>
-		<TD class="c1"></TD>
+		<TD class="c1"><a href="{{ url_for('editaritem', codigo=item.codigo , fase=item.id_fase, id=item.id, tipo=item.id_tipo_item) }}" > <img src="../static/images/e.png" alt="Editar" height="20" width="20" title="Editar" style="vertical-align: middle;"></a>
+		<a href="{{ url_for('eliminaritem', cod=item.codigo) }}" onclick="javascript:return confirmar()"><img src="../static/images/b.png" alt="Eliminar" height="20" width="20" title="Eliminar" style="vertical-align: middle;"> </a></TD>
 		<TD class="c2"><SPAN>{{item.codigo|e}}</SPAN></TD>
 		<TD class="c3"><SPAN>{{item.nombre|e}}</SPAN></TD>
 		<TD class="c4"><SPAN>{{item.descripcion|e}}</SPAN></TD>
@@ -60,13 +66,16 @@
 		<TD class="c7"><SPAN>{{item.complejidad|e}}</SPAN></TD>
 		<TD class="c8"><SPAN>{{item.costo|e}}</SPAN></TD>
 		<TD class="c9"><SPAN>{{item.version|e}}</SPAN></TD>
+		<TD class="c10"><SPAN>{{item.fase.nombre|e}}</SPAN></TD>
+		<TD class="c11"><SPAN>{{item.tipo_item.nombre|e}}</SPAN></TD>
 	</TR>
 	{% else %}
-  	<TR>add
+  	<TR>
 		<em>Sin registro de Items</em>
 	</TR>
 	{% endfor %}
 </table>
+</div>
 </div>
 </div>
 {% endblock %}
