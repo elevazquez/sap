@@ -1,4 +1,4 @@
-from wtforms import Form, TextField, validators, IntegerField, SelectField, DateField
+from wtforms import Form, TextField, validators, IntegerField, SelectField, DateField,DecimalField
 from com.py.sap.adm.mod.Usuario import  Usuario
 from com.py.sap.des.mod.Fase import Fase
 from com.py.sap.des.mod.TipoItem import TipoItem
@@ -17,7 +17,7 @@ class ItemEditarFormulario(Form):
                                           ('Z', 'Rechazado'), ('E', 'Eliminado'), ('V', 'Revision'),  ('B', 'Bloqueado')   ])
     complejidad = IntegerField('Complejidad', [validators.Required()]) 
     fecha = DateField('Fecha', format='%Y-%m-%d' )
-    costo = IntegerField('Costo', [validators.Required()]) 
+    costo = DecimalField('Costo', [validators.Required()]) 
     version = IntegerField('Version', [validators.Required()]) 
     usuario = IntegerField('Usuario', [validators.Required()]) 
     fase = TextField('Fase',[validators.Required()])   

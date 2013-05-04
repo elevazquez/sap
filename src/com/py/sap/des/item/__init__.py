@@ -9,8 +9,8 @@ from com.py.sap.des.item.ItemEditarFormulario import ItemEditarFormulario
 from com.py.sap.adm.mod.Usuario import Usuario
 from com.py.sap.des.mod.Fase import Fase
 from com.py.sap.des.mod.TipoItem import TipoItem
-#from com.py.sap.des.mod.LbItem import LbItem
-#from com.py.sap.ges.mod.LineaBase import LineaBase
+from com.py.sap.des.mod.LbItem import LbItem
+from com.py.sap.ges.mod.LineaBase import LineaBase
 #from com.py.sap.ges.mod.Relacion  import Relacion
 #from com.py.sap.ges.mod.TipoRelacion import TipoRelacion
 import flask, flask.views
@@ -18,6 +18,9 @@ from sqlalchemy.exc import DatabaseError
 from com.py.sap.UserPermission import *
 import os
 import datetime
+
+fase_global= None;
+tipo_global = None; 
 
 db_session = scoped_session(sessionmaker(autocommit=False,
                                          autoflush=False,
@@ -92,41 +95,47 @@ def buscarItem():
 
 @app.route('/item/editaritem', methods=['GET', 'POST'])
 def editaritem():
+   
     today = datetime.date.today()
-    init_db(db_session)  
+    init_db(db_session)      
     i = db_session.query(Item).filter_by(codigo=request.args.get('codigo')).filter_by(id=request.args.get('id')).first() 
-    form = ItemEditarFormulario(request.form,i)        
-    #item = db_session.query(Item).filter_by(codigo=form.codigo.data).first()      
-    item = db_session.query(Item).filter_by(nombre=form.nombre.data).order_by(Item.version.desc()).first()  
-    
+    form = ItemEditarFormulario(request.form,i)             
+    item = db_session.query(Item).filter_by(nombre=form.nombre.data).filter_by(id=request.args.get('id')).first()  
     form.usuario.data = session['user_id']  
-    form.fecha.data= today 
-    fase_selected= db_session.query(Fase).filter_by(id=request.args.get('fase') ).first() 
-    tipo_selected= db_session.query(TipoItem).filter_by(id=request.args.get('tipo') ).first()
-             
+    form.fecha.data= today     
+    fase_selected= db_session.query(Fase).filter_by(id=request.args.get('fase')).first()      
+    tipo_selected= db_session.query(TipoItem).filter_by(id= request.args.get('tipo') ).first() 
+    enlb= db_session.query(LbItem).filter_by(id_item=request.args.get('id')).first() 
+  
+               
     if request.method != 'POST':        
-        form.fase.data= fase_selected.nombre  
-        form.tipo_item.data= tipo_selected.nombre  
-   # enlb= db_session.query(LbItem).filter_by(id_item=request.args.get('id')).first() 
-    form.version.data= form.version.data + 1 #modifica la version
-    form.fecha.data= today
+         form.fase.data= fase_selected.nombre  
+         form.tipo_item.data= tipo_selected.nombre
+         global fase_global
+         fase_global = fase_selected.id
+         global tipo_global
+         tipo_global= tipo_selected.id
+         form.version.data= form.version.data + 1 #modifica la version
+     
 #    relac = db_session.query(Relacion).from_statement("select r.* from item i,  relacion r where (r.id_item_duenho= "+item.id +" or r.id_item= "+item.id +" ) and r.id_item = i.id ").all()
 #    item_relac = db_session.query(Item).from_statement("select i.* from item i,  relacion r where (r.id_item_duenho= "+item.id +" or r.id_item= "+item.id +" ) and r.id_item = i.id ").all()
-    #verifica si puede ser modificado
-#    if enlb == None and form.estado.data != 'E' :
-#        flash('El Item no puede ser modificado, ya que se encuebra en una Linea Base o esta Eliminado!','error')
-#        return render_template('item/editaritem.html', form=form)
+    
+    #verifica si puede ser modificado:
+    if enlb != None and form.estado.data == 'E' :
+        flash('El Item no puede ser modificado, ya que se encuebra en una Linea Base o esta Eliminado!','error')
+        return render_template('item/editaritem.html', form=form)
+    
     if request.method == 'POST' and form.validate():
-        try:                    
-            
-            items = Item(form.codigo.data, form.nombre.data, form.descripcion.data, 
+        init_db(db_session)
+        try:   
+            item = Item(form.codigo.data, form.nombre.data, form.descripcion.data, 
                     form.estado.data, form.complejidad.data, form.fecha.data, form.costo.data, 
-                    form.usuario.data , form.version.data, form.fase.data , form.tipo_item.data  )
-         
-            form.populate_obj(item)            
-            item.fecha = today
+                    form.usuario.data , form.version.data, fase_global , tipo_global )
+            
             db_session.add(item)
             db_session.commit()
+            session.pop('fase_global',None)
+            session.pop('tipo_global',None)
 #            for it in item_relac:
 #                it.estado= 'V'
 #                it.version= it.version+1
@@ -146,7 +155,7 @@ def editaritem():
 
 @app.route('/item/eliminaritem', methods=['GET', 'POST'])
 def eliminaritem():
-        cod = request.args.get('cod')
+       # cod = request.args.get('cod')
         init_db(db_session)    
         
 
