@@ -73,7 +73,7 @@ def eliminar():
         db_session.commit()
         return redirect('/administrarrol')
     except DatabaseError, e:
-            flash('Error en la Base de Datos' + e.args[0],'error')
+            flash('Error en la Base de Datos' + e.args[0],'info')
             return render_template('rol/administrarrol.html')
 
 @app.route('/buscar', methods=['GET', 'POST'])

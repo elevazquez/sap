@@ -75,7 +75,7 @@ def eliminarmiembrosComite():
         db_session.commit()
         return redirect('/miembrosComite/administrarmiembrosComite')
     except DatabaseError, e:
-            flash('Error en la Base de Datos' + e.args[0],'error')
+            flash('Error en la Base de Datos' + e.args[0],'info')
             return render_template('/miembrosComite/administrarmiembrosComite.html')
     
 @app.route('/miembrosComite/buscarmiembrosComite', methods=['GET', 'POST'])
@@ -86,7 +86,7 @@ def buscarmiembrosComite():
     if valor == "" : 
         p = db_session.query(MiembrosComite).filter_by(id_proyecto=session['pry'])
     elif parametro == 'id_usuario' :
-        p = db_session.query(MiembrosComite).from_statement("SELECT * FROM miembros_comite where to_char("+parametro+", '99999') ilike '%"+valor+"%' and id_proyecto='"+session['pry'].__repr__()+"'").all()
+        p = db_session.query(MiembrosComite).from_statement("SELECT * FROM miembros_comite where to_char("+parametro+", '99999') ilike '%"+valor+"%' and id_proyecto='"+session['pry']+"'").all()
     return render_template('miembrosComite/administrarmiembrosComite.html', miembrosComites = p)
 
 @app.route('/miembrosComite/administrarmiembrosComite')

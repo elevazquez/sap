@@ -2,8 +2,8 @@
 {% block content %}
 <div class="primary">
 	<h1>Modificar Tipo Item</h1>
-	{% with errors = get_flashed_messages(category_filter=["error"]) %} {%
-		if errors %}
+	{% with errors = get_flashed_messages(category_filter=["error"]) %} 
+		{% if errors %}
 			<div class="block-message">
 				<a class="close" href="#"
 					dir="rtl">×</a>

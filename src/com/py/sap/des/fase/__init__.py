@@ -100,7 +100,7 @@ def eliminarfase():
         db_session.commit()
         return redirect('/fase/administrarfase')
     except DatabaseError, e:
-            flash('Error en la Base de Datos' + e.args[0],'error')
+            flash('Error en la Base de Datos' + e.args[0],'info')
             return render_template('/fase/administrarfase.html')
     
 @app.route('/fase/buscarfase', methods=['GET', 'POST'])
@@ -111,11 +111,11 @@ def buscarfase():
     if valor == "" : 
         p = db_session.query(Fase).filter_by(id_proyecto=session['pry']).order_by(Fase.nro_orden)
     elif parametro == 'nro_orden' or parametro == 'id_proyecto':
-        p = db_session.query(Fase).from_statement("SELECT * FROM fase where to_char("+parametro+", '99999') ilike '%"+valor+"%' and id_proyecto='"+session['pry'].__repr__()+"'").all()
+        p = db_session.query(Fase).from_statement("SELECT * FROM fase where to_char("+parametro+", '99999') ilike '%"+valor+"%' and id_proyecto='"+session['pry']+"'").all()
     elif parametro == 'fecha_inicio' or parametro == 'fecha_fin':
-        p = db_session.query(Fase).from_statement("SELECT * FROM fase where to_char("+parametro+", 'YYYY-mm-dd') ilike '%"+valor+"%' and id_proyecto='"+session['pry'].__repr__()+"'").all()
+        p = db_session.query(Fase).from_statement("SELECT * FROM fase where to_char("+parametro+", 'YYYY-mm-dd') ilike '%"+valor+"%' and id_proyecto='"+session['pry']+"'").all()
     else:
-        p = db_session.query(Fase).from_statement("SELECT * FROM fase where "+parametro+" ilike '%"+valor+"%' and id_proyecto='"+session['pry'].__repr__()+"'").all()
+        p = db_session.query(Fase).from_statement("SELECT * FROM fase where "+parametro+" ilike '%"+valor+"%' and id_proyecto='"+session['pry']+"'").all()
     return render_template('fase/administrarfase.html', fases = p)
 
 @app.route('/fase/administrarfase')

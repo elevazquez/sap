@@ -8,6 +8,7 @@ from com.py.sap.des.mod.TipoItem import TipoItem
 from com.py.sap.des.mod.Item import Item
 from sqlalchemy.exc import DatabaseError
 from com.py.sap.des.tipoItem.TipoItemFormulario import TipoItemFormulario 
+from com.py.sap.des.tipoItem.TipoItemFormularioEd import TipoItemFormularioEd 
 from com.py.sap.des.mod.TItemAtributo import TItemAtributo
 from com.py.sap.des.mod.Atributo import Atributo
 from com.py.sap.des.mod.Fase import Fase
@@ -28,27 +29,26 @@ def flash_errors(form):
             flash(u"Error in the %s field - %s" % (
                 getattr(form, field).label.text,
                 error
-            ))
+            ),'error')
                 
 """ Funcion para agregar registros a la tabla de Tipo de Item""" 
 @app.route('/tipoItem/nuevotipoItem', methods=['GET', 'POST'])
 def nuevotipoItem():
     form = TipoItemFormulario(request.form) 
     init_db(db_session)
-    form.id_fase.choices= [(f.id, f.nombre) for f in db_session.query(Fase).filter_by(id_proyecto=session['pry']).order_by(Fase.nombre).all()]
+    form.fase.choices= [(f.id, f.nombre) for f in db_session.query(Fase).filter_by(id_proyecto=session['pry']).order_by(Fase.nombre).all()]
     form.lista_atributo.choices = [(f.id, f.nombre) for f in db_session.query(Atributo).order_by(Atributo.nombre).all()]
-    
-    if request.method == 'POST' :        
+    if request.method == 'POST' and form.validate():        
         try:
             """verifica si la fase esta en un estado inicial la cambia en progreso"""   
-            fase_selected = db_session.query(Fase).filter_by(id=form.id_fase.data).first()
+            fase_selected = db_session.query(Fase).filter_by(id=form.fase.data).first()
             if fase_selected.estado == "I" :
                 fase_selected.estado = "P"
                 db_session.merge(fase_selected)
                 db_session.commit()     
                   
             tipo = TipoItem( form.codigo.data, form.nombre.data, form.descripcion.data, 
-                    form.id_fase.data)
+                    form.fase.data)
             db_session.add(tipo)
             db_session.commit()
             
@@ -70,21 +70,22 @@ def nuevotipoItem():
 @app.route('/tipoItem/editartipoItem', methods=['GET', 'POST'])
 def editartipoItem():
     init_db(db_session)   
-    tipoItem = db_session.query(TipoItem).filter_by(codigo=request.args.get('codigo')).first() 
-    form = TipoItemFormulario(request.form,tipoItem)  
-    fase_selected= db_session.query(Fase).filter_by(id=request.args.get('fase') ).first()      
+    ti = db_session.query(TipoItem).filter_by(codigo=request.args.get('codigo')).first() 
+    form = TipoItemFormularioEd(request.form,ti)  
+    tipoItem = db_session.query(TipoItem).filter_by(codigo=form.codigo.data).first()
+    fase_selected= db_session.query(Fase).filter_by(id=tipoItem.id_fase ).first()       
     form.id_fase.data= fase_selected.nombre
-    atributos= db_session.query(Atributo).from_statement("Select a.* from atributo a , tipo_item ti, titem_atributo ta where ta.id_atributo= a.id and ta.id_tipo_item = ti.id and ti.id = "+request.args.get('id')).all()
+    atributos= db_session.query(Atributo).from_statement("Select a.* from atributo a , tipo_item ti, titem_atributo ta where ta.id_atributo= a.id and ta.id_tipo_item = ti.id and ti.id = '"+tipoItem.id.__repr__()+"'").all()
     form.lista_atributo.choices = [(f.id, f.nombre) for f in atributos ]
-
-    if request.method == 'POST' :
+    if request.method == 'POST' and form.validate():
        items= db_session.query(Item).filter_by(id_tipo_item= tipoItem.id).first()
        #se verifica si el tipo de item esta siendo utilizado, en tal caso no podra ser editado 
        if items !=  None :
           flash('El Tipo de Item no puede ser modificado, ya que esta siendo utilizado por algun recurso!','error')
           return render_template('tipoItem/editartipoItem.html', form=form)
        try:          
-          form.populate_obj(tipoItem)          
+          form.populate_obj(tipoItem)
+          tipoItem.id_fase = fase_selected.id          
           db_session.merge(tipoItem)
           db_session.commit()
           return redirect('/tipoItem/administrartipoItem')
@@ -103,18 +104,24 @@ def eliminartipoItem():
         cod = request.args.get('cod')
         init_db(db_session)
         tipoItem = db_session.query(TipoItem).filter_by(codigo=cod).first()  
-        items= db_session.query(Item).filter_by(id_tipo_item= tipoItem.id).first()
+        items= db_session.query(Item).filter_by(id_tipo_item=tipoItem.id).first()
+        cant = db_session.query(TItemAtributo).filter_by(id_tipo_item=tipoItem.id).count()
+        cnt = 0
        #se verifica si el tipo de item esta siendo utilizado, en tal caso no podra ser editado 
         if items !=  None :
-          flash('El Tipo de Item no puede ser eliminado, ya que esta siendo utilizado por algun recurso!','error')
-          return render_template('tipoItem/eliminartipoItem.html')
-        
+          flash('El Tipo de Item no puede ser eliminado, ya que esta siendo utilizado por algun recurso!','info')
+          return render_template('tipoItem/administrartipoItem.html')
+        while cnt < cant :
+            cnt = cnt + 1
+            tt = db_session.query(TItemAtributo).filter_by(id_tipo_item=tipoItem.id).first()  
+            db_session.delete(tt)
+            db_session.commit()
         db_session.delete(tipoItem)
         db_session.commit()
         return redirect('/tipoItem/administrartipoItem')
     except DatabaseError, e:
-            flash('Error en la Base de Datos' + e.args[0],'error')
-            return render_template('atributo/eliminaratributo.html')
+            flash('Error en la Base de Datos' + e.args[0],'info')
+            return render_template('tipoItem/administrartipoItem.html')
     
 @app.route('/tipoItem/buscartipoItem', methods=['GET', 'POST'])
 def buscartipoItem():
@@ -153,23 +160,24 @@ def listartipoItem():
 @app.route('/tipoItem/importartipoItem', methods=['GET', 'POST'])
 def importartipoItem():
     init_db(db_session)   
-    tipoItem = db_session.query(TipoItem).filter_by(codigo=request.args.get('codigo')).first() 
-    form = TipoItemFormulario(request.form,tipoItem)  
-    fase_selected= db_session.query(Fase).filter_by(id=request.args.get('fase') ).first()      
-    form.id_fase.data= fase_selected.nombre
-    atributos= db_session.query(Atributo).from_statement("Select a.* from atributo a , tipo_item ti, titem_atributo ta where ta.id_atributo= a.id and ta.id_tipo_item = ti.id and ti.id = "+request.args.get('id')).all()
+    ti = db_session.query(TipoItem).filter_by(codigo=request.args.get('codigo')).first() 
+    form = TipoItemFormulario(request.form,ti)  
+    tipoItem = db_session.query(TipoItem).filter_by(codigo=form.codigo.data).first()
+    fase_selected= db_session.query(Fase).filter_by(id=form.fase.data).first()       
+    #form.id_fase.data= fase_selected.nombre
+    atributos= db_session.query(Atributo).from_statement("Select a.* from atributo a , tipo_item ti, titem_atributo ta where ta.id_atributo= a.id and ta.id_tipo_item = ti.id and ti.id = '"+form.fase.data+"'").all()
     form.lista_atributo.choices = [(f.id, f.nombre) for f in atributos ]
-    if request.method == 'POST' :        
+    if request.method == 'POST' and form.validate():        
         try:
             """verifica si la fase esta en un estado inicial la cambia en progreso"""   
-            fase_selected = db_session.query(Fase).filter_by(id=form.id_fase.data).first()
+            fase_selected = db_session.query(Fase).filter_by(id=form.fase.data).first()
             if fase_selected.estado == "I" :
                 fase_selected.estado = "P"
                 db_session.merge(fase_selected)
                 db_session.commit()     
                   
             tipo = TipoItem( form.codigo.data, form.nombre.data, form.descripcion.data, 
-                    form.id_fase.data)
+                    form.fase.data)
             db_session.add(tipo)
             db_session.commit()
             
