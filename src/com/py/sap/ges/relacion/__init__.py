@@ -100,4 +100,5 @@ def shutdown_session(response):
 
 def getItemByProyecto():
     id_proy =  session['pry']
-    return db_session.query(Item).join(Fase, Fase.id == Item.id_fase).join(Proyecto, Proyecto.id == Fase.id_proyecto).filter_by(Proyecto.id == id.proy)
+    items = db_session.query(Item).join(Fase, Fase.id == Item.id_fase).join(Proyecto, Proyecto.id == Fase.id_proyecto).filter(Proyecto.id == id_proy).all()
+    return items

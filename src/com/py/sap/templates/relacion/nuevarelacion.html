@@ -2,7 +2,7 @@
 {% block content %}
 <div class="primary">
 	<h1>Agregar Relación</h1>
-	Seleccionar item, dueño de la relación:
+	<p>Seleccionar item, dueño de la relación </p>
 	<table id="tablanuevarelacion" border="1">
 		<TR>
 			<TH class="c3"></TH>
@@ -13,7 +13,7 @@
 			<TH class="c3">Tipo item</TH>
 		</TR>
 		{% for item in items %}
-		<form name="nuevarelacion" action="" method="get">
+		<form name="nuevarelacion" action="/relacion/nuevarelacion" method="get">
 			<TR>
 				<TD class="c4">
 				<input type="radio" name="item_duenho" value="{{ item.id }}">
@@ -30,5 +30,6 @@
 				<em>Sin registro de items</em>
 			</TR>
 		{% endfor %}
+	</table>
 </div>
 {% endblock %}
