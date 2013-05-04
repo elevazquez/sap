@@ -30,6 +30,7 @@ from com.py.sap.adm.usuario import *
 from com.py.sap.des.atributo import *
 from com.py.sap.des.tipoItem import *
 from com.py.sap.des.item import *
+from com.py.sap.ges.relacion import *
 
 
 def get_resource_as_string(name, charset='utf-8'):
@@ -93,7 +94,7 @@ class Main(views.MethodView):
         """ Se un objeto md5 para encriptar la contrasenha del usuario """    
         con = md5.new()    
         con.update(request.form['passwd'])
-        #passwd = con.hexdigest()
+        passwd = con.hexdigest()
         
         user = db_session.query(Usuario).filter_by(usuario=username,password= passwd ).first() 
         if user == None :

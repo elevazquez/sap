@@ -1,6 +1,9 @@
-from sqlalchemy import *
-from sqlalchemy.orm import *
+from sqlalchemy import Column, Integer, Sequence, Date, ForeignKey
+from sqlalchemy.orm import relationship, backref
 from com.py.sap.util.database import Base
+from com.py.sap.des.mod.Item import Item
+from com.py.sap.ges.mod.TipoRelacion import TipoRelacion 
+
 
 class Relacion (Base):
     __tablename__ = 'relacion'
@@ -10,9 +13,9 @@ class Relacion (Base):
     id_tipo_relacion = Column(Integer, ForeignKey('tipo_relacion.id'))
     tipo_relacion = relationship('TipoRelacion', backref=backref('tipo_relaciones', lazy='dynamic'))
     id_item = Column(Integer, ForeignKey('item.id'))
-    item = relationship('Item', backref=backref('item_hijo', lazy='dynamic'))
+    item = relationship('Item', backref=backref('itemrelacion', lazy='dynamic'), foreign_keys=[id_item])
     id_item_duenho = Column(Integer, ForeignKey('item.id'))
-    item_duenho = relationship('ItemDuenho', backref=backref('item_duenho', lazy='dynamic'))
+    item_duenho = relationship('Item', backref=backref('itemrelacionduenho', lazy='dynamic'), foreign_keys=[id_item_duenho])
 
     def __init__(self, fecha_creacion=None, fecha_modificacion=None, id_tipo_relacion=None,
                  id_item=None, id_item_duenho=None,):
