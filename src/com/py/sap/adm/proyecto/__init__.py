@@ -163,7 +163,6 @@ def getProyectoByUsuario():
 def proyectoActual():
     proyecto = request.args['pyo']
     session['pry'] = proyecto
-    p = db_session.query(Proyecto).filter_by(id= proyecto).first()
+    p = db_session.query(Proyecto).filter_by(id = proyecto).first()
     session['proyecto_nombre'] = p.nombre
-    
     return redirect(url_for('index'))

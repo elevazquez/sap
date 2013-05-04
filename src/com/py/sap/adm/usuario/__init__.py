@@ -52,8 +52,8 @@ def nuevousuario():
             return render_template('usuario/nuevousuario.html', form=form)  
         try:
             con.update(form.password.data)
-            usu = Usuario(form.usuario.data, con.hexdigest(), 
-                    form.nombre.data, form.apellido.data, 
+            usu = Usuario(form.usuario.data,  
+                    form.nombre.data, form.apellido.data, con.hexdigest(), 
                     form.correo.data, form.domicilio.data, 
                     form.telefono.data, form.fecha_nac.data)
             db_session.add(usu)
