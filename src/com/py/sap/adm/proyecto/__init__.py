@@ -162,7 +162,7 @@ def getProyectoByUsuario():
 @app.route('/proyectoActual')
 def proyectoActual():
     proyecto = request.args['pyo']
-    session['proyecto_actual'] = proyecto
+    session['pry'] = proyecto
     p = db_session.query(Proyecto).filter_by(id= proyecto).first()
     session['proyecto_nombre'] = p.nombre
     

@@ -99,5 +99,5 @@ def shutdown_session(response):
     return response
 
 def getItemByProyecto():
-    id_proy =  session['proyecto_actual']
+    id_proy =  session['pry']
     return db_session.query(Item).join(Fase, Fase.id == Item.id_fase).join(Proyecto, Proyecto.id == Fase.id_proyecto).filter_by(Proyecto.id == id.proy)
