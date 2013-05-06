@@ -1,0 +1,34 @@
+{% extends "principal.html" %} 
+{% block content %}
+<div class="primary">
+	<h1>Modificar Item</h1>
+		{% with errors = get_flashed_messages(category_filter=["error"]) %} 
+			{% if errors %}
+			<div class="block-message">
+				<a class="close" href="{{ url_for( 'administraritem' ) }}"
+					dir="rtl">×</a>
+					<ul>
+						{%- for msg in errors %}
+							<li>{{ msg }}</li> {% endfor -%}
+					</ul>
+			</div>Required
+		{% endif %} 
+	{% endwith %}
+	<form id=editaritem method=post action="/item/editaritem">
+			<label>Fase</label> <input type="text" name="fase" value="{{ form.fase.data }} " id="fase" readonly="true"/> 
+    		<label>Tipo Item</label> <input type="text" name="tipo_item" value="{{ form.tipo_item.data }} " id="tipo_item" readonly="true"/> 
+    		<label>Código</label> <input type="text" name="codigo" value="{{ form.codigo.data }}" id="codigo" readonly="true" />
+    		<label>Nombre</label> {{ form.nombre()}}
+    		<label>Descripción</label> {{ form.descripcion() }}
+    		<label>Estado</label> <input type="text" name="estado" value="{{ form.estado.data }}" id="estado" readonly="true"/> 
+    		<label>Fecha </label> <input type="date" name="fecha" value="{{ form.fecha.data }}"  id="fecha"/>
+    		<label>Complejidad</label> {{ form.complejidad() }}
+    		<label>Costo</label> {{ form.costo() }}
+    		<label>Versión</label><input type="number" name="version" value="{{ form.version.data }}" id="version" readonly="true" /> 
+    		
+  		<p><input type=submit value=Guardar>
+  		<input type="button" value="Cancelar"  onClick="document.location.href='{{ url_for( 'administraritem' ) }}';"> 
+	</form>
+</div>
+{% endblock %}
+

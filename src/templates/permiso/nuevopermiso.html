@@ -1,0 +1,13 @@
+{% extends "principal.html" %} 
+{% block content %}
+<div class="primary">
+	<h1>Agregar Permiso</h1>
+	<form id=nuevopermiso method=post action="/permiso/nuevopermiso">
+    	{{ form.codigo.label }} {{ form.codigo.data}}
+    	{{ form.descripcion.label }} {{ form.descripcion() }}
+    	{{ form.id_recurso.label }} {{ form.id_recurso() }}
+  		<p><input type=submit value=Guardar>
+  		<input type="button" value="Cancelar"  onClick="document.location.href='{{ url_for( 'administrarpermiso' ) }}';">
+	</form>
+</div>
+{% endblock %}

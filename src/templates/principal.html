@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta charset="utf-8"/>
+    <title>Sap</title>
+    <style type=text/css>{{ get_resource_as_string('static/plantilla.css') }}</style>
+</head>
+<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+<body id="arriba">
+	<div id="header-wrap">
+			<header>
+				<hgroup>
+					<h1>SAP</h1>
+				</hgroup>
+	
+				<div class="subscribe">
+					 {# {% if 'username' in session %} #}
+					 {% if current_user.is_authenticated() %}
+					 	{% if 'pry' in session %}
+					 		{{session['proyecto_nombre']}}
+					 	{% endif %}
+						<!-- <a href="#">{{session['username']}}</a> | <a href="{{ url_for('logout') }}">Salir</a>  -->
+						 <a href="#">{{ current_user.getUserName() }}</a> | <a href="{{ url_for('logout') }}">Salir</a>   
+					 {% else %}
+					 	<a href="{{ url_for('index') }} ">Entrar</a>
+					 {% endif %}
+				</div>
+				
+			</header>
+  	</div>
+  	
+				
+
+	<div id="content-wrap" >
+	
+        <div id="content" class="clearfix">  
+			<div id="main">
+					
+						{% block content %} {% endblock %}
+					
+				{# {% if 'username' in session %} #}
+				{% if current_user.is_authenticated() and session['is_administrador'] %}
+					<div >
+						<h3>Menu</h3>
+						<ul>  
+							<li><a href="{{ url_for('administrarusuario') }}">Administrar Usuario   </a></li>
+							<li><a href="{{ url_for('administrarrol') }}">Administrar Rol   </a></li>
+							<li><a href="{{ url_for('administrarpermiso') }}">Administrar Permisos   </a></li>
+							<li><a href="{{ url_for('administrarproyecto') }}">Administrar Proyecto   </a></li>
+							<li><a href="{{ url_for('administrarmiembrosComite') }}">Comité de Cambio   </a></li>
+							<li><a href="{{ url_for('administrarfase') }}">Administrar Fases   </a></li>
+							<li><a href="{{ url_for('administrarrol') }}">Administrar Línea Base   </a></li>
+							<li><a href="{{ url_for('administraratributo') }}">Administrar Atributo  </a></li>
+							<li><a href="{{ url_for('administrartipoItem') }}">Administrar Tipo Item   </a></li>
+							<li><a href="{{ url_for('administraritem') }}">Administrar Ítem   </a></li>
+							<li><a href="{{ url_for('administrarrol') }}">Relacion Entre Ítem   </a></li>
+							<li><a href="{{ url_for('administrarrol') }}">Solicitud de Cambio   </a></li>
+							<li><a href="{{ url_for('administrarrelacion') }}">Administrar Relación   </a></li>
+						</ul>			
+					</div>
+				 {% endif %}	
+			</div>
+		</div>
+	</div>
+	
+</body>
+</html>
