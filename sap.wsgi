@@ -1,5 +1,5 @@
 import sys
-sys.path.insert(0, '/home/elena/workspace/sap/src/com/py/sap')
+sys.path.insert(0, '/home/elena/workspace/sap/src/')
 
 from loginC import app as application
 
