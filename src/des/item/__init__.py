@@ -37,28 +37,49 @@ def flash_errors(form):
                 getattr(form, field).label.text,
                 error
             ),'error')
-                
+ 
+ 
+""" Funcion que lista las fases en la cual se creara el item"""     
+@app.route('/item/listafase', methods=['GET', 'POST'])
+def listafase():   
+    init_db(db_session)
+    fases = db_session.query(Fase).from_statement(" select * from fase where id_proyecto = "+str(session['pry'])+" order by nro_orden " )
+    return render_template('item/listafase.html', fases = fases)  
+    
+ 
+""" Funcion que lista los tipo de items posibles del item a crear"""     
+@app.route('/item/listatipoitem', methods=['GET', 'POST'])
+def listatipoitem():   
+    init_db(db_session)
+    tipo = db_session.query(TipoItem).from_statement(" select * from tipo_item where id_fase = "+request.args.get('id_fase')+" order by codigo " )
+    global fase_global
+    fase_global = request.args.get('id_fase')
+    return render_template('item/listatipoitem.html', tipos = tipo)  
+    
+                   
 """ Funcion para agregar registros a la tabla de Item""" 
 @app.route('/item/nuevoitem', methods=['GET', 'POST'])
 def nuevoitem():
     today = datetime.date.today()
     form = ItemFormulario(request.form)
     init_db(db_session)    
-    form.usuario.data = session['user_id']
-    form.fase.choices= [(f.id,f.nombre) for f in db_session.query(Fase).filter_by(id_proyecto=session['pry']).order_by(Fase.nombre).all()]
-    form.tipo_item.choices=[(f.id, f.nombre) for f in db_session.query(TipoItem).order_by(TipoItem.nombre).all()]
-    #form.id_tipo_item.choices=  [(f.id, f.nombre) for f in db_session.query(TipoItem).filter_by(id_fase=form.id_fase.data).order_by(TipoItem.nombre).all()]
+    form.usuario.data = session['user_id']    
+    #form.fase.choices= [(f.id,f.nombre) for f in db_session.query(Fase).filter_by(id_proyecto=session['pry']).order_by(Fase.nombre).all()]
+    #form.tipo_item.choices=[(f.id, f.nombre) for f in db_session.query(TipoItem).filter_by(id_fase=request.args.get('id_fase')).order_by(TipoItem.nombre).all()]
     form.version.data= 1    
     form.fecha.data= today   
+    if request.method != 'POST':   
+        global tipo_global
+        tipo_global=  request.args.get('id_tipo') 
     if request.method == 'POST' and form.validate():
         try:
-            tipo_selected = db_session.query(TipoItem).filter_by(id_fase=form.fase.data ).first()
-            if tipo_selected == None:
-                flash('El Tipo de Item no corresponde a la Fase seleccionada','error')
-                return render_template('item/nuevoitem.html', form=form)
+#            tipo_selected = db_session.query(TipoItem).filter_by(id_fase=request.args.get('fase') ).first()
+#            if tipo_selected == None:
+#                flash('El Tipo de Item no corresponde a la Fase seleccionada','error')
+#                return render_template('item/nuevoitem.html', form=form)
             item = Item(form.codigo.data, form.nombre.data, form.descripcion.data, 
                     form.estado.data, form.complejidad.data, form.fecha.data, form.costo.data, 
-                    form.usuario.data , form.version.data, form.fase.data, form.tipo_item.data )
+                    form.usuario.data , form.version.data, fase_global ,tipo_global )
             db_session.add(item)
             db_session.commit()
             flash('El Item ha sido registrada con Exito','info')
@@ -69,6 +90,7 @@ def nuevoitem():
     else:
         flash_errors(form) 
     return render_template('item/nuevoitem.html', form=form)
+
 
 """Funcion que permite realizar busqueda de items"""
 @app.route('/item/buscarItem', methods=['GET', 'POST'])
@@ -95,8 +117,7 @@ def buscarItem():
 
 """Funcion que permite editar un item"""
 @app.route('/item/editaritem', methods=['GET', 'POST'])
-def editaritem():
-   
+def editaritem():   
     today = datetime.date.today()
     init_db(db_session)      
     i = db_session.query(Item).filter_by(codigo=request.args.get('codigo')).filter_by(id=request.args.get('id')).first() 
@@ -107,35 +128,34 @@ def editaritem():
     fase_selected= db_session.query(Fase).filter_by(id=request.args.get('fase')).first()      
     tipo_selected= db_session.query(TipoItem).filter_by(id= request.args.get('tipo') ).first()
     enlb= db_session.query(LbItem).filter_by(id_item=request.args.get('id')).first() 
-    estado= request.args.get('es')
-    
+    estado= request.args.get('es')    
                
-    if request.method != 'POST':        
-         form.fase.data= fase_selected.nombre  
-         form.tipo_item.data= tipo_selected.nombre
-         global fase_global
-         fase_global = fase_selected.id
-         global tipo_global
-         tipo_global= tipo_selected.id
-         form.version.data= form.version.data + 1 #modifica la version
-         if estado == 'I':
-             form.estado.data= 'Abierto'
-         elif estado == 'P':
-             form.estado.data = 'En Progreso'
-         elif estado == 'R':
-             form.estado.data = 'Resuelto'
-         elif estado == 'A':
-             form.estado.data = 'Aprobado'
-         elif estado == 'E':
-             form.estado.data = 'Eliminado'
-         elif estado == 'Z':
-             form.estado.data = 'Rechazado'
-         elif estado == 'V':
-             form.estado.data = 'Revision'
-         elif estado == 'B':
-             form.estado.data = 'Bloqueado'
-         global estado_global
-         estado_global = estado
+    if request.method != 'POST':   
+        form.fase.data= fase_selected.nombre  
+        form.tipo_item.data= tipo_selected.nombre
+        global fase_global
+        fase_global = fase_selected.id
+        global tipo_global
+        tipo_global= tipo_selected.id
+        form.version.data= form.version.data + 1 #modifica la version
+        if estado == 'I':
+            form.estado.data= 'Abierto'
+        elif estado == 'P':
+            form.estado.data = 'En Progreso'
+        elif estado == 'R':
+            form.estado.data = 'Resuelto'
+        elif estado == 'A':
+            form.estado.data = 'Aprobado'
+        elif estado == 'E':
+            form.estado.data = 'Eliminado'
+        elif estado == 'Z':
+            form.estado.data = 'Rechazado'
+        elif estado == 'V':
+            form.estado.data = 'Revision'
+        elif estado == 'B':
+            form.estado.data = 'Bloqueado'
+        global estado_global
+        estado_global = estado
      
 #    relac = db_session.query(Relacion).from_statement("select r.* from item i,  relacion r where (r.id_item_duenho= "+item.id +" or r.id_item= "+item.id +" ) and r.id_item = i.id ").all()
 #    item_relac = db_session.query(Item).from_statement("select i.* from item i,  relacion r where (r.id_item_duenho= "+item.id +" or r.id_item= "+item.id +" ) and r.id_item = i.id ").all()
@@ -179,7 +199,6 @@ def eliminaritem():
     today = datetime.date.today()
     try:
         id_item = request.args.get('id')
-        estado= request.args.get('es')
         init_db(db_session)
         item = db_session.query(Item).filter_by(id= id_item).first()
         
@@ -209,40 +228,79 @@ def eliminaritem():
 @app.route('/item/listarreversionitem', methods=['GET', 'POST'])
 def listarreversionitem():   
     init_db(db_session)
-    #item= db_session.query(Item).filter_by(codigo=request.args.get('cod')).filter_by(id != request.args.get('id')).order_by(Item.version).all()
     item2 = db_session.query(Item).from_statement(" select * from item where codigo = '"+str(request.args.get('cod'))+"' and id != "+str(request.args.get('id'))+" order by version " )
     return render_template('item/listarreversionitem.html', items2 = item2)  
     
      
 """funcion que permite la reversion de items"""     
 @app.route('/item/reversionaritem', methods=['GET', 'POST'])
-def reversionaritem():   
+def reversionaritem():  
     today = datetime.date.today()
-    init_db(db_session)
-    item = db_session.query(Item).filter_by(id=request.args.get('id')).filter_by(codigo=request.args.get('cod')).first()       
-    
-    try:
+    init_db(db_session)      
+    i = db_session.query(Item).filter_by(codigo=request.args.get('cod')).filter_by(id=request.args.get('id')).first() 
+    form = ItemEditarFormulario(request.form,i)             
+    item = db_session.query(Item).filter_by(nombre=form.nombre.data).filter_by(id=request.args.get('id')).first()  
+    form.usuario.data = session['user_id']   
+    fase_selected= db_session.query(Fase).filter_by(id=request.args.get('fase')).first()      
+    tipo_selected= db_session.query(TipoItem).filter_by(id= request.args.get('tipo') ).first()
+    estado= request.args.get('es')    
+               
+    if request.method != 'POST':        
+        form.fase.data= fase_selected.nombre  
+        form.tipo_item.data= tipo_selected.nombre
+        global fase_global
+        fase_global = fase_selected.id
+        global tipo_global
+        tipo_global= tipo_selected.id
+        if estado == 'I':
+            form.estado.data= 'Abierto'
+        elif estado == 'P':
+            form.estado.data = 'En Progreso'
+        elif estado == 'R':
+            form.estado.data = 'Resuelto'
+        elif estado == 'A':
+            form.estado.data = 'Aprobado'
+        elif estado == 'E':
+            form.estado.data = 'Eliminado'
+        elif estado == 'Z':
+            form.estado.data = 'Rechazado'
+        elif estado == 'V':
+            form.estado.data = 'Revision'
+        elif estado == 'B':
+            form.estado.data = 'Bloqueado'
+        global estado_global
+        estado_global = estado
+
+    if request.method == 'POST' and form.validate():
         init_db(db_session)
-        #item = db_session.query(Item).filter_by(id=request.args.get('id')).first()            
-        items2 = Item(item.codigo, item.nombre, item.descripcion, 
-                    item.estado, item.complejidad, today, item.costo, 
-                    session['user_id']  , item.version+1 , item.id_fase , item.id_tipo_item )
-       
-        init_db(db_session)
-        db_session.add(items2)
-        db_session.commit() 
-        #return redirect('/item/administraritem')
-        return render_template('item/administraritem.html') 
-    except DatabaseError, e:
+        try:
+            maxversionitem = db_session.query(Item.version).from_statement("select *  from item where codigo = '"+form.codigo.data+"' and version = ( "+ 
+                                                                    " select max(version) from item i where i.codigo = '"+form.codigo.data+"' )" ).first()
+            
+            item_aux = Item(form.codigo.data, form.nombre.data, form.descripcion.data, 
+                    'R', form.complejidad.data, today, form.costo.data, 
+                     session['user_id']  , maxversionitem.version + 1 , fase_global , tipo_global )
+            
+            db_session.add(item_aux)
+            db_session.commit()
+            session.pop('fase_global',None)
+            session.pop('tipo_global',None)
+            session.pop('estado_global',None)
+            
+            flash('El Item ha sido Reversionado con Exito','info')
+            return redirect('/item/administraritem')     
+        except DatabaseError, e:
             flash('Error en la Base de Datos' + e.args[0],'error')
-            return render_template('item/administraritem.html')
- 
+            return render_template('item/reversionaritem.html', form=form)
+    else:
+        flash_errors(form)
+    return render_template('item/reversionaritem.html', form=form)
+    
 
 """funcion que lista los items a ser revividos"""
 @app.route('/item/listarreviviritem', methods=['GET', 'POST'])
 def listarreviviritem():   
     init_db(db_session)
-    #item= db_session.query(Item).filter_by(codigo=request.args.get('cod')).filter_by(id != request.args.get('id')).order_by(Item.version).all()
     item2 = db_session.query(Item).from_statement(" select i.* from item i where i.estado = 'E' and version = (Select max(i2.version) from item i2 where i2.codigo = i.codigo ) order by i.codigo " )
     return render_template('item/listarreviviritem.html', items2 = item2)  
     
@@ -261,30 +319,30 @@ def reviviritem():
     
                
     if request.method != 'POST':        
-         form.fase.data= fase_selected.nombre  
-         form.tipo_item.data= tipo_selected.nombre
-         global fase_global
-         fase_global = fase_selected.id
-         global tipo_global
-         tipo_global= tipo_selected.id
-         if estado == 'I':
-             form.estado.data= 'Abierto'
-         elif estado == 'P':
-             form.estado.data = 'En Progreso'
-         elif estado == 'R':
-             form.estado.data = 'Resuelto'
-         elif estado == 'A':
-             form.estado.data = 'Aprobado'
-         elif estado == 'E':
-             form.estado.data = 'Eliminado'
-         elif estado == 'Z':
-             form.estado.data = 'Rechazado'
-         elif estado == 'V':
-             form.estado.data = 'Revision'
-         elif estado == 'B':
-             form.estado.data = 'Bloqueado'
-         global estado_global
-         estado_global = estado
+        form.fase.data= fase_selected.nombre  
+        form.tipo_item.data= tipo_selected.nombre
+        global fase_global
+        fase_global = fase_selected.id
+        global tipo_global
+        tipo_global= tipo_selected.id
+        if estado == 'I':
+            form.estado.data= 'Abierto'
+        elif estado == 'P':
+            form.estado.data = 'En Progreso'
+        elif estado == 'R':
+            form.estado.data = 'Resuelto'
+        elif estado == 'A':
+            form.estado.data = 'Aprobado'
+        elif estado == 'E':
+            form.estado.data = 'Eliminado'
+        elif estado == 'Z':
+            form.estado.data = 'Rechazado'
+        elif estado == 'V':
+            form.estado.data = 'Revision'
+        elif estado == 'B':
+            form.estado.data = 'Bloqueado'
+        global estado_global
+        estado_global = estado
      
 #    relac = db_session.query(Relacion).from_statement("select r.* from item i,  relacion r where (r.id_item_duenho= "+item.id +" or r.id_item= "+item.id +" ) and r.id_item = i.id ").all()
 #    item_relac = db_session.query(Item).from_statement("select i.* from item i,  relacion r where (r.id_item_duenho= "+item.id +" or r.id_item= "+item.id +" ) and r.id_item = i.id ").all()
@@ -329,9 +387,8 @@ def administraritem():
                         " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id "+
                         " and f.id_proyecto = "+str(session['pry'])+"  group by codigo order by 1 ) s "+
                         " where it.codigo = cod and it.version= vermax and it.estado != 'E' " )
-    #item = db_session.query(Item).order_by(Item.codigo)
+    
     return render_template('item/administraritem.html', items = item)
-
 
 
 """Lanza un mensaje de error en caso de que la pagina solicitada no exista"""

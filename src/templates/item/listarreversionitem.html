@@ -2,16 +2,6 @@
 {% block content %}
 <div class="primary">
 <div >
-<SCRIPT> 
-	function confirmar() { 
-			if(!confirm("¿Esta seguro que desea volver a la versión del Item Seleccionada?")) { 
-				return false; //no se borra 
-			} 
-			else { 
-				return true;//si se borra  
-			}
-	} 
-</SCRIPT> 
 <h1>Reversion de Item</h1>		
 <p></p>
 {% with errors = get_flashed_messages(category_filter=["info"]) %}
@@ -43,7 +33,7 @@
 	</TR>
 	{% for item2 in items2 %}
 	<TR>
-		<TD class="c1"><a href="{{ url_for('reversionaritem', cod=item2.codigo, id=item2.id, es=item2.estado ) }}" onclick="javascript:return confirmar()" ><img src="../static/images/s.png" alt="Reversionar" height="20" width="20" title="Reversionar" style="vertical-align: middle;"> </a></TD>
+		<TD class="c1"><a href="{{ url_for('reversionaritem', cod=item2.codigo, id=item2.id, es=item2.estado, ver=item2.version, fase=item2.id_fase, tipo=item2.id_tipo_item) }}" onclick="javascript:return confirmar()" ><img src="../static/images/s.png" alt="Reversionar" height="20" width="20" title="Reversionar" style="vertical-align: middle;"> </a></TD>
 		<TD class="c2"><SPAN>{{item2.codigo|e}}</SPAN></TD>
 		<TD class="c3"><SPAN>{{item2.nombre|e}}</SPAN></TD>
 		<TD class="c4"><SPAN>{{item2.descripcion|e}}</SPAN></TD>

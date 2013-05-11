@@ -20,8 +20,8 @@ class ItemFormulario(Form):
     costo = IntegerField('Costo', [validators.Required()]) 
     version = IntegerField('Version', [validators.Required()]) 
     usuario = IntegerField('Usuario', [validators.Required()]) 
-    fase = SelectField('Fase', choices=[(f.id,f.nombre) for f in db_session.query(Fase).order_by(Fase.nombre).all()], coerce=int)   
-    tipo_item = SelectField('Tipo Item', choices=[(f.id, f.nombre) for f in db_session.query(TipoItem).order_by(TipoItem.nombre).all()],coerce=int) 
+    #fase = SelectField('Fase', choices=[(f.id,f.nombre) for f in db_session.query(Fase).order_by(Fase.nombre).all()], coerce=int)   
+    #tipo_item = SelectField('Tipo Item', choices=[(f.id, f.nombre) for f in db_session.query(TipoItem).order_by(TipoItem.nombre).all()],coerce=int) 
    
    # archivo= bytearray('Archivo',[validators.Required()] )
    # mime= TextField('Mime',[validators.Length(min=2, max=15), validators.Required()])

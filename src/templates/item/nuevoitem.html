@@ -15,8 +15,6 @@
 		{% endif %} 
 	{% endwith %}
 	<form id=nuevoitem method=post action="/item/nuevoitem">
-			<label>Fase</label> {{ form.fase() }} 
-    		<label>Tipo Item</label> {{ form.tipo_item() }}
     		<label>Código</label> {{ form.codigo}}
     		<label>Nombre</label> {{ form.nombre()}}
     		<label>Descripción</label> {{ form.descripcion() }}
