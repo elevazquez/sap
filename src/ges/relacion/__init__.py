@@ -35,10 +35,16 @@ def nuevarelacion():
     # if permission.can():
     #===========================================================================
     idItem = request.args.get('id_item')
+    #===========================================================================
+    # Si no hay ningun item seleccionado muestra todos los items que pertenecen a 
+    # un proyecto, caso contrario muestra todos los items de la misma fase o fase
+    # Siguiente, recordar que el duenho de la relacion es el hijo/sucesor, es decir, en el
+    # else se selecciona al hijo o sucesor
+    #===========================================================================
     if idItem == None or idItem == '':
         items = getItemByProyecto()
     else:
-        items = getItemByProyectoBeforeFase(idItem)
+        items = getItemByProyBefoActFase(idItem)
         if items != None or items != '':
             session['itemduenho'] = idItem
         
@@ -105,12 +111,14 @@ def shutdown_session(response):
     db_session.remove()
     return response
 
+""" Obtiene los items de un proyecto, para lo cual obtiene el id del proyecto guardado en la session"""
 def getItemByProyecto():
     id_proy =  session['pry']
     items = db_session.query(Item).join(Fase, Fase.id == Item.id_fase).join(Proyecto, Proyecto.id == Fase.id_proyecto).filter(Proyecto.id == id_proy).all()
     return items
 
-def getItemByProyectoBeforeFase(id_item):
+def getItemByProyBefoActFase(id_item):
     id_proy = session['pry']
-    items = db_session.query(Item).join(Fase, Fase.id == Item.id_fase).join(Proyecto, Proyecto.id == Fase.id_proyecto).filter(Proyecto.id == id_proy).filter(Item.id < id_item).all()
+    fase_actual = db_session.query(Item.id_fase).filter_by(id = id_item)
+    items = db_session.query(Item).join(Fase, Fase.id == Item.id_fase).join(Proyecto, Proyecto.id == Fase.id_proyecto).filter(Proyecto.id == id_proy).filter(Fase.id >= fase_actual).filter(Item.id != id_item).all()
     return items

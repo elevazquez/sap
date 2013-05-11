@@ -11,7 +11,7 @@
 			<TH class="c3">Item nombre</TH>
 			<TH class="c3">Item descripción</TH>
 			<TH class="c3">Usuario del item</TH>
-			<TH class="c3">Fase</TH>
+			<TH class="c3">Fase del item</TH>
 			<TH class="c3">Tipo item</TH>
 		</TR>
 		{% for item in items %}
@@ -20,7 +20,7 @@
 				<TD class="c4"><SPAN>{{item.codigo|e}}</SPAN></TD>
 				<TD class="c4"><SPAN>{{item.nombre|e}}</SPAN></TD>
 				<TD class="c4"><SPAN>{{item.descripcion|e}}</SPAN></TD>
-				<TD class="c4"><SPAN>{{item.usuario|e}}</SPAN></TD>
+				<TD class="c4"><SPAN>{{item.usuario.nombre|e}}</SPAN></TD>
 				<TD class="c4"><SPAN>{{item.fase.nombre|e}}</SPAN></TD>
 				<TD class="c4"><SPAN>{{item.tipo_item.nombre|e}}</SPAN></TD>
 			</TR> 
