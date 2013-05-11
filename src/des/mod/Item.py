@@ -1,6 +1,9 @@
 from sqlalchemy import *
 from sqlalchemy.orm import *
 from util.database import Base
+from adm.mod.Usuario import Usuario
+from des.mod.Fase import Fase
+from des.mod.TipoItem import TipoItem
 
 class Item (Base):
     __tablename__ = 'item'
@@ -41,6 +44,6 @@ class Item (Base):
         
     def __repr__(self):
         return '<Item %s %s %s %s %i %d %f %s %s  %s %s>' % (self.codigo, self.nombre, self.descripcion, 
-        self.estado, self.complejidad, self.fecha, self.costo,  self.usuario,
-        self.version, self.fase, self.tipo_item)
+        self.estado, self.complejidad, self.fecha, self.costo,  self.id_usuario,
+        self.version, self.id_fase, self.id_tipo_item)
     

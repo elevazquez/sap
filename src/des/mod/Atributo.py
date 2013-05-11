@@ -1,6 +1,7 @@
 from sqlalchemy import *
 from sqlalchemy.orm import *
 from util.database import Base
+from des.mod.TipoAtributo import TipoAtributo
 
 class Atributo (Base):
     __tablename__ = 'atributo'
@@ -18,5 +19,5 @@ class Atributo (Base):
         self.id_tipo_atributo = id_tipo_atributo
         
     def __repr__(self):
-        return '<Atributo %s %s %s %s>' % (self.codigo, self.nombre, self.descripcion, self.tipo_atributo)
+        return '<Atributo %s %s %s %s>' % (self.codigo, self.nombre, self.descripcion, self.id_tipo_atributo)
     
