@@ -17,5 +17,5 @@ class Permiso (Base):
         self.id_recurso = id_recurso
  
     def __repr__(self):
-        return '<Permiso %s %s %s>' % (self.codigo, self.descripcion, self.recurso)
+        return '<Permiso %s %s %s>' % (self.codigo, self.descripcion, self.id_recurso)
     

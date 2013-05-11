@@ -11,6 +11,8 @@ from des.mod.Fase import Fase
 from des.mod.TipoItem import TipoItem
 from des.mod.LbItem import LbItem
 from ges.mod.LineaBase import LineaBase
+from des.mod.ItemAtributo import ItemAtributo
+
 #from ges.mod.Relacion  import Relacion
 #from ges.mod.TipoRelacion import TipoRelacion
 import flask, flask.views

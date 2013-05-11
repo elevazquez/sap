@@ -13,12 +13,12 @@ def init_db(db_session):
     # you will have to import them first before calling init_db()
     Base.query = db_session.query_property()
     #===========================================================================
-    # from com.py.sap.adm.mod.Rol import Rol
-    # from com.py.sap.adm.mod.Usuario import Usuario
-    # from com.py.sap.adm.mod.Permiso import Permiso
-    # from com.py.sap.adm.mod.Recurso import Recurso
-    # from com.py.sap.ges.mod.Relacion import Relacion
-    # from com.py.sap.des.mod.Item import Item
+    # from adm.mod.Rol import Rol
+    # from adm.mod.Usuario import Usuario
+    # from adm.mod.Permiso import Permiso
+    # from adm.mod.Recurso import Recurso
+    # from ges.mod.Relacion import Relacion
+    # from des.mod.Item import Item
     #===========================================================================
     Base.metadata.create_all(bind=engine)
     
