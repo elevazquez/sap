@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, Sequence, Date, ForeignKey
+from sqlalchemy import Column, Integer, Sequence, Date, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import relationship, backref
 from util.database import Base
 from des.mod.Item import Item
@@ -16,16 +16,18 @@ class Relacion (Base):
     item = relationship('Item', backref=backref('itemrelacion', lazy='dynamic'), foreign_keys=[id_item])
     id_item_duenho = Column(Integer, ForeignKey('item.id'))
     item_duenho = relationship('Item', backref=backref('itemrelacionduenho', lazy='dynamic'), foreign_keys=[id_item_duenho])
+    __table_args__ = (UniqueConstraint('id_item', 'id_item_duenho', name='uq_relacion'),)
+    
 
     def __init__(self, fecha_creacion=None, fecha_modificacion=None, id_tipo_relacion=None,
                  id_item=None, id_item_duenho=None,):
         self.fecha_creacion = fecha_creacion
         self.fecha_modificacion = fecha_modificacion
-        self.tipo_relacion = id_tipo_relacion
+        self.id_tipo_relacion = id_tipo_relacion
         self.id_item = id_item
         self.id_item_duenho = id_item_duenho
         
     def __repr__(self):
         return '<Relacion %d %d %s %s %s>' % (self.fecha_creacion, self.fecha_modificacion,
-                 self.tipo_relacion, self.item, self.item_duenho)
+                 self.id_tipo_relacion, self.id_item, self.id_item_duenho)
     

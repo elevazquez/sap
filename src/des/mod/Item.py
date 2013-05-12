@@ -15,7 +15,7 @@ class Item (Base):
     complejidad = Column('complejidad', Integer)  
     fecha = Column('fecha', Date)
     costo = Column('costo', Numeric(10,2))
-   # archivo = Column('archivo', bytearray)
+    #archivo = Column('archivo', BYTEA)
    # mime = Column('mime', String(15), unique=True)
     version = Column('version', Integer)
     id_usuario = Column(Integer, ForeignKey('usuario.id'))

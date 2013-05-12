@@ -6,12 +6,11 @@
 	{% if current_user.is_authenticated() %}
 		<!--<p> Bienvenido {{session['username']}}!</p> -->
 		<p> Bienvenido {{ current_user.getUserName() }}!</p>
-    	
 	{% else %}		
 		<form action="{{ url_for('index') }}" method="post" >
 			<p>Usuario: <br/>
 			<input type="text" name= "username" /></p>
-			<p>Contraseña: <br />
+			<p>Contraseña: <br/>
 			<input type="password" name= 'passwd' ></p>
 			<p><input type="submit" value="Entrar" /> </p> 		
 		</form>
