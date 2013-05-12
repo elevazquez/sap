@@ -5,6 +5,7 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.exc import DatabaseError
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from des.mod.Fase import Fase
+from adm.mod.Rol import Rol
 from adm.mod.Proyecto import Proyecto
 from adm.mod.UsuarioRol import UsuarioRol
 from adm.mod.Recurso import Recurso
@@ -37,6 +38,7 @@ def nuevoproyecto():
     """ Se obtiene la fecha actual para almacenar la fecha de ultima actualizacion """
     today = datetime.date.today()
     form = ProyFormulario(request.form)
+    r = db_session.query(Rol).filter_by(codigo='COMITE CAMBIOS').first()  
     if request.method == 'POST' and form.validate():
         init_db(db_session)
         if form.fecha_inicio.data > form.fecha_fin.data :
@@ -55,6 +57,10 @@ def nuevoproyecto():
             mc = MiembrosComite(pry.id, form.usuario_lider.data)
             db_session.add(mc)
             db_session.commit()
+            if r == None :
+                rol = Rol('COMITE CAMBIOS', 'COMITE CAMBIOS')
+                db_session.add(rol)
+                db_session.commit()
             flash('El Proyecto ha sido registrado con exito','info')
             return redirect('/proyecto/administrarproyecto')
         except DatabaseError, e:

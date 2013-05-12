@@ -5,6 +5,7 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.exc import DatabaseError
 from flask import Flask, render_template, request, redirect, url_for, flash 
 from des.mod.Atributo import Atributo
+from des.mod.TipoAtributo import TipoAtributo
 from des.atributo.AtributoFormulario import AtributoFormulario
 import flask, flask.views
 import os
@@ -28,6 +29,8 @@ def flash_errors(form):
 @app.route('/atributo/nuevoatributo', methods=['GET', 'POST'])
 def nuevoatributo():
         form = AtributoFormulario(request.form)
+        init_db(db_session)
+        form.id_tipo_atributo.choices= [(t.id, t.nombre) for t in db_session.query(TipoAtributo).order_by(TipoAtributo.nombre).all()]
         if request.method == 'POST' and form.validate():
             init_db(db_session)
             try: 

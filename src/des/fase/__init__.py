@@ -3,9 +3,11 @@ from loginC import app
 from util.database import init_db, engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.exc import DatabaseError
+from sqlalchemy import func, Integer
 from flask import Flask, render_template, request, redirect, url_for, flash, session 
 from adm.mod.Proyecto import Proyecto
 from des.mod.Fase import Fase
+from des.mod.TipoItem import TipoItem
 from des.fase.FaseFormulario import FaseFormulario
 import flask, flask.views
 import os
@@ -31,6 +33,8 @@ def flash_errors(form):
 def nuevafase():
     form = FaseFormulario(request.form)
     init_db(db_session)
+    n = db_session.query(func.max(Fase.nro_orden, type_=Integer)).filter_by(id_proyecto=session['pry']).scalar()
+    form.nro_orden.default = n + 1
     pro = db_session.query(Proyecto).filter_by(id=session['pry']).first()
     form.id_proyecto.data = pro.nombre
     if pro.estado != 'N' :
@@ -90,7 +94,12 @@ def eliminarfase():
     pro = db_session.query(Proyecto).filter_by(id=session['pry']).first()
     if pro.estado != 'N' :
         flash('No se pueden eliminar Fases del Proyecto','info')
-        return render_template('fase/administrarfase.html') 
+        return render_template('fase/administrarfase.html')
+    f = db_session.query(Fase).filter_by(nro_orden=request.args.get('nro')).filter_by(id_proyecto=session['pry']).first()  
+    ti = db_session.query(TipoItem).filter_by(id_fase=f.id).first()
+    if ti != None :
+        flash('No se pueden eliminar la Fase esta asociada al Tipo Item ' + ti.nombre,'info')
+        return render_template('fase/administrarfase.html')  
     try:
         nro = request.args.get('nro')
         init_db(db_session)
@@ -139,6 +148,8 @@ def importarfase():
     form = FaseFormulario(request.form,f)
     fase = db_session.query(Fase).filter_by(nro_orden=form.nro_orden.data).filter_by(id_proyecto=request.args.get('py')).first()  
     form.id_proyecto.data = pro.nombre
+    n = db_session.query(func.max(Fase.nro_orden, type_=Integer)).filter_by(id_proyecto=session['pry']).scalar()
+    form.nro_orden.default = n + 1
     if pro.estado != 'N' :
         flash('No se pueden importar Fases al Proyecto','info')
         return render_template('fase/administrarfase.html') 
@@ -172,5 +183,3 @@ def page_not_found(error):
 def shutdown_session(response):
     db_session.remove()
     return response
-
-

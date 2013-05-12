@@ -26,7 +26,16 @@
     		<label>Complejidad</label> <input type="text" name="complejidad" value="{{ form.complejidad.data }}" id="complejidad" readonly="true"/> 
     		<label>Costo</label> <input type="text" name="costo" value="{{ form.costo.data }}" id="costo" readonly="true"/> 
     		<label>Versión</label><input type="number" name="version" value="{{ form.version.data }}" id="version" readonly="true" /> 
-    		
+    		<p><label>Atributos del Item</label>
+    	{% for atr in att %}
+    		{% for val in vals %}
+    			{% if val.id_atributo == atr.id %}
+    		<label>{{atr.nombre|e}}</label>  <input name={{atr.nombre|e}} value={{val.valor|e}} type="text" />
+    			{% endif %} 
+    		{% endfor %}
+    	{% else %}
+			<em>El item no posee atributos</em>
+    	{% endfor %}	
   			<p><input type=submit value=Revivir>
   		<input type="button" value="Cancelar"  onClick="document.location.href='{{ url_for( 'administraritem' ) }}';"> 
 	</form>

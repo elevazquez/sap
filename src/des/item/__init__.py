@@ -12,7 +12,7 @@ from des.mod.TipoItem import TipoItem
 from des.mod.LbItem import LbItem
 from ges.mod.LineaBase import LineaBase
 from des.mod.ItemAtributo import ItemAtributo
-
+from des.mod.Atributo import Atributo
 #from ges.mod.Relacion  import Relacion
 #from ges.mod.TipoRelacion import TipoRelacion
 import flask, flask.views
@@ -66,8 +66,8 @@ def nuevoitem():
     form = ItemFormulario(request.form)
     init_db(db_session)    
     form.usuario.data = session['user_id']    
-    #form.fase.choices= [(f.id,f.nombre) for f in db_session.query(Fase).filter_by(id_proyecto=session['pry']).order_by(Fase.nombre).all()]
-    #form.tipo_item.choices=[(f.id, f.nombre) for f in db_session.query(TipoItem).filter_by(id_fase=request.args.get('id_fase')).order_by(TipoItem.nombre).all()]
+    atributo = db_session.query(Atributo).from_statement(" select a.* from tipo_item ti , titem_atributo ta, atributo a "+
+                                                        " where ti.id = ta.id_tipo_item and a.id = ta.id_atributo and ti.id=  " +str(request.args.get('id_tipo')) )
     form.version.data= 1    
     form.fecha.data= today   
     if request.method != 'POST':   
@@ -75,23 +75,34 @@ def nuevoitem():
         tipo_global=  request.args.get('id_tipo') 
     if request.method == 'POST' and form.validate():
         try:
-#            tipo_selected = db_session.query(TipoItem).filter_by(id_fase=request.args.get('fase') ).first()
-#            if tipo_selected == None:
-#                flash('El Tipo de Item no corresponde a la Fase seleccionada','error')
-#                return render_template('item/nuevoitem.html', form=form)
+            atributo = db_session.query(Atributo).from_statement(" select a.* from tipo_item ti , titem_atributo ta, atributo a "+
+                                                        " where ti.id = ta.id_tipo_item and a.id = ta.id_atributo and ti.id=  " +str(tipo_global) )
+    
             item = Item(form.codigo.data, form.nombre.data, form.descripcion.data, 
                     form.estado.data, form.complejidad.data, form.fecha.data, form.costo.data, 
-                    form.usuario.data , form.version.data, fase_global ,tipo_global )
+                    form.usuario.data , form.version.data, fase_global , tipo_global )
             db_session.add(item)
             db_session.commit()
+            try:
+                if atributo != None:
+                    for atr in atributo:
+                        valor =  request.form[atr.nombre]                  
+                        ia= ItemAtributo(valor, item.id, atr.id)
+                        db_session.add(ia)
+                        db_session.commit()
+            except DatabaseError, e:
+                flash('Error en la Base de Datos' + e.args[0],'error')
+                return render_template('item/nuevoitem.html', form=form, att=atributo)                      
+            
+            session.pop('tipo_global',None)
             flash('El Item ha sido registrada con Exito','info')
             return redirect('/item/administraritem') 
         except DatabaseError, e:
                 flash('Error en la Base de Datos' + e.args[0],'error')
-                return render_template('item/nuevoitem.html', form=form)
+                return render_template('item/nuevoitem.html', form=form, att=atributo)
     else:
         flash_errors(form) 
-    return render_template('item/nuevoitem.html', form=form)
+    return render_template('item/nuevoitem.html', form=form,att=atributo)
 
 
 """Funcion que permite realizar busqueda de items"""
@@ -117,6 +128,7 @@ def buscarItem():
         return 'no existe concordancia'
     return render_template('item/administraritem.html', items = r)
 
+
 """Funcion que permite editar un item"""
 @app.route('/item/editaritem', methods=['GET', 'POST'])
 def editaritem():   
@@ -131,7 +143,11 @@ def editaritem():
     tipo_selected= db_session.query(TipoItem).filter_by(id= request.args.get('tipo') ).first()
     enlb= db_session.query(LbItem).filter_by(id_item=request.args.get('id')).first() 
     estado= request.args.get('es')    
-               
+    atributo = db_session.query(Atributo).from_statement(" select a.* from tipo_item ti , titem_atributo ta, atributo a "+
+                                                        " where ti.id = ta.id_tipo_item and a.id = ta.id_atributo and ti.id=  " +str(request.args.get('tipo')) )
+    
+    valoresatr = db_session.query(ItemAtributo).from_statement(" select ia.* from item_atributo ia where ia.id_item= " +str(request.args.get('id')) )
+             
     if request.method != 'POST':   
         form.fase.data= fase_selected.nombre  
         form.tipo_item.data= tipo_selected.nombre
@@ -165,17 +181,26 @@ def editaritem():
     #verifica si puede ser modificado:
     if enlb != None and form.estado.data == 'E' :
         flash('El Item no puede ser modificado, ya que se encuebra en una Linea Base o esta Eliminado!','error')
-        return render_template('item/editaritem.html', form=form)
+        return render_template('item/editaritem.html', form=form, att=atributo, vals=valoresatr)
     
     if request.method == 'POST' and form.validate():
         init_db(db_session)
         try:   
+            atributo = db_session.query(Atributo).from_statement(" select a.* from tipo_item ti , titem_atributo ta, atributo a "+
+                                                        " where ti.id = ta.id_tipo_item and a.id = ta.id_atributo and ti.id=  " +str(tipo_global) )
+    
             item = Item(form.codigo.data, form.nombre.data, form.descripcion.data, 
                     estado_global, form.complejidad.data, form.fecha.data, form.costo.data, 
                     form.usuario.data , form.version.data, fase_global , tipo_global )
             
             db_session.add(item)
             db_session.commit()
+            if atributo != None:
+                for atr in atributo:
+                    valor =  request.form[atr.nombre]                  
+                    ia= ItemAtributo(valor, item.id, atr.id)
+                    db_session.add(ia)
+                    db_session.commit()
             session.pop('fase_global',None)
             session.pop('tipo_global',None)
             session.pop('estado_global',None)
@@ -189,10 +214,10 @@ def editaritem():
             return redirect('/item/administraritem')     
         except DatabaseError, e:
             flash('Error en la Base de Datos' + e.args[0],'error')
-            return render_template('item/editaritem.html', form=form)
+            return render_template('item/editaritem.html', form=form, att=atributo, vals=valoresatr)
     else:
         flash_errors(form)
-    return render_template('item/editaritem.html', form=form)
+    return render_template('item/editaritem.html', form=form, att=atributo ,vals=valoresatr )
 
 
 """funcion que permite eliminar items"""
@@ -203,23 +228,41 @@ def eliminaritem():
         id_item = request.args.get('id')
         init_db(db_session)
         item = db_session.query(Item).filter_by(id= id_item).first()
-        
+        atributo = db_session.query(Atributo).from_statement(" select a.* from tipo_item ti , titem_atributo ta, atributo a "+
+                                                        " where ti.id = ta.id_tipo_item and a.id = ta.id_atributo and ti.id=  " +str(request.args.get('tipo')) )
+    
+        valoresatr = db_session.query(ItemAtributo).from_statement(" select ia.* from item_atributo ia where ia.id_item= " +str(request.args.get('id')) )
+       
         if item.estado == 'A' :
             items = Item(item.codigo, item.nombre, item.descripcion, 
                      'P' , item.complejidad, today, item.costo, 
                     session['user_id']  , item.version +1 , item.id_fase , item.id_tipo_item )       
             init_db(db_session)
             db_session.add(items)
-            db_session.commit()   
-            item= items   
+            db_session.commit()
+            item= items  
+            if atributo != None:
+                for atr in atributo:
+                    for val in valoresatr:
+                        if atr.id == val.id_atributo :                   
+                            ia= ItemAtributo(val.valor, item.id, atr.id)
+                            db_session.add(ia)
+                            db_session.commit()               
             
         items = Item(item.codigo, item.nombre, item.descripcion, 
                     'E', item.complejidad, today, item.costo, 
                     session['user_id']  , item.version+1 , item.id_fase , item.id_tipo_item )
-       
+        
         init_db(db_session)
         db_session.add(items)
         db_session.commit() 
+        if atributo != None:
+            for atr in atributo:
+                for val in valoresatr:
+                    if atr.id == val.id_atributo :                   
+                        ia= ItemAtributo(val.valor, items.id, atr.id)
+                        db_session.add(ia)
+                        db_session.commit()  
         return redirect('/item/administraritem')
     except DatabaseError, e:
             flash('Error en la Base de Datos' + e.args[0],'error')
@@ -240,13 +283,18 @@ def reversionaritem():
     today = datetime.date.today()
     init_db(db_session)      
     i = db_session.query(Item).filter_by(codigo=request.args.get('cod')).filter_by(id=request.args.get('id')).first() 
+    atributo = db_session.query(Atributo).from_statement(" select a.* from tipo_item ti , titem_atributo ta, atributo a "+
+                                                        " where ti.id = ta.id_tipo_item and a.id = ta.id_atributo and ti.id=  " +str(request.args.get('tipo')) )
+    
+    valoresatr = db_session.query(ItemAtributo).from_statement(" select ia.* from item_atributo ia where ia.id_item= " +str(request.args.get('id')) )
+    
     form = ItemEditarFormulario(request.form,i)             
     item = db_session.query(Item).filter_by(nombre=form.nombre.data).filter_by(id=request.args.get('id')).first()  
     form.usuario.data = session['user_id']   
     fase_selected= db_session.query(Fase).filter_by(id=request.args.get('fase')).first()      
     tipo_selected= db_session.query(TipoItem).filter_by(id= request.args.get('tipo') ).first()
     estado= request.args.get('es')    
-               
+                
     if request.method != 'POST':        
         form.fase.data= fase_selected.nombre  
         form.tipo_item.data= tipo_selected.nombre
@@ -279,12 +327,22 @@ def reversionaritem():
             maxversionitem = db_session.query(Item.version).from_statement("select *  from item where codigo = '"+form.codigo.data+"' and version = ( "+ 
                                                                     " select max(version) from item i where i.codigo = '"+form.codigo.data+"' )" ).first()
             
+            atributo = db_session.query(Atributo).from_statement(" select a.* from tipo_item ti , titem_atributo ta, atributo a "+
+                                                        " where ti.id = ta.id_tipo_item and a.id = ta.id_atributo and ti.id=  " +str(tipo_global) )
+    
+            
             item_aux = Item(form.codigo.data, form.nombre.data, form.descripcion.data, 
                     'R', form.complejidad.data, today, form.costo.data, 
                      session['user_id']  , maxversionitem.version + 1 , fase_global , tipo_global )
             
             db_session.add(item_aux)
             db_session.commit()
+            if atributo != None:
+                for atr in atributo:
+                    valor =  request.form[atr.nombre]                  
+                    ia= ItemAtributo(valor, item_aux.id, atr.id)
+                    db_session.add(ia)
+                    db_session.commit()
             session.pop('fase_global',None)
             session.pop('tipo_global',None)
             session.pop('estado_global',None)
@@ -293,10 +351,10 @@ def reversionaritem():
             return redirect('/item/administraritem')     
         except DatabaseError, e:
             flash('Error en la Base de Datos' + e.args[0],'error')
-            return render_template('item/reversionaritem.html', form=form)
+            return render_template('item/reversionaritem.html', form=form, att=atributo, vals=valoresatr)
     else:
         flash_errors(form)
-    return render_template('item/reversionaritem.html', form=form)
+    return render_template('item/reversionaritem.html', form=form, att=atributo, vals=valoresatr)
     
 
 """funcion que lista los items a ser revividos"""
@@ -305,6 +363,7 @@ def listarreviviritem():
     init_db(db_session)
     item2 = db_session.query(Item).from_statement(" select i.* from item i where i.estado = 'E' and version = (Select max(i2.version) from item i2 where i2.codigo = i.codigo ) order by i.codigo " )
     return render_template('item/listarreviviritem.html', items2 = item2)  
+    
     
 """funcion que permite revivir un item"""
 @app.route('/item/reviviritem', methods=['GET', 'POST'])
@@ -318,8 +377,11 @@ def reviviritem():
     fase_selected= db_session.query(Fase).filter_by(id=request.args.get('fase')).first()      
     tipo_selected= db_session.query(TipoItem).filter_by(id= request.args.get('tipo') ).first()
     estado= request.args.get('es')
+    atributo = db_session.query(Atributo).from_statement(" select a.* from tipo_item ti , titem_atributo ta, atributo a "+
+                                                        " where ti.id = ta.id_tipo_item and a.id = ta.id_atributo and ti.id=  " +str(request.args.get('tipo')) )
     
-               
+    valoresatr = db_session.query(ItemAtributo).from_statement(" select ia.* from item_atributo ia where ia.id_item= " +str(request.args.get('id')) )
+                   
     if request.method != 'POST':        
         form.fase.data= fase_selected.nombre  
         form.tipo_item.data= tipo_selected.nombre
@@ -355,13 +417,21 @@ def reviviritem():
         init_db(db_session)
         try:   
             item_aux = db_session.query(Item).from_statement("select * from item where codigo= '"+form.codigo.data+"' and version = "+str(form.version.data)+"-1 " ).first()
-            
+            atributo = db_session.query(Atributo).from_statement(" select a.* from tipo_item ti , titem_atributo ta, atributo a "+
+                                                        " where ti.id = ta.id_tipo_item and a.id = ta.id_atributo and ti.id=  " +str(tipo_global) )
+                
             item = Item(item_aux.codigo, item_aux.nombre, item_aux.descripcion, 
                     'R', item_aux.complejidad, today, item_aux.costo, 
                      session['user_id']  , form.version.data + 1 , fase_global , tipo_global )
-            
             db_session.add(item)
             db_session.commit()
+            if atributo != None:
+                for atr in atributo:
+                    valor =  request.form[atr.nombre]                  
+                    ia= ItemAtributo(valor, item.id, atr.id)
+                    db_session.add(ia)
+                    db_session.commit()
+            
             session.pop('fase_global',None)
             session.pop('tipo_global',None)
             session.pop('estado_global',None)
@@ -375,10 +445,10 @@ def reviviritem():
             return redirect('/item/administraritem')     
         except DatabaseError, e:
             flash('Error en la Base de Datos' + e.args[0],'error')
-            return render_template('item/reviviritem.html', form=form)
+            return render_template('item/reviviritem.html', form=form, att=atributo, vals=valoresatr)
     else:
         flash_errors(form)
-    return render_template('item/reviviritem.html', form=form)
+    return render_template('item/reviviritem.html', form=form, att=atributo, vals=valoresatr)
 
        
 

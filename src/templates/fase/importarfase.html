@@ -15,7 +15,7 @@
 		{% endif %} 
 	{% endwith %}
 	<form id=importar method=post action="/fase/importarfase">
-  			<label>Número</label> {{ form.nro_orden() }}
+  			<label>Número</label> <input type="number" name="nro_orden" id="nro_orden" value="{{ form.nro_orden.default }}">
   			<label>Nombre</label> {{ form.nombre() }}
     		<label>Descripción</label> {{ form.descripcion() }}
     		<label>Estado</label> {{ form.estado() }}

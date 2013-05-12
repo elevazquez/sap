@@ -20,6 +20,7 @@ from des.fase import *
 from des.atributo import *
 from des.tipoItem import *
 from des.item import *
+from des.tipoAtributo import *
 from ges.relacion import *
 
 
