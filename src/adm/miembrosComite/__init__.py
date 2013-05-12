@@ -6,6 +6,12 @@ from sqlalchemy.exc import DatabaseError
 from flask import Flask, render_template, request, redirect, url_for, flash, session 
 from adm.mod.Proyecto import Proyecto
 from adm.mod.Usuario import Usuario
+from adm.mod.Recurso import Recurso
+from adm.mod.Permiso import Permiso
+from adm.mod.Rol import Rol
+from adm.mod.RolPermiso import RolPermiso
+from adm.mod.UsuarioRol import UsuarioRol
+
 from adm.mod.MiembrosComite import MiembrosComite
 from adm.miembrosComite.MiembrosComiteFormulario import MiembrosComiteFormulario
 import flask, flask.views
@@ -36,6 +42,7 @@ def nuevomiembrosComite():
     form = MiembrosComiteFormulario(request.form,u)
     usuario = db_session.query(Usuario).filter_by(usuario=form.usuario.data).first()
     cant = db_session.query(MiembrosComite).filter_by(id_proyecto=pro.id).count()
+    r = db_session.query(Rol).filter_by(codigo='COMITE CAMBIOS').first()  
     if pro.estado != 'N' :
         flash('No se pueden asignar Miembros al Comite de Cambios','info')
         return render_template('miembrosComite/administrarmiembrosComite.html')
@@ -45,8 +52,26 @@ def nuevomiembrosComite():
     if request.method == 'POST' and form.validate():
         init_db(db_session)
         try:
+            re = db_session.query(Recurso).filter_by(id_proyecto=pro.id).filter_by(nombre=pro.nombre).first()  
+            if re == None :
+                re = Recurso(pro.nombre, pro.id)
+                db_session.add(re)
+                db_session.commit()
+            per = db_session.query(Permiso).filter_by(id_recurso=re.id).filter_by(codigo='CONSULTAR PROYECTO').first()
+            if per == None :
+                per = Permiso('CONSULTAR PROYECTO', 'CONSULTAR PROYECTO', re.id)
+                db_session.add(per)
+                db_session.commit()
+            rp = db_session.query(RolPermiso).filter_by(id_rol=r.id).filter_by(id_permiso=per.id).first()
+            if rp == None :
+                rp = RolPermiso(r.id, per.id)
+                db_session.add(rp)
+                db_session.commit()
             miembrosComite = MiembrosComite(pro.id, usuario.id)
             db_session.add(miembrosComite)
+            db_session.commit()
+            ur = UsuarioRol('COMITE PROYECTO', 'COMITE PROYECTO', r.id, usuario.id)
+            db_session.add(ur)
             db_session.commit()
             flash('Se ha asignado el usario al Comite de Cambios','info')
             return redirect('/miembrosComite/administrarmiembrosComite')
@@ -60,6 +85,7 @@ def nuevomiembrosComite():
 @app.route('/miembrosComite/eliminarmiembrosComite', methods=['GET', 'POST'])
 def eliminarmiembrosComite():
     init_db(db_session)
+    r = db_session.query(Rol).filter_by(codigo='COMITE CAMBIOS').first()  
     pro = db_session.query(Proyecto).filter_by(id=session['pry']).first()
     if pro.estado != 'N' :
         flash('No se pueden desasignar Miembros al Comites de Cambios','info')
@@ -69,6 +95,12 @@ def eliminarmiembrosComite():
         return render_template('miembrosComite/administrarmiembrosComite.html')   
     try:
         init_db(db_session)
+        mc = db_session.query(MiembrosComite).filter_by(id=request.args.get('id_mc')).first()  
+        ur = db_session.query(UsuarioRol).filter_by(id_rol=r.id).filter_by(id_usuario=mc.id_usuario).first()  
+        init_db(db_session)
+        db_session.delete(ur)
+        db_session.commit()
+        
         miembrosComite = db_session.query(MiembrosComite).filter_by(id=request.args.get('id_mc')).first()  
         init_db(db_session)
         db_session.delete(miembrosComite)

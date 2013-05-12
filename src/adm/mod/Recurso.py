@@ -13,10 +13,10 @@ class Recurso (Base):
     id_fase = Column(Integer, ForeignKey('fase.id'))
     fase = relationship('Fase', backref=backref('fases', lazy='dynamic'))
     
-    def __init__(self, nombre=None, proyecto=None, fase=None):
+    def __init__(self, nombre=None, id_proyecto=None, id_fase=None):
         self.nombre = nombre
-        self.proyecto = proyecto 
-        self.fase = fase
+        self.id_proyecto = id_proyecto 
+        self.id_fase = id_fase
  
     def __repr__(self):
         return '<Recurso %s %s %s>' % (self.nombre, self.proyecto, self.fase)

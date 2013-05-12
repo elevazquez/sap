@@ -14,10 +14,10 @@ class UsuarioRol (Base):
     id_usuario = Column(Integer, ForeignKey('usuario.id'))
     usuario = relationship('Usuario', backref=backref('usuariosroles', lazy='dynamic'))
     
-    def __init__(self, nombre=None, descripcion=None, rol=None, id_usuario=None):
+    def __init__(self, nombre=None, descripcion=None, id_rol=None, id_usuario=None):
         self.nombre = nombre
         self.descripcion = descripcion
-        self.rol = rol
+        self.id_rol = id_rol
         self.id_usuario = id_usuario
     
     def __repr__(self):
