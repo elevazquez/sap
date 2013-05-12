@@ -23,3 +23,4 @@ class ItemEditarFormulario(Form):
     usuario = IntegerField('Usuario', [validators.Required()]) 
     fase = TextField('Fase',[validators.Required()])   
     tipo_item = TextField('Tipo Item',[validators.Required()]) 
+    
