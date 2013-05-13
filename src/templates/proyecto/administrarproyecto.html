@@ -61,7 +61,8 @@
 		<a href="{{ url_for('eliminarproyecto', nom=proyecto.nombre) }}" onclick="javascript:return confirmar()"><img src="../static/images/b.png" alt="Eliminar" height="20" width="20" title="Eliminar" style="vertical-align: middle;"> </a></TD>
 		<TD class="c3"><SPAN>{{proyecto.nombre|e}}</SPAN></TD>
 		<TD class="c4"><SPAN>{{proyecto.descripcion|e}}</SPAN></TD>
-		<TD class="c5"><SPAN>{{proyecto.estado|e}}</SPAN></TD>
+		<TD class="c5"><SPAN>{{'Nuevo' if proyecto.estado=='N' else 'En Progreso' if proyecto.estado=='P' 
+		else 'Anulado' if proyecto.estado=='A' else 'Finalizado' if proyecto.estado=='F'|e}}</SPAN></TD>
 		<TD class="c2"><SPAN>{{proyecto.cant_miembros|e}}</SPAN></TD>
 		<TD class="c6"><SPAN>{{proyecto.fecha_inicio|e}}</SPAN></TD>
 		<TD class="c7"><SPAN>{{proyecto.fecha_fin|e}}</SPAN></TD>

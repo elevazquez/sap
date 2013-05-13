@@ -26,18 +26,15 @@
 				
 			</header>
   	</div>
-  	
-				
 
 	<div id="content-wrap" >
-	
         <div id="content" class="clearfix">  
 			<div id="main">
 				<div class="primary">
 				<h1>Proyectos</h1>
 					{% for proyecto in proyectos %}
 					<TR>
-						<TD class="c3"><SPAN><a href="{{ url_for('proyectoActual', pyo=proyecto.id) }}" >{{ proyecto.nombre|e }}</a></TD></SPAN></TD>
+						<TD class="c3"><SPAN><a href="{{ url_for('proyectoActual', pyo=proyecto.id) }}" >{{ proyecto.nombre|e }}</a></SPAN></TD>
 					</TR>
 						{% else %}
   					<TR>
