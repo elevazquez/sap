@@ -5,7 +5,9 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.exc import DatabaseError
 from flask import Flask, render_template, request, redirect, url_for, flash 
 from adm.mod.Rol import Rol
+from adm.permiso import administrarpermiso
 from adm.rol.RolFormulario import RolFormulario
+from adm.mod.RolPermiso import RolPermiso
 import flask, flask.views
 import os
 
@@ -92,11 +94,21 @@ def buscar():
         return 'no existe concordancia'
     return render_template('rol/administrarrol.html', roles = r)
 
-@app.route('/administrarrol')
+@app.route('/administrarrol', methods=['GET', 'POST'])
 def administrarrol():
     init_db(db_session)
     roles = db_session.query(Rol).order_by(Rol.codigo)
     return render_template('rol/administrarrol.html', roles = roles)
+
+@app.route('/rol/asignarpermiso', methods=['GET', 'POST'])
+def asignarpermiso():
+    if request.method == 'POST':
+        permisos=request.form.getlist('permisos')
+        for p in request.form.getlist('permisos') :
+            permiso = RolPermiso(None, None)
+            db_session.add()
+        return redirect('/administrarrol')
+    return redirect(url_for('administrarpermiso', isAdministrar = False))
 
 """Lanza un mensaje de error en caso de que la pagina solicitada no exista"""
 @app.errorhandler(404)

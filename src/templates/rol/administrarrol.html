@@ -45,8 +45,10 @@
 	</TR>
 	{% for rol in roles %}
 	<TR>
-		<TD class="c4"><a href="{{ url_for('editar', cod=rol.codigo) }}" ><img src="../static/images/e.png" alt="Editar" height="20" width="20" title="Editar" style="vertical-align: middle;"></a>
-		<a href="{{ url_for('eliminar', cod=rol.codigo) }}" onclick="javascript:return confirmar()"><img src="../static/images/b.png" alt="Eliminar" height="20" width="20" title="Eliminar" style="vertical-align: middle;"> </a></TD>
+		<TD class="c4">
+		<a href="{{ url_for('editar', cod=rol.codigo) }}" ><img src="../static/images/e.png" alt="Editar" height="20" width="20" title="Editar" style="vertical-align: middle;"></a>
+		<a href="{{ url_for('eliminar', cod=rol.codigo) }}" onclick="javascript:return confirmar()"><img src="../static/images/b.png" alt="Eliminar" height="20" width="20" title="Eliminar" style="vertical-align: middle;"> </a>
+		<a href="{{ url_for('asignarpermiso') }}">Asignar</a></TD>
 		<TD class="c4"><SPAN>{{rol.codigo|e}}</SPAN></TD>
 		<TD class="c5"><SPAN>{{rol.descripcion|e}}</SPAN></TD>
 	</TR>
