@@ -1,6 +1,6 @@
 from loginC import app
 from util.database import init_db, engine
-import sqlalchemy
+from sqlalchemy import distinct
 from sqlalchemy.orm import scoped_session, sessionmaker
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from ges.mod.Relacion import Relacion
@@ -8,9 +8,11 @@ from des.mod.Fase import Fase
 from adm.mod.Proyecto import Proyecto
 from des.mod.Item import Item
 from ges.relacion.RelacionFormulario import RelacionFormulario
+from ges.mod.TipoRelacion import TipoRelacion
 import flask, flask.views
 from UserPermission import *
 import os
+import datetime
 
 db_session = scoped_session(sessionmaker(autocommit=False,
                                          autoflush=False,
@@ -34,20 +36,45 @@ def nuevarelacion():
     # permission = UserPermission('administrador')
     # if permission.can():
     #===========================================================================
-    idItem = request.args.get('id_item')
+    codItem = request.args.get('cod_item')
+    codItem2 = request.args.get('cod_item2')
     #===========================================================================
     # Si no hay ningun item seleccionado muestra todos los items que pertenecen a 
     # un proyecto, caso contrario muestra todos los items de la misma fase o fase
     # Siguiente, recordar que el duenho de la relacion es el hijo/sucesor, es decir, en el
-    # else se selecciona al hijo o sucesor
+    # if se selecciona al hijo o sucesor
     #===========================================================================
-    if idItem == None or idItem == '':
-        items = getItemByProyecto()
+    if codItem == None or codItem == '':
+        if codItem2 == None or codItem == '':
+            items = getItemByProyecto()
+            if 'itemDuenho' in session:
+                session.pop('itemDuenho', None)
+        else:
+            if 'itemDuenho' in session:
+                #===============================================================
+                # Obtiene los ordenes de fases a la que pertenece cada item
+                #===============================================================
+                fasePhaAnt = db_session.query(Fase).join(Item, Fase.id == Item.id_fase).filter(Item.codigo == codItem2).first()
+                faseChiSuc = db_session.query(Fase).join(Item, Fase.id == Item.id_fase).filter(Item.codigo == session['itemDuenho']).first()
+                #===============================================================
+                # Verifica de que fases son para establecer el tipo de relacion
+                #===============================================================
+                if fasePhaAnt.nro_orden == faseChiSuc.nro_orden:
+                    tipo = db_session.query(TipoRelacion.id).filter_by(codigo='Padre Hijo').first()
+                else:
+                    tipo = db_session.query(TipoRelacion.id).filter_by(codigo='Antecesor Sucesor').first()
+                
+                relacion = Relacion(datetime.date.today(), None, tipo, codItem2, session['itemDuenho'])
+                db_session.add(relacion)
+                db_session.commit()
+                session.pop('itemDuenho',None)
+                flash('La relacion ha sido registrado con exito','info')
+                return redirect('/relacion/administrarrelacion')
     else:
-        items = getItemByProyBefoActFase(idItem)
-        if items != None or items != '':
-            session['itemduenho'] = idItem
-        
+        items = getItemByProyBefoActFase(codItem)
+        session['itemDuenho'] = codItem
+        codItem = db_session.query(Item).filter_by(codigo=codItem).first()
+        return render_template('relacion/nuevarelacionpaso2.html', items = items, idfirstItem = codItem)
     return render_template('relacion/nuevarelacion.html', items = items)
     #===========================================================================
     # else:
@@ -120,5 +147,5 @@ def getItemByProyecto():
 def getItemByProyBefoActFase(id_item):
     id_proy = session['pry']
     fase_actual = db_session.query(Item.id_fase).filter_by(id = id_item)
-    items = db_session.query(Item).join(Fase, Fase.id == Item.id_fase).join(Proyecto, Proyecto.id == Fase.id_proyecto).filter(Proyecto.id == id_proy).filter(Fase.id >= fase_actual).filter(Item.id != id_item).all()
+    items = db_session.query(Item).join(Fase, Fase.id == Item.id_fase).join(Proyecto, Proyecto.id == Fase.id_proyecto).filter(Proyecto.id == id_proy).filter(Fase.id <= fase_actual).filter(~Item.id.in_(db_session.query(Relacion.id_item).from_statement("SELECT relacion.id_item from relacion where relacion.id_item_duenho = "+ id_item))).filter(~Item.id.in_(db_session.query(Relacion.id_item).from_statement("SELECT relacion.id_item_duenho from relacion where relacion.id_item = "+ id_item))).filter(Item.id != id_item).all()
     return items

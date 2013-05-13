@@ -1,6 +1,7 @@
 from sqlalchemy import *
 from sqlalchemy.orm import *
 from util.database import Base
+from des.mod.Fase import Fase
 
 class TipoItem (Base):
     __tablename__ = 'tipo_item'
