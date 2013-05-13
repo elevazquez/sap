@@ -84,9 +84,10 @@ def buscarpermiso():
 
 @app.route('/permiso/administrarpermiso')
 def administrarpermiso():
+    valor = request.args.get('value')
     init_db(db_session)
     permisos = db_session.query(Permiso).order_by(Permiso.id)
-    return render_template('permiso/administrarpermiso.html', permisos = permisos)
+    return render_template('permiso/administrarpermiso.html', permisos = permisos, isAdministrar = valor)
 
 """Lanza un mensaje de error en caso de que la pagina solicitada no exista"""
 @app.errorhandler(404)
