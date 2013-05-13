@@ -52,25 +52,25 @@ def nuevomiembrosComite():
     if request.method == 'POST' and form.validate():
         init_db(db_session)
         try:
-            re = db_session.query(Recurso).filter_by(id_proyecto=pro.id).filter_by(nombre=pro.nombre).first()  
-            if re == None :
-                re = Recurso(pro.nombre, pro.id)
-                db_session.add(re)
-                db_session.commit()
-            per = db_session.query(Permiso).filter_by(id_recurso=re.id).filter_by(codigo='CONSULTAR PROYECTO').first()
-            if per == None :
-                per = Permiso('CONSULTAR PROYECTO', 'CONSULTAR PROYECTO', re.id)
-                db_session.add(per)
-                db_session.commit()
-            rp = db_session.query(RolPermiso).filter_by(id_rol=r.id).filter_by(id_permiso=per.id).first()
-            if rp == None :
-                rp = RolPermiso(r.id, per.id)
-                db_session.add(rp)
-                db_session.commit()
+#            re = db_session.query(Recurso).filter_by(id_proyecto=pro.id).filter_by(nombre=pro.nombre).first()  
+#            if re == None :
+#                re = Recurso(pro.nombre, pro.id)
+#                db_session.add(re)
+#                db_session.commit()
+#            per = db_session.query(Permiso).filter_by(id_recurso=re.id).filter_by(codigo='CONSULTAR PROYECTO').first()
+#            if per == None :
+#                per = Permiso('CONSULTAR PROYECTO', 'CONSULTAR PROYECTO', re.id)
+#                db_session.add(per)
+#                db_session.commit()
+#            rp = db_session.query(RolPermiso).filter_by(id_rol=r.id).filter_by(id_permiso=per.id).first()
+#            if rp == None :
+#                rp = RolPermiso(r.id, per.id)
+#                db_session.add(rp)
+#                db_session.commit()
             miembrosComite = MiembrosComite(pro.id, usuario.id)
             db_session.add(miembrosComite)
             db_session.commit()
-            ur = UsuarioRol('COMITE PROYECTO', 'COMITE PROYECTO', r.id, usuario.id)
+            ur = UsuarioRol(r.id, usuario.id, pro.id)
             db_session.add(ur)
             db_session.commit()
             flash('Se ha asignado el usario al Comite de Cambios','info')
@@ -96,7 +96,7 @@ def eliminarmiembrosComite():
     try:
         init_db(db_session)
         mc = db_session.query(MiembrosComite).filter_by(id=request.args.get('id_mc')).first()  
-        ur = db_session.query(UsuarioRol).filter_by(id_rol=r.id).filter_by(id_usuario=mc.id_usuario).first()  
+        ur = db_session.query(UsuarioRol).filter_by(id_rol=r.id).filter_by(id_usuario=mc.id_usuario).filter_by(id_proyecto=pro.id).first()  
         init_db(db_session)
         db_session.delete(ur)
         db_session.commit()

@@ -60,7 +60,8 @@
 		<TD class="c2"><SPAN>{{fase.nro_orden|e}}</SPAN></TD>
 		<TD class="c3"><SPAN>{{fase.nombre|e}}</SPAN></TD>
 		<TD class="c4"><SPAN>{{fase.descripcion|e}}</SPAN></TD>
-		<TD class="c5"><SPAN>{{fase.estado|e}}</SPAN></TD>
+		<TD class="c5"><SPAN>{{'Inicial' if fase.estado=='I' else 'En Progreso' if fase.estado=='P' 
+		else 'En Linea Base' if fase.estado=='L' else 'Aprobado' if fase.estado=='A'|e}}</SPAN></TD>
 		<TD class="c6"><SPAN>{{fase.fecha_inicio|e}}</SPAN></TD>
 		<TD class="c7"><SPAN>{{fase.fecha_fin|e}}</SPAN></TD>
 		<TD class="c8"><SPAN>{{fase.proyecto.nombre|e}}</SPAN></TD>

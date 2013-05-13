@@ -34,7 +34,10 @@ def nuevafase():
     form = FaseFormulario(request.form)
     init_db(db_session)
     n = db_session.query(func.max(Fase.nro_orden, type_=Integer)).filter_by(id_proyecto=session['pry']).scalar()
-    form.nro_orden.default = n + 1
+    if n != None :
+        form.nro_orden.default = n + 1
+    else :
+        form.nro_orden.default = 1
     pro = db_session.query(Proyecto).filter_by(id=session['pry']).first()
     form.id_proyecto.data = pro.nombre
     if pro.estado != 'N' :
