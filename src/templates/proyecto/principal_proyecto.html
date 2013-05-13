@@ -32,15 +32,13 @@
 			<div id="main">
 				<div class="primary">
 				<h1>Proyectos</h1>
-					{% for proyecto in proyectos %}
-					<TR>
-						<TD class="c3"><SPAN><a href="{{ url_for('proyectoActual', pyo=proyecto.id) }}" >{{ proyecto.nombre|e }}</a></SPAN></TD>
-					</TR>
-						{% else %}
-  					<TR>
-						<em>Sin registro de proyectos</em>
-					</TR>
-						{% endfor %}
+				<p></p>
+				<p></p>
+				<ul>
+    				{% for proyecto in proyectos %}
+    					<li><a href="{{ url_for('proyectoActual', pyo=proyecto.id) }}" >{{ proyecto.nombre|e }}</a></li>
+    				{% endfor -%}
+  				</ul>
 				</div>
 			</div>
 		</div>
