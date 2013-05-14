@@ -13,6 +13,7 @@ from des.mod.LbItem import LbItem
 from ges.mod.LineaBase import LineaBase
 from des.mod.ItemAtributo import ItemAtributo
 from des.mod.Atributo import Atributo
+from des.mod.TItemAtributo import TItemAtributo
 #from ges.mod.Relacion  import Relacion
 #from ges.mod.TipoRelacion import TipoRelacion
 import flask, flask.views
@@ -20,6 +21,9 @@ from sqlalchemy.exc import DatabaseError
 from UserPermission import *
 import os
 import datetime
+import psycopg2 
+
+
 
 fase_global= None;
 tipo_global = None; 
@@ -63,30 +67,49 @@ def listatipoitem():
 @app.route('/item/nuevoitem', methods=['GET', 'POST'])
 def nuevoitem():
     today = datetime.date.today()
+   # atributo = db_session.query(Atributo).from_statement(" select a.* from tipo_item ti , titem_atributo ta, atributo a "+
+   #                                                     " where ti.id = ta.id_tipo_item and a.id = ta.id_atributo and ti.id=  " +str(request.args.get('id_tipo')) )
+    atributo = db_session.query(Atributo).join(TItemAtributo , TItemAtributo.id_atributo == Atributo.id).join(TipoItem, TipoItem.id == TItemAtributo.id_tipo_item).filter(TipoItem.id == request.args.get('id_tipo')).all()
+    
     form = ItemFormulario(request.form)
     init_db(db_session)    
     form.usuario.data = session['user_id']    
-    atributo = db_session.query(Atributo).from_statement(" select a.* from tipo_item ti , titem_atributo ta, atributo a "+
-                                                        " where ti.id = ta.id_tipo_item and a.id = ta.id_atributo and ti.id=  " +str(request.args.get('id_tipo')) )
+    
+    
     form.version.data= 1    
     form.fecha.data= today   
     if request.method != 'POST':   
         global tipo_global
         tipo_global=  request.args.get('id_tipo') 
+        
     if request.method == 'POST' and form.validate():
         try:
-            atributo = db_session.query(Atributo).from_statement(" select a.* from tipo_item ti , titem_atributo ta, atributo a "+
-                                                        " where ti.id = ta.id_tipo_item and a.id = ta.id_atributo and ti.id=  " +str(tipo_global) )
+            #atributo = db_session.query(Atributo).from_statement(" select a.* from tipo_item ti , titem_atributo ta, atributo a "+
+            #                                            " where ti.id = ta.id_tipo_item and a.id = ta.id_atributo and ti.id=  " +str(tipo_global) )
+            atributo = db_session.query(Atributo).join(TItemAtributo , TItemAtributo.id_atributo == Atributo.id).join(TipoItem, TipoItem.id == TItemAtributo.id_tipo_item).filter(TipoItem.id == tipo_global).all()
     
+            
+            #f=open(form.archivo.data ,'rb')
+            #fb= f.read()
+            #arch = request.FILES[form.archivo.name].read()
+            # open(os.path.join(UPLOAD_PATH, form.archivo.data), 'w').write(arch)
+           
+            f = open("/home/raquel/Descargas/"+form.archivo.data, 'rb')
+            binary = f.read()
+            #archivo=file(form.archivo.data,'rb').read()
+            
+           # archivo=PgSQL.PgBytea(archivo)
             item = Item(form.codigo.data, form.nombre.data, form.descripcion.data, 
                     form.estado.data, form.complejidad.data, form.fecha.data, form.costo.data, 
-                    form.usuario.data , form.version.data, fase_global , tipo_global )
+                    form.usuario.data , form.version.data, fase_global , tipo_global, binary )
             db_session.add(item)
-            db_session.commit()
+            db_session.commit() 
+            #psycopg2.Binary(form.archivo.data) 
+            
             try:
                 if atributo != None:
                     for atr in atributo:
-                        valor =  request.form[atr.nombre]                  
+                        valor =  request.form[atr.nombre]                                           
                         ia= ItemAtributo(valor, item.id, atr.id)
                         db_session.add(ia)
                         db_session.commit()
@@ -102,7 +125,7 @@ def nuevoitem():
                 return render_template('item/nuevoitem.html', form=form, att=atributo)
     else:
         flash_errors(form) 
-    return render_template('item/nuevoitem.html', form=form,att=atributo)
+    return render_template('item/nuevoitem.html', form=form, att=atributo)
 
 
 """Funcion que permite realizar busqueda de items"""
@@ -191,7 +214,7 @@ def editaritem():
     
             item = Item(form.codigo.data, form.nombre.data, form.descripcion.data, 
                     estado_global, form.complejidad.data, form.fecha.data, form.costo.data, 
-                    form.usuario.data , form.version.data, fase_global , tipo_global )
+                    form.usuario.data , form.version.data, fase_global , tipo_global , None)
             
             db_session.add(item)
             db_session.commit()
@@ -236,7 +259,7 @@ def eliminaritem():
         if item.estado == 'A' :
             items = Item(item.codigo, item.nombre, item.descripcion, 
                      'P' , item.complejidad, today, item.costo, 
-                    session['user_id']  , item.version +1 , item.id_fase , item.id_tipo_item )       
+                    session['user_id']  , item.version +1 , item.id_fase , item.id_tipo_item, None )       
             init_db(db_session)
             db_session.add(items)
             db_session.commit()
@@ -251,7 +274,7 @@ def eliminaritem():
             
         items = Item(item.codigo, item.nombre, item.descripcion, 
                     'E', item.complejidad, today, item.costo, 
-                    session['user_id']  , item.version+1 , item.id_fase , item.id_tipo_item )
+                    session['user_id']  , item.version+1 , item.id_fase , item.id_tipo_item , None)
         
         init_db(db_session)
         db_session.add(items)
@@ -333,7 +356,7 @@ def reversionaritem():
             
             item_aux = Item(form.codigo.data, form.nombre.data, form.descripcion.data, 
                     'R', form.complejidad.data, today, form.costo.data, 
-                     session['user_id']  , maxversionitem.version + 1 , fase_global , tipo_global )
+                     session['user_id']  , maxversionitem.version + 1 , fase_global , tipo_global, None )
             
             db_session.add(item_aux)
             db_session.commit()
@@ -422,7 +445,7 @@ def reviviritem():
                 
             item = Item(item_aux.codigo, item_aux.nombre, item_aux.descripcion, 
                     'R', item_aux.complejidad, today, item_aux.costo, 
-                     session['user_id']  , form.version.data + 1 , fase_global , tipo_global )
+                     session['user_id']  , form.version.data + 1 , fase_global , tipo_global, None )
             db_session.add(item)
             db_session.commit()
             if atributo != None:
@@ -473,5 +496,4 @@ def page_not_found(error):
 def shutdown_session(response):
     db_session.remove()
     return response
-
 

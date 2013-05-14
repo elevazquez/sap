@@ -1,4 +1,4 @@
-from wtforms import Form, TextField, validators, IntegerField, SelectField, DateField
+from wtforms import Form, TextField, validators, IntegerField, SelectField, DateField, FileField
 from adm.mod.Usuario import  Usuario
 from des.mod.Fase import Fase
 from des.mod.TipoItem import TipoItem
@@ -20,11 +20,20 @@ class ItemFormulario(Form):
     costo = IntegerField('Costo', [validators.Required()]) 
     version = IntegerField('Version', [validators.Required()]) 
     usuario = IntegerField('Usuario', [validators.Required()]) 
+    archivo=  FileField('Adjuntar Archivo')
     #fase = SelectField('Fase', choices=[(f.id,f.nombre) for f in db_session.query(Fase).order_by(Fase.nombre).all()], coerce=int)   
     #tipo_item = SelectField('Tipo Item', choices=[(f.id, f.nombre) for f in db_session.query(TipoItem).order_by(TipoItem.nombre).all()],coerce=int) 
    
    # archivo= bytearray('Archivo',[validators.Required()] )
    # mime= TextField('Mime',[validators.Length(min=2, max=15), validators.Required()])
-    
-    
+   
+#    def checkfile(form,field):
+#        if field.data:
+#            filename=field.data.lower()
+#            ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif','pdf','doc','odt','txt'])
+#            if not ('.' in filename and filename.rsplit('.',1)[1] in ALLOWED_EXTENSIONS):
+#                raise ValidationError('Wrong Filetype, you can upload only png,jpg,jpeg,gif files')
+#        else:
+#            raise ValidationError('field not Present') # I added this justfor some debugging.
+#    
     
