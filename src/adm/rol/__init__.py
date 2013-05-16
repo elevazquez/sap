@@ -102,13 +102,14 @@ def administrarrol():
 
 @app.route('/rol/asignarpermiso', methods=['GET', 'POST'])
 def asignarpermiso():
+    idrol = request.args.get('idrol')
     if request.method == 'POST':
         permisos=request.form.getlist('permisos')
-        for p in request.form.getlist('permisos') :
-            permiso = RolPermiso(None, None)
-            db_session.add()
+        for p in permisos :
+            rolper = RolPermiso(idrol, p)
+            db_session.add(rolper)
         return redirect('/administrarrol')
-    return redirect(url_for('administrarpermiso', isAdministrar = False))
+    return redirect(url_for('administrarpermiso', isAdministrar = False, idrol = idrol))
 
 """Lanza un mensaje de error en caso de que la pagina solicitada no exista"""
 @app.errorhandler(404)

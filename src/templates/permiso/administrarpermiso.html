@@ -38,6 +38,7 @@
 	{% endwith %}
 	{% if not isAdministrar %}
 	<form id=buscar method=post action="/rol/asignarpermiso">
+		<input type="text" hidden="true" value="{{ idrol }}" name="rol"/>
 	{% endif %}
 	<table id="tablapermisos" border="1">
 		<TR>
