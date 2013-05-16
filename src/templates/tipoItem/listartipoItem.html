@@ -3,6 +3,17 @@
 <div class="primary">
 <div >
 <h1>Importar Tipo Item</h1>
+<form id=buscartipoItem method=get action="/tipoItem/buscartipoItem2">
+			<input type="text" name="patron" /> 
+			<select name=parametro>
+				<option value="codigo">Código</option>
+				<option value="nombre">Nombre</option>
+				<option value="descripcion">Descripción</option>				
+				<option value="id_fase">Fase</option>
+			</select> 
+			<input type=submit name="Buscar" value=Buscar /> 
+			<input type="button" value="Cancelar"  onClick="document.location.href='{{ url_for( 'administrartipoItem' ) }}';"> 			
+</form>
 <p></p>
 {% with errors = get_flashed_messages(category_filter=["info"]) %}
 {% if errors %}

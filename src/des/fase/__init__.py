@@ -122,13 +122,32 @@ def buscarfase():
     init_db(db_session)
     if valor == "" : 
         p = db_session.query(Fase).filter_by(id_proyecto=session['pry']).order_by(Fase.nro_orden)
-    elif parametro == 'nro_orden' or parametro == 'id_proyecto':
+    elif parametro == 'nro_orden' :
         p = db_session.query(Fase).from_statement("SELECT * FROM fase where to_char("+parametro+", '99999') ilike '%"+valor+"%' and id_proyecto='"+session['pry']+"'").all()
+    elif parametro == 'id_proyecto':
+        p = db_session.query(Fase).from_statement("SELECT * FROM fase where id_proyecto='"+session['pry']+"' and "+parametro+" in (SELECT id FROM proyecto where nombre ilike '%"+valor+"%')").all()
     elif parametro == 'fecha_inicio' or parametro == 'fecha_fin':
         p = db_session.query(Fase).from_statement("SELECT * FROM fase where to_char("+parametro+", 'YYYY-mm-dd') ilike '%"+valor+"%' and id_proyecto='"+session['pry']+"'").all()
     else:
         p = db_session.query(Fase).from_statement("SELECT * FROM fase where "+parametro+" ilike '%"+valor+"%' and id_proyecto='"+session['pry']+"'").all()
     return render_template('fase/administrarfase.html', fases = p)
+
+@app.route('/fase/buscarfase2', methods=['GET', 'POST'])
+def buscarfase2():
+    valor = request.args['patron']
+    parametro = request.args['parametro']
+    init_db(db_session)
+    if valor == "" : 
+        p = db_session.query(Fase).order_by(Fase.nro_orden)
+    elif parametro == 'nro_orden' :
+        p = db_session.query(Fase).from_statement("SELECT * FROM fase where to_char("+parametro+", '99999') ilike '%"+valor+"%' ").all()
+    elif parametro == 'id_proyecto':
+        p = db_session.query(Fase).from_statement("SELECT * FROM fase where "+parametro+" in (SELECT id FROM proyecto where nombre ilike '%"+valor+"%')").all()
+    elif parametro == 'fecha_inicio' or parametro == 'fecha_fin':
+        p = db_session.query(Fase).from_statement("SELECT * FROM fase where to_char("+parametro+", 'YYYY-mm-dd') ilike '%"+valor+"%' ").all()
+    else:
+        p = db_session.query(Fase).from_statement("SELECT * FROM fase where "+parametro+" ilike '%"+valor+"%' ").all()
+    return render_template('fase/listarfase.html', fases2 = p)
 
 @app.route('/fase/administrarfase')
 def administrarfase():

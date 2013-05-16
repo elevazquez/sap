@@ -3,6 +3,20 @@
 <div class="primary">
 <div >
 <h1>Importar Fases</h1>		
+<form id=buscar method=get action="/fase/buscarfase2">
+			<input type="text" name="patron" /> 
+			<select name=parametro>
+				<option value="nro_orden">Número</option>
+				<option value="nombre">Nombre</option>
+				<option value="descripcion">Descripción</option>
+				<option value="estado">Estado</option>
+				<option value="fecha_inicio">Fecha Inicio</option>
+				<option value="fecha_fin">Fecha Fin</option>
+				<option value="id_proyecto">Proyecto</option>
+			</select> 
+			<input type=submit name="Buscar" value=Buscar />
+			<input type="button" value="Cancelar"  onClick="document.location.href='{{ url_for( 'administrarfase' ) }}';"> 
+</form>
 <p></p>
 {% with errors = get_flashed_messages(category_filter=["info"]) %}
 {% if errors %}

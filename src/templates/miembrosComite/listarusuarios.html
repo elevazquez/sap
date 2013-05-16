@@ -3,6 +3,16 @@
 <div class="primary">
 <div >
 <h1>Asignar Usuario</h1>		
+<form id=buscar method=get action="/miembrosComite/buscarmiembrosComite2">
+			<input type="text" name="patron" /> 
+			<select name=parametro>
+				<option value="usuario">Usuario</option>
+				<option value="nombre">Nombre</option>
+				<option value="apellido">Apellido</option>
+			</select> 
+			<input type=submit name="Buscar" value=Buscar /> 			
+	  		<input type="button" value="Cancelar"  onClick="document.location.href='{{ url_for( 'administrarmiembrosComite' ) }}';"> 
+</form>
 <p></p>
 {% with errors = get_flashed_messages(category_filter=["info"]) %}
 {% if errors %}

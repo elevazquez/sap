@@ -52,21 +52,6 @@ def nuevomiembrosComite():
     if request.method == 'POST' and form.validate():
         init_db(db_session)
         try:
-#            re = db_session.query(Recurso).filter_by(id_proyecto=pro.id).filter_by(nombre=pro.nombre).first()  
-#            if re == None :
-#                re = Recurso(pro.nombre, pro.id)
-#                db_session.add(re)
-#                db_session.commit()
-#            per = db_session.query(Permiso).filter_by(id_recurso=re.id).filter_by(codigo='CONSULTAR PROYECTO').first()
-#            if per == None :
-#                per = Permiso('CONSULTAR PROYECTO', 'CONSULTAR PROYECTO', re.id)
-#                db_session.add(per)
-#                db_session.commit()
-#            rp = db_session.query(RolPermiso).filter_by(id_rol=r.id).filter_by(id_permiso=per.id).first()
-#            if rp == None :
-#                rp = RolPermiso(r.id, per.id)
-#                db_session.add(rp)
-#                db_session.commit()
             miembrosComite = MiembrosComite(pro.id, usuario.id)
             db_session.add(miembrosComite)
             db_session.commit()
@@ -117,9 +102,20 @@ def buscarmiembrosComite():
     init_db(db_session)
     if valor == "" : 
         p = db_session.query(MiembrosComite).filter_by(id_proyecto=session['pry'])
-    elif parametro == 'id_usuario' :
-        p = db_session.query(MiembrosComite).from_statement("SELECT * FROM miembros_comite where to_char("+parametro+", '99999') ilike '%"+valor+"%' and id_proyecto='"+session['pry']+"'").all()
+    else :
+        p = db_session.query(MiembrosComite).from_statement("SELECT * FROM miembros_comite where id_usuario in (SELECT id FROM usuario where "+parametro+" ilike '%"+valor+"%') and id_proyecto='"+session['pry']+"'").all() 
     return render_template('miembrosComite/administrarmiembrosComite.html', miembrosComites = p)
+
+@app.route('/miembrosComite/buscarmiembrosComite2', methods=['GET', 'POST'])
+def buscarmiembrosComite2():
+    valor = request.args['patron']
+    parametro = request.args['parametro']
+    init_db(db_session)
+    if valor == "" : 
+        p = db_session.query(Usuario).from_statement("select * from usuario where id not in (select id_usuario from miembros_comite where id_proyecto='"+session['pry']+"')").all()
+    else :
+        p = db_session.query(Usuario).from_statement("select * from usuario where "+parametro+" ilike '%"+valor+"%' and id not in (select id_usuario from miembros_comite where id_proyecto='"+session['pry']+"')").all() 
+    return render_template('miembrosComite/listarusuarios.html', usuarios = p)
 
 @app.route('/miembrosComite/administrarmiembrosComite')
 def administrarmiembrosComite():

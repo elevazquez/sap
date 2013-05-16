@@ -17,7 +17,9 @@
 <form id=buscar method=get action="/miembrosComite/buscarmiembrosComite">
 			<input type="text" name="patron" /> 
 			<select name=parametro>
-				<option value="id_usuario">Id Usuario</option>
+				<option value="usuario">Usuario</option>
+				<option value="nombre">Nombre</option>
+				<option value="apellido">Apellido</option>
 			</select> 
 			<input type=submit name="Buscar" value=Buscar /> 			
 		<a href="{{ url_for('listarusuarios') }}" ><img src="../static/images/a.png" alt="Asignar" height="30" width="30" title="Asignar" ></a>

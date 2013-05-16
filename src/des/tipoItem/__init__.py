@@ -131,7 +131,7 @@ def buscartipoItem():
     if valor == "" : 
         administrartipoItem()
     if parametro == 'id_fase':
-        ti = db_session.query(TipoItem).from_statement("SELECT t.* FROM tipo_item t, fase f where lower(f.nombre)  ilike lower('%"+valor+"%') and t.id_fase= f.id").all()
+        ti = db_session.query(TipoItem).from_statement("SELECT * FROM tipo_item where "+parametro+" in (SELECT id FROM fase where nombre ilike '%"+valor+"%' and id_proyecto='"+session['pry']+"')").all()
     else:
         ti = db_session.query(TipoItem).from_statement("SELECT * FROM tipo_item where "+parametro+" ilike '%"+valor+"%'").all()
     return render_template('tipoItem/administrartipoItem.html', tipoItems = ti)    
@@ -142,6 +142,26 @@ def buscartipoItem():
     if r == None:
         return 'no existe concordancia'
     return render_template('tipoItem/administrartipoItem.html', tipoItems = r)
+
+@app.route('/tipoItem/buscartipoItem2', methods=['GET', 'POST'])
+def buscartipoItem2():
+    valor = request.args['patron']
+    parametro = request.args['parametro']
+    init_db(db_session)
+    if valor == "" : 
+        administrartipoItem()
+    if parametro == 'id_fase':
+        ti = db_session.query(TipoItem).from_statement("SELECT * FROM tipo_item where "+parametro+" in (SELECT id FROM fase where nombre ilike '%"+valor+"%' )").all()
+    else:
+        ti = db_session.query(TipoItem).from_statement("SELECT * FROM tipo_item where "+parametro+" ilike '%"+valor+"%'").all()
+    return render_template('tipoItem/listartipoItem.html', tipoItems2 = ti)    
+    
+    valor = request.args['patron']
+    init_db(db_session)
+    r = db_session.query(TipoItem).filter_by(nombre=valor)
+    if r == None:
+        return 'no existe concordancia'
+    return render_template('tipoItem/listartipoItem.html', tipoItems2 = r)
 
 @app.route('/tipoItem/administrartipoItem')
 def administrartipoItem():

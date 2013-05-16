@@ -221,8 +221,10 @@ def buscarproyecto():
     init_db(db_session)
     if valor == "" : 
         administrarproyecto()
-    if parametro == 'cant_miembros' or parametro == 'id_usuario_lider':
+    if parametro == 'cant_miembros' :
         p = db_session.query(Proyecto).from_statement("SELECT * FROM proyecto where to_char("+parametro+", '99999') ilike '%"+valor+"%'").all()
+    elif parametro == 'id_usuario_lider':
+        p = db_session.query(Proyecto).from_statement("SELECT * FROM proyecto where "+parametro+" in (SELECT id FROM usuario where nombre ilike '%"+valor+"%' or apellido ilike '%"+valor+"%')").all()
     elif parametro == 'fecha_inicio' or parametro == 'fecha_fin':
         p = db_session.query(Proyecto).from_statement("SELECT * FROM proyecto where to_char("+parametro+", 'YYYY-mm-dd') ilike '%"+valor+"%'").all()
     else:
