@@ -19,6 +19,9 @@
 			<option value="descripcion">descripcion</option>
 			<option value="id_recurso">recurso</option>
 		</select> 
+		{% if not isAdministrar %}
+		<input type="text" hidden="true" name="rol" value="{{ idrol }}"/>
+		{% endif %}
 		<input type=submit name="Buscar" value=Buscar /> 
 		<a href="{{ url_for('nuevopermiso') }}"><img
 			src="../static/images/a.png" alt="Agregar" height="30" width="30"
@@ -27,7 +30,7 @@
 	{% with infos = get_flashed_messages(category_filter=["info"]) %} {%
 		if infos %}
 			<div class="block-message">
-				<a class="close" href="{{ url_for( 'administrarpermiso' ) }}"
+				<a class="close" href="{{ url_for( 'administrarpermiso', value = True ) }}"
 					dir="rtl">×</a>
 					<ul>
 						{%- for msg in infos %}
@@ -37,8 +40,8 @@
 		{% endif %} 
 	{% endwith %}
 	{% if not isAdministrar %}
-	<form id=buscar method=post action="/rol/asignarpermiso">
-		<input type="text" hidden="true" name="rol" value="{{ idrol }}"/>
+	<form id=asignarPermisos method=post action="/rol/asignarpermiso">
+		<input type="text" hidden="true" name="idrol" value="{{ idrol }}"/>
 	{% endif %}
 	<table id="tablapermisos" border="1">
 		<TR>

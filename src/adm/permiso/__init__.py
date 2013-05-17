@@ -71,6 +71,7 @@ def eliminarpermiso():
 def buscarpermiso():
     valor = request.args['patron']
     parametro = request.args['parametro']
+    idrol =request.form.get('rol')
     init_db(db_session)
     if valor=='' or valor == None:
         return administrarpermiso()
@@ -81,22 +82,28 @@ def buscarpermiso():
         else:
             p = db_session.query(Permiso).from_statement("SELECT * FROM permiso where "+parametro+" ilike '%"+valor+"%'").all()
     #p = db_session.query(Permiso).filter(Permiso.codigo.like('%'+valor+'%'))
-        return render_template('permiso/administrarpermiso.html', permisos = p)
+    if idrol != '' and idrol != None:
+        yourPermiso=getPermisosByRol(idrol)
+        lista = []
+        for per in yourPermiso:
+            lista.append(per)
+        return render_template('permiso/administrarpermiso.html', permisos = p, isAdministrar = False, idrol = idrol, asignados = lista)
+    return render_template('permiso/administrarpermiso.html', permisos = p, isAdministrar = True)
 
 @app.route('/permiso/administrarpermiso')
 def administrarpermiso():
-    valor = request.args.get('value')
+    isAdmin = request.args.get('value')
     rol = request.args.get('idrol')
     permisos = db_session.query(Permiso).order_by(Permiso.id)
     lista = []
-    if not valor :
+    if not isAdmin :
         #=======================================================================
-        # en esta lista se inserta los permisos que sestan asignados a un rol
+        # en esta lista se inserta los permisos que estan asignados a un rol
         #=======================================================================
         yourPermiso=getPermisosByRol(rol)
         for p in yourPermiso:
             lista.append(p)
-    return render_template('permiso/administrarpermiso.html', permisos = permisos, isAdministrar = valor, idrol = rol, asignados = lista)
+    return render_template('permiso/administrarpermiso.html', permisos = permisos, isAdministrar = isAdmin, idrol = rol, asignados = lista)
 
 """Lanza un mensaje de error en caso de que la pagina solicitada no exista"""
 @app.errorhandler(404)
