@@ -8,6 +8,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 from adm.mod.Proyecto import Proyecto
 from des.mod.Fase import Fase
 from des.mod.TipoItem import TipoItem
+from des.mod.Item import Item
 from des.fase.FaseFormulario import FaseFormulario
 import flask, flask.views
 import os
@@ -40,6 +41,7 @@ def nuevafase():
         form.nro_orden.default = 1
     pro = db_session.query(Proyecto).filter_by(id=session['pry']).first()
     form.id_proyecto.data = pro.nombre
+    form.estado.data = 'Inicial'
     if pro.estado != 'N' :
         flash('No se pueden agregar Fases al Proyecto','info')
         return render_template('fase/administrarfase.html') 
@@ -50,14 +52,17 @@ def nuevafase():
             return render_template('fase/nuevafase.html', form=form) 
         try:
             fase = Fase(form.nro_orden.data, form.nombre.data, form.descripcion.data, 
-                    form.estado.data, form.fecha_inicio.data, 
+                    'I', form.fecha_inicio.data, 
                     form.fecha_fin.data, pro.id)
             db_session.add(fase)
             db_session.commit()
             flash('La fase ha sido registrada con exito','info')
             return redirect('/fase/administrarfase')
         except DatabaseError, e:
-            flash('Error en la Base de Datos' + e.args[0],'error')
+            if e.args[0].find('duplicate key value violates unique')!=-1:
+                flash('Clave unica violada por favor ingrese otro NUMERO de Fase' ,'error')
+            else:
+                flash('Error en la Base de Datos' + e.args[0],'error')
             return render_template('fase/nuevafase.html', form=form)
     else:
         flash_errors(form)  
@@ -71,16 +76,35 @@ def editarfase():
     form = FaseFormulario(request.form,f)
     fase = db_session.query(Fase).filter_by(nro_orden=form.nro_orden.data).filter_by(id_proyecto=pro.id).first()  
     form.id_proyecto.data = pro.nombre
+    if fase.estado=='I':
+        form.estado.data='Inicial'
+    elif fase.estado=='P':
+        form.estado.data='En Progreso'
+    elif fase.estado=='L':
+        form.estado.data='En Linea Base'
+    elif fase.estado=='A':
+        form.estado.data='Aprobado'
     if pro.estado != 'N' :
         flash('No se pueden modificar Fases del Proyecto','info')
-        return render_template('fase/administrarfase.html') 
+        return render_template('fase/administrarfase.html')
+    if fase.estado != 'I' :
+        flash('No se pueden modificar Fases que no se encuentren en estado Inicial','info')
+        return render_template('fase/administrarfase.html')  
     if request.method == 'POST' and form.validate():
         if form.fecha_inicio.data > form.fecha_fin.data :
             flash('La fecha de inicio no puede ser mayor que la fecha de finalizacion','error')
-            return render_template('fase/editarfase.html', form=form) 
+            return render_template('fase/editarfase.html', form=form)
         try:
             form.populate_obj(fase)
             fase.id_proyecto = pro.id
+            if form.estado.data=='Inicial':
+                fase.estado='I'
+            elif form.estado.data=='En Progreso':
+                fase.estado='P'
+            elif form.estado.data=='En Linea Base':
+                fase.estado='L'
+            elif form.estado.data=='Aprobado':
+                fase.estado='A' 
             db_session.merge(fase)
             db_session.commit()
             return redirect('/fase/administrarfase')
@@ -102,6 +126,9 @@ def eliminarfase():
     ti = db_session.query(TipoItem).filter_by(id_fase=f.id).first()
     if ti != None :
         flash('No se pueden eliminar la Fase esta asociada al Tipo Item ' + ti.nombre,'info')
+        return render_template('fase/administrarfase.html')  
+    if f.estado != 'I' :
+        flash('No se pueden eliminar Fases que no se encuentren en estado Inicial','info')
         return render_template('fase/administrarfase.html')  
     try:
         nro = request.args.get('nro')
@@ -172,6 +199,7 @@ def importarfase():
     form.id_proyecto.data = pro.nombre
     n = db_session.query(func.max(Fase.nro_orden, type_=Integer)).filter_by(id_proyecto=session['pry']).scalar()
     form.nro_orden.default = n + 1
+    form.estado.data = 'Inicial'
     if pro.estado != 'N' :
         flash('No se pueden importar Fases al Proyecto','info')
         return render_template('fase/administrarfase.html') 
@@ -182,7 +210,7 @@ def importarfase():
             return render_template('fase/importarfase.html', form=form) 
         try:
             fase = Fase(form.nro_orden.data, form.nombre.data, form.descripcion.data, 
-                    form.estado.data, form.fecha_inicio.data, 
+                    'I', form.fecha_inicio.data, 
                     form.fecha_fin.data, pro.id)
             db_session.add(fase)
             db_session.commit()
@@ -195,6 +223,37 @@ def importarfase():
         flash_errors(form)  
     return render_template('fase/importarfase.html', form=form)
 
+@app.route('/fase/finalizarfase')
+def finalizarfase():
+    init_db(db_session)
+    nro = request.args.get('nro')
+    fase = db_session.query(Fase).filter_by(nro_orden=nro).filter_by(id_proyecto=session['pry']).first()  
+    items = db_session.query(Item).from_statement("SELECT * FROM item WHERE id_fase='"+str(fase.id)+"'").all()
+    f='S'
+    if items==None:
+        flash('La fase no posee items relacionados','info')
+        return redirect('/fase/administrarfase')
+    for it in items:
+        if it.estado != 'B' :
+            f='N'
+    if f=='N':
+        flash('La fase no puede ser finalizada algun item no se encuentra en Linea Base','info')
+        return redirect('/fase/administrarfase')
+    else :
+        try:
+           # form.populate_obj(fase)
+            fase.estado = 'A'
+            db_session.merge(fase)
+            db_session.commit()
+            flash('La fase ha sido finalizada con exito','info')
+            return redirect('/fase/administrarfase')
+        except DatabaseError, e:
+            flash('Error en la Base de Datos' + e.args[0],'error')
+            return redirect('/fase/administrarfase')
+        
+        flash('La fase ha sido finalizada con exito','info')
+        return redirect('/fase/administrarfase')
+    
 """Lanza un mensaje de error en caso de que la pagina solicitada no exista"""
 @app.errorhandler(404)
 def page_not_found(error):

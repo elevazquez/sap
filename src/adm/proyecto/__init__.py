@@ -92,7 +92,10 @@ def nuevoproyecto():
             flash('El Proyecto ha sido registrado con exito','info')
             return redirect('/proyecto/administrarproyecto')
         except DatabaseError, e:
-            flash('Error en la Base de Datos' + e.args[0],'error')
+            if e.args[0].find('duplicate key value violates unique')!=-1:
+                flash('Clave unica violada por favor ingrese otro NOMBRE de Proyecto' ,'error')
+            else:
+                flash('Error en la Base de Datos' + e.args[0],'error')
             return render_template('proyecto/nuevoproyecto.html', form=form)
     else:
         flash_errors(form) 

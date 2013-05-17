@@ -19,6 +19,9 @@
 			<option value="descripcion">descripcion</option>
 			<option value="id_recurso">recurso</option>
 		</select> 
+		{% if not isAdministrar %}
+		<input type="text" hidden="true" name="rol" value="{{ idrol }}"/>
+		{% endif %}
 		<input type=submit name="Buscar" value=Buscar /> 
 		<a href="{{ url_for('nuevopermiso') }}"><img
 			src="../static/images/a.png" alt="Agregar" height="30" width="30"
@@ -27,7 +30,7 @@
 	{% with infos = get_flashed_messages(category_filter=["info"]) %} {%
 		if infos %}
 			<div class="block-message">
-				<a class="close" href="{{ url_for( 'administrarpermiso' ) }}"
+				<a class="close" href="{{ url_for( 'administrarpermiso', value = True ) }}"
 					dir="rtl">×</a>
 					<ul>
 						{%- for msg in infos %}
@@ -37,7 +40,8 @@
 		{% endif %} 
 	{% endwith %}
 	{% if not isAdministrar %}
-	<form id=buscar method=post action="/rol/asignarpermiso">
+	<form id=asignarPermisos method=post action="/rol/asignarpermiso">
+		<input type="text" hidden="true" name="idrol" value="{{ idrol }}"/>
 	{% endif %}
 	<table id="tablapermisos" border="1">
 		<TR>
@@ -57,7 +61,20 @@
 					src="../static/images/b.png" alt="Eliminar" height="20" width="20"
 					title="Eliminar" style="vertical-align: middle;"> </a></TD>
 			{% else %}
-				<TD class="c4"> <input type="checkbox" name="permisos" value="{{ permiso.id }}"/> </TD>
+				{% if (asignados|length) > 0 %}
+					{% set exists = [] %}
+					{% for asig in asignados %}
+						{% if permiso.id == asig.id %}
+							{% do exists.append(1) %}
+							<TD class="c4"> <input type="checkbox" name="permisos" value="{{ permiso.id }}" checked="checked"/> </TD>
+						{% endif %}
+					{% endfor %}
+					{% if not exists %}
+						<TD class="c4"> <input type="checkbox" name="permisos" value="{{ permiso.id }}"/> </TD>
+					{% endif %}
+				{% else %}
+					<TD class="c4"> <input type="checkbox" name="permisos" value="{{ permiso.id }}"/> </TD>
+				{% endif %}
 			{% endif %}
 				<TD class="c4" id="codpermiso"><SPAN>{{permiso.codigo|e}}</SPAN></TD>
 				<TD class="c4"><SPAN>{{permiso.descripcion|e}}</SPAN></TD>

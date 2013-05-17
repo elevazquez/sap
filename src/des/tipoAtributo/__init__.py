@@ -42,7 +42,10 @@ def nuevotipoAtributo():
             flash('El Tipo Atributo ha sido registrado con exito','info')
             return redirect('/tipoAtributo/administrartipoAtributo')
         except DatabaseError, e:
-            flash('Error en la Base de Datos' + e.args[0],'error')
+            if e.args[0].find('duplicate key value violates unique')!=-1:
+                flash('Clave unica violada por favor ingrese otro CODIGO para el Tipo de Atributo' ,'error')
+            else:
+                flash('Error en la Base de Datos' + e.args[0],'error')
             return render_template('tipoAtributo/nuevotipoAtributo.html', form=form)
     else:
         flash_errors(form)  

@@ -8,6 +8,7 @@ from adm.mod.Rol import Rol
 from adm.permiso import administrarpermiso
 from adm.rol.RolFormulario import RolFormulario
 from adm.mod.RolPermiso import RolPermiso
+from adm.permiso import getPermisosByRol
 import flask, flask.views
 import os
 
@@ -39,7 +40,10 @@ def add():
             flash('El rol ha sido registrado con exito','info')
             return redirect('/administrarrol') #/listarol
         except DatabaseError, e:
-            flash('Error en la Base de Datos' + e.args[0],'error')
+            if e.args[0].find('duplicate key value violates unique')!=-1:
+                flash('Clave unica violada por favor ingrese otro CODIGO de Rol' ,'error')
+            else:
+                flash('Error en la Base de Datos' + e.args[0],'error')
             return render_template('rol/nuevorol.html', form=form)
     else:
         flash_errors(form) 
@@ -102,13 +106,30 @@ def administrarrol():
 
 @app.route('/rol/asignarpermiso', methods=['GET', 'POST'])
 def asignarpermiso():
+    idrol = request.args.get('idrol')
     if request.method == 'POST':
+        rol = request.form.get('rol')
         permisos=request.form.getlist('permisos')
-        for p in request.form.getlist('permisos') :
-            permiso = RolPermiso(None, None)
-            db_session.add()
+        ps= getPermisosByRol(rol)
+        for per in ps:
+            #===================================================================
+            # Elimina los permisos de los roles que ya no se encuentran seleccionados
+            #===================================================================
+            if not (permisos.count(per.id) > 0) :
+                rp= db_session.query(RolPermiso).filter_by(id_rol=rol, id_permiso=per.id).first()
+                db_session.delete(rp)
+                db_session.commit()
+        #=======================================================================
+        # Inserta los roles permisos seleccionados, si no existe realiza el merge y confirma los cambios
+        #=======================================================================
+        for p in permisos :
+            rolper = RolPermiso(rol, p)
+            exits = db_session.query(RolPermiso).filter_by(id_rol=rol, id_permiso=p).first()
+            if not exits:
+                db_session.merge(rolper)
+                db_session.commit()
         return redirect('/administrarrol')
-    return redirect(url_for('administrarpermiso', isAdministrar = False))
+    return redirect(url_for('administrarpermiso', isAdministrar = False, idrol = idrol))
 
 """Lanza un mensaje de error en caso de que la pagina solicitada no exista"""
 @app.errorhandler(404)

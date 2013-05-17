@@ -61,6 +61,9 @@ def nuevotipoItem():
             flash('El Tipo de Item ha sido registrado con exito','info')
             return redirect('/tipoItem/administrartipoItem') 
         except DatabaseError, e:
+            if e.args[0].find('duplicate key value violates unique')!=-1:
+                flash('Clave unica violada por favor ingrese otro CODIGO de Tipo de Item' ,'error')
+            else:
                 flash('Error en la Base de Datos' + e.args[0],'error')
                 return render_template('tipoItem/nuevotipoItem.html', form=form)
     else:

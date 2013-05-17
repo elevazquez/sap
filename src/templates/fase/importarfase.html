@@ -18,7 +18,7 @@
   			<label>Número</label> <input type="number" name="nro_orden" id="nro_orden" value="{{ form.nro_orden.default }}">
   			<label>Nombre</label> {{ form.nombre() }}
     		<label>Descripción</label> {{ form.descripcion() }}
-    		<label>Estado</label> {{ form.estado() }}
+    		<label>Estado</label><input type="text" name="estado" value="{{ form.estado.data }}" id="estado" readonly="true"/>
     		<label>Fecha Inicio</label><input type="date" name="fecha_inicio" value="{{ form.fecha_inicio.data }}" id="fecha_inicio"/>
     		<label>Fecha Fin</label><input type="date" name="fecha_fin" value="{{ form.fecha_fin.data }}" id="fecha_fin"/>
     		<label>Proyecto</label><input type="text" name="id_proyecto" value="{{ form.id_proyecto.data }}" id="id_proyecto" readonly="true"/>
