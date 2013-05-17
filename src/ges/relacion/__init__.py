@@ -54,8 +54,8 @@ def nuevarelacion():
                 #===============================================================
                 # Obtiene los ordenes de fases a la que pertenece cada item
                 #===============================================================
-                fasePhaAnt = db_session.query(Fase).join(Item, Fase.id == Item.id_fase).filter(Item.codigo == codItem2).first()
-                faseChiSuc = db_session.query(Fase).join(Item, Fase.id == Item.id_fase).filter(Item.codigo == session['itemDuenho']).first()
+                fasePhaAnt = db_session.query(Fase).join(Item, Fase.id == Item.id_fase).filter(Item.id == codItem2).first()
+                faseChiSuc = db_session.query(Fase).join(Item, Fase.id == Item.id_fase).filter(Item.id == session['itemDuenho']).first()
                 #===============================================================
                 # Verifica de que fases son para establecer el tipo de relacion
                 #===============================================================
@@ -73,8 +73,8 @@ def nuevarelacion():
     else:
         items = getItemByProyBefoActFase(codItem)
         session['itemDuenho'] = codItem
-        codItem = db_session.query(Item).filter_by(codigo=codItem).first()
-        return render_template('relacion/nuevarelacionpaso2.html', items = items, idfirstItem = codItem)
+        item = db_session.query(Item).filter_by(id=codItem).first()
+        return render_template('relacion/nuevarelacionpaso2.html', items = items, firstItem = item)
     return render_template('relacion/nuevarelacion.html', items = items)
     #===========================================================================
     # else:
@@ -141,7 +141,7 @@ def shutdown_session(response):
 """ Obtiene los items de un proyecto, para lo cual obtiene el id del proyecto guardado en la session"""
 def getItemByProyecto():
     id_proy =  session['pry']
-    items = db_session.query(Item).from_statement("Select it.*  from item it, "+ 
+    items = db_session.query(Item).from_statement("Select it.id  from item it, "+ 
                         " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id "+
                         " and f.id_proyecto = "+str(id_proy)+"  group by codigo order by 1 ) s "+
                         " where it.codigo = cod and it.version= vermax and it.estado != 'E' " ).all()
@@ -150,7 +150,9 @@ def getItemByProyecto():
 
 def getItemByProyBefoActFase(id_item):
     id_proy = session['pry']
-    fase_actual = db_session.query(Item.id_fase).filter_by(id = id_item)
-    items = db_session.query(Item).join(Fase, Fase.id == Item.id_fase).join(Proyecto, Proyecto.id == Fase.id_proyecto).filter(Proyecto.id == id_proy).filter(Fase.id <= fase_actual).filter(~Item.id.in_(db_session.query(Relacion.id_item).from_statement("SELECT relacion.id_item from relacion where relacion.id_item_duenho = "+ id_item))).filter(~Item.id.in_(db_session.query(Relacion.id_item).from_statement("SELECT relacion.id_item_duenho from relacion where relacion.id_item = "+ id_item))).filter(Item.id != id_item).all()
+    fase_actual = db_session.query(Fase).join(Item, Item.id_fase == Fase.id).filter(Item.id == id_item).first()
+    #print(fase_actual)
+    items = db_session.query(Item).join(Fase, Fase.id == Item.id_fase).join(Proyecto, Proyecto.id == Fase.id_proyecto).filter(Proyecto.id == id_proy).filter(Fase.nro_orden <= fase_actual.nro_orden).filter(~Item.id.in_(db_session.query(Relacion.id_item).from_statement("SELECT relacion.id_item from relacion where relacion.id_item_duenho = "+ id_item))).filter(~Item.id.in_(db_session.query(Relacion.id_item).from_statement("SELECT relacion.id_item_duenho from relacion where relacion.id_item = "+ id_item))).filter(Item.id != id_item).filter(Item.id.in_(db_session.query(Item.id).from_statement("Select it.id  from item it, (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id and f.id_proyecto = "+str(id_proy)+"  group by codigo order by 1 ) s where it.codigo = cod and it.version= vermax and it.estado != 'E' " ))).all()
+    #items = db_session.query(Item).join(Fase, Fase.id == Item.id_fase).join(Proyecto, Proyecto.id == Fase.id_proyecto).filter(Proyecto.id == id_proy).filter(Fase.id <= fase_actual).filter(~Item.id.in_(db_session.query(Relacion.id_item).from_statement("SELECT relacion.id_item from relacion where relacion.id_item_duenho = "+ id_item))).filter(~Item.id.in_(db_session.query(Relacion.id_item).from_statement("SELECT relacion.id_item_duenho from relacion where relacion.id_item = "+ id_item))).filter(Item.id != id_item).all()
     return items
 
