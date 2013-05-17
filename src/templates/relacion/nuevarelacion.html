@@ -16,7 +16,7 @@
 		</TR>
 		{% for item in items %}
 			<TR>
-				<TD class="c4" width="200"><a href="{{ url_for('nuevarelacion', cod_item=item.codigo) }}">Seleccionar</a></TD>
+				<TD class="c4" width="200"><a href="{{ url_for('nuevarelacion', cod_item=item.id) }}">Seleccionar</a></TD>
 				<TD class="c4"><SPAN>{{item.codigo|e}}</SPAN></TD>
 				<TD class="c4"><SPAN>{{item.nombre|e}}</SPAN></TD>
 				<TD class="c4"><SPAN>{{item.descripcion|e}}</SPAN></TD>
