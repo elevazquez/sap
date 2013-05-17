@@ -54,7 +54,7 @@ def flash_errors(form):
 @app.route('/item/listafase', methods=['GET', 'POST'])
 def listafase():   
     init_db(db_session)
-    fases = db_session.query(Fase).from_statement(" select * from fase where id_proyecto = "+str(session['pry'])+" and estado= 'P' order by nro_orden " )
+    fases = db_session.query(Fase).from_statement(" select * from fase where id_proyecto = "+str(session['pry'])+" and estado != 'A' order by nro_orden " )
     return render_template('item/listafase.html', fases = fases)  
     
  
@@ -77,7 +77,7 @@ def nuevoitem():
     atributo = db_session.query(Atributo).join(TItemAtributo , TItemAtributo.id_atributo == Atributo.id).join(TipoItem, TipoItem.id == TItemAtributo.id_tipo_item).filter(TipoItem.id == request.args.get('id_tipo')).all()
     
     form = ItemFormulario(request.form)
-    init_db(db_session)    
+    init_db(db_session)
     form.usuario.data = session['user_id']    
     
     
@@ -112,6 +112,13 @@ def nuevoitem():
             db_session.add(item)
             db_session.commit() 
             #psycopg2.Binary(form.archivo.data)  (psycopg2.Binary(file),) 
+            
+            #cambia el estado de la fase si este es inicial
+            fase= db_session.query(Fase).filter_by(id=item.id_fase).first()  
+            if fase.estado=='I':
+                fase.estado='P'
+                db_session.merge(fase)
+                db_session.commit()   
             
             try:
                 if atributo != None:

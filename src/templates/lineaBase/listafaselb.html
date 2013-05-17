@@ -7,7 +7,7 @@
 {% with errors = get_flashed_messages(category_filter=["info"]) %}
 {% if errors %}
 <div class="block-message">
-  <a class="close" href="{{ url_for( 'listafase' ) }}" dir="rtl">×</a>
+  <a class="close" href="{{ url_for( 'listafaselb' ) }}" dir="rtl">×</a>
   <ul>
     {%- for msg in errors %}
     <li>{{ msg }}</li>
