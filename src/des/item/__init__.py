@@ -324,6 +324,7 @@ def reversionaritem():
     fase_selected= db_session.query(Fase).filter_by(id=request.args.get('fase')).first()      
     tipo_selected= db_session.query(TipoItem).filter_by(id= request.args.get('tipo') ).first()
     estado= request.args.get('es')    
+    enlb= db_session.query(LbItem).filter_by(id_item=request.args.get('id')).first() 
                 
     if request.method != 'POST':        
         form.fase.data= fase_selected.nombre  
@@ -351,9 +352,12 @@ def reversionaritem():
         global estado_global
         estado_global = estado
 
+
+ 
     if request.method == 'POST' and form.validate():
         init_db(db_session)
         try:
+            
             maxversionitem = db_session.query(Item.version).from_statement("select *  from item where codigo = '"+form.codigo.data+"' and version = ( "+ 
                                                                     " select max(version) from item i where i.codigo = '"+form.codigo.data+"' )" ).first()
             
@@ -362,7 +366,7 @@ def reversionaritem():
     
             
             item_aux = Item(form.codigo.data, form.nombre.data, form.descripcion.data, 
-                    'R', form.complejidad.data, today, form.costo.data, 
+                    'V', form.complejidad.data, today, form.costo.data, 
                      session['user_id']  , maxversionitem.version + 1 , fase_global , tipo_global, None )
             
             db_session.add(item_aux)

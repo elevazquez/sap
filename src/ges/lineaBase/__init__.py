@@ -72,8 +72,13 @@ def nuevalineabase():
     form =  LineaBaseFormulario(request.form)
     form.fechaCreacion.data= today
     init_db(db_session)       
-    items = db_session.query(Item).from_statement(" select * from item where id_fase = "+str(request.args.get('id_fase'))+" and (estado = 'A' and estado != 'B') order by codigo " )
+    #items = db_session.query(Item).from_statement(" select i.* from item i where i.id_fase = "+str(request.args.get('id_fase'))+" and (i.estado = 'A' and i.estado != 'B') order by i.codigo " )
      
+    items = db_session.query(Item).from_statement("Select it.*  from item it, "+ 
+                        " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id "+
+                        " and f.id_proyecto = "+str(session['pry'])+"  group by codigo order by 1 ) s "+
+                        " where it.codigo = cod and it.version= vermax and (it.estado = 'A' and it.estado != 'B') and it.id_fase= "+str(request.args.get('id_fase'))+" order by it.codigo " )
+        
     if request.method == 'POST' and form.validate():                
         try:      
             linea = LineaBase( form.descripcion.data, form.estado.data, form.fechaCreacion.data, None)
@@ -114,7 +119,7 @@ def editarlineabase():
     today = datetime.date.today()
     init_db(db_session)   
     lin = db_session.query(LineaBase).filter_by(id=request.args.get('id_linea')).first()  
-    print('antes del post')
+   
     if  request.args.get('id_linea') == None:
         id_linea= request.form.get('id')
     else:
@@ -124,7 +129,7 @@ def editarlineabase():
     form = LineaBaseModifFormulario(request.form,lin) 
     
     linea = db_session.query(LineaBase).filter_by(id= form.id.data).first() 
-    itemslb=  db_session.query(Item).join(LbItem, Item.id== LbItem.id_item).filter(LbItem.id_linea_base== id_linea ).all()   
+    itemslb=  db_session.query(Item).join(LbItem, Item.id== LbItem.id_item).filter(LbItem.id_linea_base== id_linea ).filter(Item.estado=='B').all()   
     item_aux= db_session.query(Item).join(LbItem, Item.id== LbItem.id_item).filter(LbItem.id_linea_base== id_linea).first()   
      
     if estado == 'V':
@@ -159,7 +164,7 @@ def editarlineabase():
                 lbit= LbItem(linea.id, it.id)
                 db_session.add(lbit)
                 db_session.commit()
-                
+            flash('La Linea Base se modifico con Exito','info')   
             return redirect('/lineaBase/administrarlineabase')
         except DatabaseError, e:
             flash('Error en la Base de Datos' + e.args[0],'error')
@@ -180,7 +185,70 @@ def buscarlineabase():
         p = db_session.query(LineaBase).from_statement("SELECT * FROM linea_base where "+parametro+" ilike '%"+valor+"%' ").all()
     return render_template('lineaBase/buscarlineabase.html', fases2 = p)
 
-               
+ 
+"""funcion que permite la liberacion de lineas base"""     
+@app.route('/lineaBase/liberarlineabase', methods=['GET', 'POST'])
+def liberarlineabase():  
+    today = datetime.date.today()
+    init_db(db_session)   
+    lin = db_session.query(LineaBase).filter_by(id=request.args.get('id_linea')).first() 
+    if  request.args.get('id_linea') == None:
+        id_linea= request.form.get('id')
+    else:
+        id_linea=request.args.get('id_linea')
+        
+    estado= request.args.get('estado_linea')    
+    form = LineaBaseModifFormulario(request.form,lin)     
+    linea = db_session.query(LineaBase).filter_by(id= form.id.data).first() 
+    itemslb=  db_session.query(Item).join(LbItem, Item.id== LbItem.id_item).filter(LbItem.id_linea_base== id_linea ).filter(Item.estado=='B').all()   
+   
+    if estado == 'V':
+        form.estado.data = 'Valido'
+    elif estado == 'N':
+        estado.data = 'No Valido'
+    elif estado == 'L':
+        form.estado.data = 'Liberado'
+        
+    form.fecha_creacion.data=  request.args.get('fecha_crea')
+    
+    if request.method == 'POST' and form.validate():        
+        try:  
+            # multiselect = request.form.getlist('selecitems')
+            list_aux=[]
+            #se cambia el estado de los items a Aprobados
+            for i in itemslb :
+                #i = db_session.query(Item).filter_by(id=it).first()    
+                item = Item(i.codigo, i.nombre, i.descripcion, 'A', i.complejidad, today, i.costo, 
+                    session['user_id']  , i.version +1 , i.id_fase , i.id_tipo_item , i.archivo)            
+                db_session.add(item)
+                db_session.commit()
+                list_aux.append(item)
+                
+            #se cambia el estado de la linea base a liberado
+            form.populate_obj(linea)
+            linea.id= form.id.data
+            linea.descripcion= form.descripcion.data
+            linea.estado='L'            
+            linea.fecha_creacion= form.fecha_creacion.data
+            db_session.merge(linea)
+            db_session.commit()
+           
+            #se guarda la linea base junto con los item pertenecientes al mismo          
+            for it in list_aux:
+                lbit= LbItem(linea.id, it.id)
+                db_session.add(lbit)
+                db_session.commit()
+                
+            flash('La Linea Base fue liberada. Todos sus Item se encuentran Aprobados!','info')    
+            return redirect('/lineaBase/administrarlineabase')
+        except DatabaseError, e:
+            flash('Error en la Base de Datos' + e.args[0],'error')
+            return render_template('lineaBase/liberarlineabase.html', form=form, items= itemslb)
+    else:
+        flash_errors(form)
+    return render_template('lineaBase/liberarlineabase.html', form=form, items= itemslb)
+    
+              
 
 @app.route('/lineaBase/administrarlineabase')
 def administrarlineabase():
