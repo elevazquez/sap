@@ -61,7 +61,10 @@ def nuevousuario():
             flash('El Usuario ha sido registrado con exito ','info')
             return redirect('/usuario/administrarusuario')
         except DatabaseError, e:
-            flash('Error en la Base de Datos' + e.args[0],'error')
+            if e.args[0].find('duplicate key value violates unique')!=-1:
+                flash('Clave unica violada por favor ingrese otro USUARIO para el registro' ,'error')
+            else:
+                flash('Error en la Base de Datos' + e.args[0],'error')
             return render_template('usuario/nuevousuario.html', form=form)
     else:
         flash_errors(form) 

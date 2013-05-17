@@ -40,7 +40,10 @@ def add():
             flash('El rol ha sido registrado con exito','info')
             return redirect('/administrarrol') #/listarol
         except DatabaseError, e:
-            flash('Error en la Base de Datos' + e.args[0],'error')
+            if e.args[0].find('duplicate key value violates unique')!=-1:
+                flash('Clave unica violada por favor ingrese otro CODIGO de Rol' ,'error')
+            else:
+                flash('Error en la Base de Datos' + e.args[0],'error')
             return render_template('rol/nuevorol.html', form=form)
     else:
         flash_errors(form) 
