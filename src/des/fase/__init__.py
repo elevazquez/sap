@@ -227,33 +227,42 @@ def importarfase():
 def finalizarfase():
     init_db(db_session)
     nro = request.args.get('nro')
-    fase = db_session.query(Fase).filter_by(nro_orden=nro).filter_by(id_proyecto=session['pry']).first()  
+    fase = db_session.query(Fase).filter_by(nro_orden=nro).filter_by(id_proyecto=session['pry']).first()
+    fase2 = db_session.query(Fase).filter_by(nro_orden=str(fase.nro_orden+1)).filter_by(id_proyecto=session['pry']).first()
     items = db_session.query(Item).from_statement("SELECT * FROM item WHERE id_fase='"+str(fase.id)+"'").all()
+    i = db_session.query(Item).from_statement("SELECT * FROM item WHERE id_fase='"+str(fase.id)+"'").first()
     f='S'
-    if items==None:
+    for it in items:
+        print it.id
+    if fase.estado!='P':
+        flash('La fase no puede ser finalizada, debe estar en estado En Progreso','info')
+        return redirect('/fase/administrarfase')
+    if i==None:
         flash('La fase no posee items relacionados','info')
         return redirect('/fase/administrarfase')
-    for it in items:
-        if it.estado != 'B' :
-            f='N'
-    if f=='N':
-        flash('La fase no puede ser finalizada algun item no se encuentra en Linea Base','info')
-        return redirect('/fase/administrarfase')
     else :
-        try:
-           # form.populate_obj(fase)
-            fase.estado = 'A'
-            db_session.merge(fase)
-            db_session.commit()
-            flash('La fase ha sido finalizada con exito','info')
+        for it in items:
+            if it.estado != 'B' :
+                f='N'
+        if f=='N':
+            flash('La fase no puede ser finalizada algun item no se encuentra en Linea Base','info')
             return redirect('/fase/administrarfase')
-        except DatabaseError, e:
-            flash('Error en la Base de Datos' + e.args[0],'error')
-            return redirect('/fase/administrarfase')
+        else :
+            try:
+                fase.estado = 'A'
+                db_session.merge(fase)
+                db_session.commit()
+            
+                if fase2!=None:
+                    fase2.estado = 'P'
+                    db_session.merge(fase2)
+                    db_session.commit()
+                flash('La fase ha sido finalizada con exito','info')
+                return redirect('/fase/administrarfase')
+            except DatabaseError, e:
+                flash('Error en la Base de Datos' + e.args[0],'info')
+                return redirect('/fase/administrarfase')
         
-        flash('La fase ha sido finalizada con exito','info')
-        return redirect('/fase/administrarfase')
-    
 """Lanza un mensaje de error en caso de que la pagina solicitada no exista"""
 @app.errorhandler(404)
 def page_not_found(error):
