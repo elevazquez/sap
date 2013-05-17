@@ -23,6 +23,11 @@ import os
 import datetime
 import psycopg2 
 
+UPLOAD_FOLDER = '/path/to/the/uploads'
+ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
+
+
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
 fase_global= None;
@@ -49,7 +54,7 @@ def flash_errors(form):
 @app.route('/item/listafase', methods=['GET', 'POST'])
 def listafase():   
     init_db(db_session)
-    fases = db_session.query(Fase).from_statement(" select * from fase where id_proyecto = "+str(session['pry'])+" order by nro_orden " )
+    fases = db_session.query(Fase).from_statement(" select * from fase where id_proyecto = "+str(session['pry'])+" and estado= 'P' order by nro_orden " )
     return render_template('item/listafase.html', fases = fases)  
     
  
@@ -94,17 +99,19 @@ def nuevoitem():
             #arch = request.FILES[form.archivo.name].read()
             # open(os.path.join(UPLOAD_PATH, form.archivo.data), 'w').write(arch)
            
-            f = open("/home/raquel/Descargas/"+form.archivo.data, 'rb')
-            binary = f.read()
-            #archivo=file(form.archivo.data,'rb').read()
-            
-           # archivo=PgSQL.PgBytea(archivo)
+            # f = open(form.archivo.file, 'rb')
+            #binary = f.read()
+            file = request.files['file']
+            #mypic = open(form.archivo.data, 'rb').read()
+            #curs.execute("insert into blobs (file) values (%s)",
+    
+            #archivo=file(form.archivo.data,'rb').read()  
             item = Item(form.codigo.data, form.nombre.data, form.descripcion.data, 
                     form.estado.data, form.complejidad.data, form.fecha.data, form.costo.data, 
-                    form.usuario.data , form.version.data, fase_global , tipo_global, binary )
+                    form.usuario.data , form.version.data, fase_global , tipo_global,  None )
             db_session.add(item)
             db_session.commit() 
-            #psycopg2.Binary(form.archivo.data) 
+            #psycopg2.Binary(form.archivo.data)  (psycopg2.Binary(file),) 
             
             try:
                 if atributo != None:

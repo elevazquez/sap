@@ -14,7 +14,7 @@
 			</div>
 		{% endif %} 
 	{% endwith %}
-	<form id=nuevoitem method=post action="/item/nuevoitem" >
+	<form id=nuevoitem method=post action="/item/nuevoitem" enctype=multipart/form-data >
     		<label>Código</label> {{ form.codigo}}
     		<label>Nombre</label> {{ form.nombre()}}
     		<label>Descripción</label> {{ form.descripcion() }}
@@ -29,7 +29,7 @@
     	{% else %}
 			<p><em>El item no posee atributos</em>
     	{% endfor %}	
-    		<label>Subir Archivo</label> {{ form.archivo() }}
+    		<label>Subir Archivo</label> <input type=file name=file>
     	<p><input type=submit value=Guardar>
   		<input type="button" value="Cancelar"  onClick="document.location.href='{{ url_for( 'administraritem' ) }}';"> 
 	</form>
