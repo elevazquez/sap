@@ -27,13 +27,4 @@ class ItemFormulario(Form):
    # archivo= bytearray('Archivo',[validators.Required()] )
    # mime= TextField('Mime',[validators.Length(min=2, max=15), validators.Required()])
    
-#    def checkfile(form,field):
-#        if field.data:
-#            filename=field.data.lower()
-#            ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif','pdf','doc','odt','txt'])
-#            if not ('.' in filename and filename.rsplit('.',1)[1] in ALLOWED_EXTENSIONS):
-#                raise ValidationError('Wrong Filetype, you can upload only png,jpg,jpeg,gif files')
-#        else:
-#            raise ValidationError('field not Present') # I added this justfor some debugging.
-#    
     

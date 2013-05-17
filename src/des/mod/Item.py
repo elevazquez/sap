@@ -17,7 +17,7 @@ class Item (Base):
     costo = Column('costo', Numeric(10,2))
     archivo= Column('archivo', LargeBinary)
     #archivo = Column('archivo', BYTEA)
-   # mime = Column('mime', String(15), unique=True)
+    # mime = Column('mime', String(15), unique=True)
     version = Column('version', Integer)
     id_usuario = Column(Integer, ForeignKey('usuario.id'))
     usuario = relationship('Usuario', backref=backref('usuariositem', lazy='dynamic'))
@@ -44,7 +44,7 @@ class Item (Base):
         self.archivo= archivo
         
     def __repr__(self):
-        return '<Item %s %s %s %s %i %d %f %s %s  %s %s>' % (self.codigo, self.nombre, self.descripcion, 
+        return '<Item %s %s %s %s %i %d %f %s %s %s %s %s>' % (self.codigo, self.nombre, self.descripcion, 
         self.estado, self.complejidad, self.fecha, self.costo,  self.id_usuario,
         self.version, self.id_fase, self.id_tipo_item, self.archivo)
     
