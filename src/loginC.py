@@ -43,6 +43,7 @@ def get_resource_as_string(name, charset='utf-8'):
         return f.read().decode(charset)
 
 app.jinja_env.globals['get_resource_as_string'] = get_resource_as_string
+app.jinja_env.add_extension('jinja2.ext.do')
 
 db_session = scoped_session(sessionmaker(autocommit=False,
                                          autoflush=False,
