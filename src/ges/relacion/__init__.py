@@ -105,8 +105,10 @@ def eliminarrelacion():
     cod = request.args.get('codigo')
     init_db(db_session)
     relacion = db_session.query(Relacion).filter_by(id=cod).first()
-    db_session.delete(relacion)
+    relacion.estado='E'
+    db_session.merge(relacion)
     db_session.commit()
+    
     return redirect('/relacion/administrarrelacion')
 
 @app.route('/relacion/buscarrelacion', methods=['GET', 'POST'])
