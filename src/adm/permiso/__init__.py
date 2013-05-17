@@ -5,6 +5,7 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from flask import Flask, render_template, request, redirect, url_for, flash 
 from adm.mod.Permiso import Permiso
 from adm.mod.Recurso import Recurso
+from adm.mod.RolPermiso import RolPermiso
 from adm.permiso.PermisoFormulario import PermisoFormulario
 import flask, flask.views
 from UserPermission import *
@@ -87,7 +88,15 @@ def administrarpermiso():
     valor = request.args.get('value')
     rol = request.args.get('idrol')
     permisos = db_session.query(Permiso).order_by(Permiso.id)
-    return render_template('permiso/administrarpermiso.html', permisos = permisos, isAdministrar = valor, idrol = rol)
+    lista = []
+    if not valor :
+        #=======================================================================
+        # en esta lista se inserta los permisos que sestan asignados a un rol
+        #=======================================================================
+        yourPermiso=getPermisosByRol(rol)
+        for p in yourPermiso:
+            lista.append(p)
+    return render_template('permiso/administrarpermiso.html', permisos = permisos, isAdministrar = valor, idrol = rol, asignados = lista)
 
 """Lanza un mensaje de error en caso de que la pagina solicitada no exista"""
 @app.errorhandler(404)
@@ -99,4 +108,8 @@ def page_not_found(error):
 def shutdown_session(response):
     db_session.remove()
     return response
+
+def getPermisosByRol(idrol):
+    yourPermisos = db_session.query(Permiso).join(RolPermiso, RolPermiso.id_permiso == Permiso.id).filter(RolPermiso.id_rol == idrol).all()
+    return yourPermisos
 
