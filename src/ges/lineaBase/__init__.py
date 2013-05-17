@@ -37,11 +37,11 @@ def flash_errors(form):
             
  
 """ Funcion que lista las fases de la cual se escoge una para la creacion de la LB"""     
-@app.route('/lineaBase/listafase', methods=['GET', 'POST'])
-def listafase():   
+@app.route('/lineaBase/listafaselb', methods=['GET', 'POST'])
+def listafaselb():   
     init_db(db_session)
-    fases = db_session.query(Fase).from_statement(" select * from fase where id_proyecto = "+str(session['pry'])+" order by nro_orden " )
-    return render_template('lineaBase/listafase.html', fases = fases)  
+    fases = db_session.query(Fase).from_statement(" select * from fase where id_proyecto = "+str(session['pry'])+" and estado !='I' order by nro_orden " )
+    return render_template('lineaBase/listafaselb.html', fases = fases)  
 
 
 """ Funcion que lista los items posibles a formar parte de una linea base"""     
@@ -87,6 +87,7 @@ def nuevalineabase():
             #listitem= request.form['selecitems']
             multiselect = request.form.getlist('selecitems')
             list_aux=[]
+            
             #se cambia el estado de los items involucrados
             for it in multiselect :
                 i = db_session.query(Item).filter_by(id=it).first()    
@@ -94,7 +95,8 @@ def nuevalineabase():
                     session['user_id']  , i.version +1 , i.id_fase , i.id_tipo_item , i.archivo)            
                 db_session.add(item)
                 db_session.commit()
-                list_aux.append(item)            
+                list_aux.append(item)
+                id_fase= i.id_fase            
             
             #se guarda la linea base junto con los item pertenecientes al mismo          
             for it in list_aux:
@@ -102,7 +104,12 @@ def nuevalineabase():
                 lbit= LbItem(linea.id, it.id)
                 db_session.add(lbit)
                 db_session.commit()
-                
+            
+            fase= db_session.query(Fase).filter_by(id=id_fase).first()  
+            fase.estado='L'
+            db_session.merge(fase)
+            db_session.commit()   
+            
             flash('La Linea Base fue creada con exito','info')            
             return redirect('/lineaBase/administrarlineabase') 
         except DatabaseError, e:
@@ -191,14 +198,16 @@ def buscarlineabase():
 def liberarlineabase():  
     today = datetime.date.today()
     init_db(db_session)   
-    lin = db_session.query(LineaBase).filter_by(id=request.args.get('id_linea')).first() 
+    lin = db_session.query(LineaBase).filter_by(id=request.args.get('id_linea')).first()  
+   
     if  request.args.get('id_linea') == None:
         id_linea= request.form.get('id')
     else:
         id_linea=request.args.get('id_linea')
         
     estado= request.args.get('estado_linea')    
-    form = LineaBaseModifFormulario(request.form,lin)     
+    form = LineaBaseModifFormulario(request.form,lin) 
+    
     linea = db_session.query(LineaBase).filter_by(id= form.id.data).first() 
     itemslb=  db_session.query(Item).join(LbItem, Item.id== LbItem.id_item).filter(LbItem.id_linea_base== id_linea ).filter(Item.estado=='B').all()   
    
@@ -211,44 +220,47 @@ def liberarlineabase():
         
     form.fecha_creacion.data=  request.args.get('fecha_crea')
     
+          
     if request.method == 'POST' and form.validate():        
         try:  
-            # multiselect = request.form.getlist('selecitems')
+           
             list_aux=[]
-            #se cambia el estado de los items a Aprobados
+            #se cambia el estado de los items a ser agregados
+            itemslb=  db_session.query(Item).join(LbItem, Item.id== LbItem.id_item).filter(LbItem.id_linea_base== id_linea ).filter(Item.estado=='B').all()   
+   
             for i in itemslb :
                 #i = db_session.query(Item).filter_by(id=it).first()    
                 item = Item(i.codigo, i.nombre, i.descripcion, 'A', i.complejidad, today, i.costo, 
-                    session['user_id']  , i.version +1 , i.id_fase , i.id_tipo_item , i.archivo)            
+                    session['user_id']  , i.version + 1 , i.id_fase , i.id_tipo_item , i.archivo)            
                 db_session.add(item)
                 db_session.commit()
                 list_aux.append(item)
-                
+             
             #se cambia el estado de la linea base a liberado
-            form.populate_obj(linea)
-            linea.id= form.id.data
-            linea.descripcion= form.descripcion.data
+            #form.populate_obj(linea)
+            
+            #linea.id= form.id.data
+            #linea.descripcion= form.descripcion.data
             linea.estado='L'            
-            linea.fecha_creacion= form.fecha_creacion.data
+            #linea.fecha_creacion= form.fecha_creacion.data
             db_session.merge(linea)
-            db_session.commit()
-           
+            db_session.commit()   
+            
             #se guarda la linea base junto con los item pertenecientes al mismo          
             for it in list_aux:
                 lbit= LbItem(linea.id, it.id)
                 db_session.add(lbit)
                 db_session.commit()
-                
             flash('La Linea Base fue liberada. Todos sus Item se encuentran Aprobados!','info')    
             return redirect('/lineaBase/administrarlineabase')
         except DatabaseError, e:
             flash('Error en la Base de Datos' + e.args[0],'error')
-            return render_template('lineaBase/liberarlineabase.html', form=form, items= itemslb)
+            return render_template('lineaBase/liberarlineabase.html', form=form, itemslb= itemslb )
     else:
         flash_errors(form)
-    return render_template('lineaBase/liberarlineabase.html', form=form, items= itemslb)
+    return render_template('lineaBase/liberarlineabase.html', form=form, itemslb= itemslb )
     
-              
+    
 
 @app.route('/lineaBase/administrarlineabase')
 def administrarlineabase():

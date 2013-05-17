@@ -155,14 +155,15 @@ addLoadEvent(selectMultiple);
 	}
 </style> 
 <form id=liberarlineabase method=post action="/lineaBase/liberarlineabase">
-	<label>Items en la Linea Base:</label>
-<div style="padding: 20px; float: left;">	
-		<select name="selecitems" disabled="true"  multiple="multiple" style="height: 200px; width: 150px">
-			{% for item in items %}
-			<option value="{{ item.id }}"  >{{item.codigo|e}}  {{item.nombre|e}}</option>
+	<label >Items en la Linea Base: </label>
+	
+		<select name="itemenlb" multiple="multiple"  style="height: 200px; width: 150px">
+			{% for itemlb in itemslb %}
+			<option disabled > {{itemlb.codigo|e}}  {{itemlb.nombre|e}}</option>
 			 {% endfor %}
 		</select>		
-</div>	
+    
+    <p></p>	<p></p><p></p>
     <input type="text" name="id" value="{{ form.id.data }}" id="descripcion" hidden="true"/>
     <label>Descripción</label> <input type="text" name="descripcion" value="{{ form.descripcion.data }}" id="descripcion" readonly="true"/>
  	<label>Estado</label><input type="text" name="estado" value="{{ form.estado.data }}" id="estado" readonly="true"/> 
