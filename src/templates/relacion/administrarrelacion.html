@@ -15,9 +15,11 @@
 	<form id=buscar method=get action="/relacion/buscarrelacion">
 		<input type="text" name="patron" /> 
 		<select name=parametro>
-			<option value="codigo">codigo</option>
-			<option value="descripcion">descripcion</option>
-			<option value="id_recurso">recurso</option>
+			<option value="fecha_creacion">Fecha de creación</option>
+			<option value="fecha_modificacion">Fecha de modificación</option>
+			<option value="id_tipo_relacion">Tipo de relación</option>
+			<option value="id_item">Item</option>
+			<option value="id_item_duenho">Item duenho</option>
 		</select> 
 		<input type=submit name="Buscar" value=Buscar /> 
 		<a href="{{ url_for('nuevarelacion') }}"><img
@@ -42,8 +44,8 @@
 			<TH class="c3">Fecha de creación</TH>
 			<TH class="c3">Fecha de modificación</TH>
 			<TH class="c3">Tipo de relación</TH>
-			<TH class="c3">Item nombre</TH>
-			<TH class="c3">Item dueño nombre</TH>
+			<TH class="c3">Item código</TH>
+			<TH class="c3">Item dueño código</TH>
 		</TR>
 		{% for relacion in relaciones %}
 			<TR>
@@ -57,7 +59,7 @@
 				<TD class="c4" id="codrelacion" hidden="true"><SPAN>{{relacion.id|e}}</SPAN></TD>
 				<TD class="c4"><SPAN>{{relacion.fecha_creacion|e}}</SPAN></TD>
 				<TD class="c4"><SPAN>{{relacion.fecha_modificacion|e}}</SPAN></TD>
-				<TD class="c4"><SPAN>{{relacion.tipo_relacion.nombre|e}}</SPAN></TD>
+				<TD class="c4"><SPAN>{{relacion.tipo_relacion.codigo|e}}</SPAN></TD>
 				<TD class="c4"><SPAN>{{relacion.item.codigo|e}}</SPAN></TD>
 				<TD class="c4"><SPAN>{{relacion.item_duenho.codigo|e}}</SPAN></TD>
 			</TR>

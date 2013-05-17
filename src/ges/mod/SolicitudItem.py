@@ -1,6 +1,6 @@
 from sqlalchemy import *
 from sqlalchemy.orm import *
-from com.py.sap.util.database import Base
+from util.database import Base
 
 class SolicitudItem (Base):
     __tablename__ = 'solicitud_item'

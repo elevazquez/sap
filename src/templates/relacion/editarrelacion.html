@@ -14,7 +14,7 @@
 			</div>
 		{% endif %} 
 	{% endwith %}
-	<form id=editarpermiso method=post action="/permiso/editarpermiso">
+	<form id=editarrelacion method=post action="/relacion/editarrelacion">
     		{{ form.codigo.label }} <input type ="text" name="codigo" value="{{ form.codigo.data }}" readonly="true" />
     		{{ form.descripcion.label }} {{ form.descripcion() }}
     		{{ form.id_recurso.label }} {{ form.id_recurso() }}
