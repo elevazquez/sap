@@ -8,6 +8,7 @@ from adm.mod.Rol import Rol
 from adm.permiso import administrarpermiso
 from adm.rol.RolFormulario import RolFormulario
 from adm.mod.RolPermiso import RolPermiso
+from adm.permiso import getPermisosByRol
 import flask, flask.views
 import os
 
@@ -107,10 +108,26 @@ def administrarrol():
 def asignarpermiso():
     idrol = request.args.get('idrol')
     if request.method == 'POST':
+        rol = request.form.get('rol')
         permisos=request.form.getlist('permisos')
+        ps= getPermisosByRol(rol)
+        for per in ps:
+            #===================================================================
+            # Elimina los permisos de los roles que ya no se encuentran seleccionados
+            #===================================================================
+            if not (permisos.count(per.id) > 0) :
+                rp= db_session.query(RolPermiso).filter_by(id_rol=rol, id_permiso=per.id).first()
+                db_session.delete(rp)
+                db_session.commit()
+        #=======================================================================
+        # Inserta los roles permisos seleccionados, si no existe realiza el merge y confirma los cambios
+        #=======================================================================
         for p in permisos :
-            rolper = RolPermiso(idrol, p)
-            db_session.add(rolper)
+            rolper = RolPermiso(rol, p)
+            exits = db_session.query(RolPermiso).filter_by(id_rol=rol, id_permiso=p).first()
+            if not exits:
+                db_session.merge(rolper)
+                db_session.commit()
         return redirect('/administrarrol')
     return redirect(url_for('administrarpermiso', isAdministrar = False, idrol = idrol))
 

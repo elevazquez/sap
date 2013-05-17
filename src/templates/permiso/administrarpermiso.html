@@ -38,7 +38,7 @@
 	{% endwith %}
 	{% if not isAdministrar %}
 	<form id=buscar method=post action="/rol/asignarpermiso">
-		<input type="text" hidden="true" value="{{ idrol }}" name="rol"/>
+		<input type="text" hidden="true" name="rol" value="{{ idrol }}"/>
 	{% endif %}
 	<table id="tablapermisos" border="1">
 		<TR>
@@ -58,7 +58,20 @@
 					src="../static/images/b.png" alt="Eliminar" height="20" width="20"
 					title="Eliminar" style="vertical-align: middle;"> </a></TD>
 			{% else %}
-				<TD class="c4"> <input type="checkbox" name="permisos" value="{{ permiso.id }}"/> </TD>
+				{% if (asignados|length) > 0 %}
+					{% set exists = [] %}
+					{% for asig in asignados %}
+						{% if permiso.id == asig.id %}
+							{% do exists.append(1) %}
+							<TD class="c4"> <input type="checkbox" name="permisos" value="{{ permiso.id }}" checked="checked"/> </TD>
+						{% endif %}
+					{% endfor %}
+					{% if not exists %}
+						<TD class="c4"> <input type="checkbox" name="permisos" value="{{ permiso.id }}"/> </TD>
+					{% endif %}
+				{% else %}
+					<TD class="c4"> <input type="checkbox" name="permisos" value="{{ permiso.id }}"/> </TD>
+				{% endif %}
 			{% endif %}
 				<TD class="c4" id="codpermiso"><SPAN>{{permiso.codigo|e}}</SPAN></TD>
 				<TD class="c4"><SPAN>{{permiso.descripcion|e}}</SPAN></TD>
