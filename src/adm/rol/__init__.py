@@ -108,7 +108,7 @@ def administrarrol():
 def asignarpermiso():
     idrol = request.args.get('idrol')
     if request.method == 'POST':
-        rol = request.form.get('rol')
+        rol = request.form.get('idrol')
         permisos=request.form.getlist('permisos')
         ps= getPermisosByRol(rol)
         for per in ps:
