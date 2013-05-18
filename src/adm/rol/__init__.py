@@ -49,8 +49,10 @@ def add():
         flash_errors(form) 
     return render_template('rol/nuevorol.html', form=form)
 
+""" Funcion para editar registros a la tabla Rol""" 
 @app.route('/editar', methods=['GET', 'POST'])
 def editar():
+    """ Funcion para editar registros a la tabla Rol""" 
     init_db(db_session)
     r = db_session.query(Rol).filter_by(codigo=request.args.get('cod')).first()  
     form = RolFormulario(request.form,r)

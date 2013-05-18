@@ -214,8 +214,11 @@ def importartipoItem():
             flash('El Tipo de Item ha sido importado con exito','info')
             return redirect('/tipoItem/importartipoItem') 
         except DatabaseError, e:
+            if e.args[0].find('duplicate key value violates unique')!=-1:
+                flash('Clave unica violada por favor ingrese otro CODIGO de Tipo de Item' ,'error')
+            else:
                 flash('Error en la Base de Datos' + e.args[0],'error')
-                return render_template('tipoItem/importartipoItem.html', form=form)
+            return render_template('tipoItem/importartipoItem.html', form=form)
     else:
         flash_errors(form) 
         return render_template('tipoItem/importartipoItem.html', form=form)

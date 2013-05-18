@@ -217,7 +217,10 @@ def importarfase():
             flash('La fase ha sido importada con exito','info')
             return redirect('/fase/administrarfase')
         except DatabaseError, e:
-            flash('Error en la Base de Datos' + e.args[0],'error')
+            if e.args[0].find('duplicate key value violates unique')!=-1:
+                flash('Clave unica violada por favor ingrese otro NUMERO de Fase' ,'error')
+            else:
+                flash('Error en la Base de Datos' + e.args[0],'error')
             return render_template('fase/importarfase.html', form=form)
     else:
         flash_errors(form)  
