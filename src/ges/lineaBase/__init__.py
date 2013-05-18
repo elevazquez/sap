@@ -190,7 +190,7 @@ def buscarlineabase():
         p = db_session.query(LineaBase)
     else:
         p = db_session.query(LineaBase).from_statement("SELECT * FROM linea_base where "+parametro+" ilike '%"+valor+"%' ").all()
-    return render_template('lineaBase/buscarlineabase.html', fases2 = p)
+    return render_template('lineaBase/administrarlineabase.html', fases2 = p)
 
  
 """funcion que permite la liberacion de lineas base"""     

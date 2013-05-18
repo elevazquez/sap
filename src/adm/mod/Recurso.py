@@ -6,6 +6,7 @@ from des.mod.Fase import Fase
 
 class Recurso (Base):
     __tablename__ = 'recurso'
+    __table_args__ = {'extend_existing': True}
     id = Column('id', Integer, Sequence('recurso_id_seq'), primary_key=True)
     nombre = Column('nombre', String(100))
     id_proyecto = Column(Integer, ForeignKey('proyecto.id'))

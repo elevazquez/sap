@@ -5,6 +5,7 @@ from adm.mod.Recurso import Recurso
 
 class Permiso (Base):
     __tablename__ = 'permiso'
+    __table_args__ = {'extend_existing': True}
     id = Column('id', Integer, Sequence('permiso_id_seq'), primary_key=True)
     codigo = Column('codigo', String(50), unique=True)
     descripcion = Column('descripcion', String(100))

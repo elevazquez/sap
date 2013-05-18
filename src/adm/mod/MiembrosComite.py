@@ -4,6 +4,7 @@ from util.database import Base
 
 class MiembrosComite (Base):
     __tablename__ = 'miembros_comite'
+    __table_args__ = {'extend_existing': True}
     id = Column('id', Integer, Sequence('miembros_comite_id_seq'), primary_key=True)
     id_proyecto = Column(Integer, ForeignKey('proyecto.id'))
     proyecto = relationship('Proyecto', backref=backref('proyectosMiembro', lazy='dynamic'))
