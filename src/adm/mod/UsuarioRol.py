@@ -6,6 +6,7 @@ from adm.mod.Usuario import Usuario
 
 class UsuarioRol (Base):
     __tablename__ = 'usuario_rol'
+    __table_args__ = {'extend_existing': True}
     id = Column('id', Integer, Sequence('usuario_rol_id_seq'), primary_key=True)
     id_rol = Column(Integer, ForeignKey('rol.id'))
     rol = relationship('Rol', backref=backref('rolesusuarios', lazy='dynamic'))

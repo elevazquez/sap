@@ -5,6 +5,7 @@ from adm.mod.Usuario import Usuario
 
 class Proyecto (Base):
     __tablename__ = 'proyecto'
+    __table_args__ = {'extend_existing': True}
     id = Column('id', Integer, Sequence('proyecto_id_seq'), primary_key=True)
     nombre = Column('nombre', String(50), unique=True)
     descripcion = Column('descripcion', String(100))

@@ -6,6 +6,7 @@ from flask_login import UserMixin
 
 class Usuario (Base, UserMixin):
     __tablename__ = 'usuario'
+    __table_args__ = {'extend_existing': True}
     id = Column('id', Integer, Sequence('usuario_id_seq'), primary_key=True)
     usuario = Column('usuario', String(50), unique=True)
     nombre = Column('nombre', String(100))

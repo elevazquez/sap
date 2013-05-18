@@ -40,7 +40,7 @@
 						{% block content %} {% endblock %}
 					
 				{# {% if 'username' in session %} #}
-				{% if current_user.is_authenticated() and session['is_administrador'] %}
+				{% if current_user.is_authenticated() or session['is_administrador'] %}
 					<div >
 						<h3>Menu</h3>
 						<ul>  

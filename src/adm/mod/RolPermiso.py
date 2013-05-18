@@ -6,6 +6,7 @@ from adm.mod.Permiso import Permiso
 
 class RolPermiso (Base):
     __tablename__ = 'rol_permiso'
+    __table_args__ = {'extend_existing': True}
     id = Column('id', Integer, Sequence('rol_permiso_id_seq'), primary_key=True)
     id_rol = Column(Integer, ForeignKey('rol.id'))
     rol = relationship('Rol', backref=backref('rolespermisos', lazy='dynamic'))
