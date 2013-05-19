@@ -2,7 +2,7 @@
 from sqlalchemy import Integer, Sequence, String, Column, ForeignKey
 from sqlalchemy.orm import backref, relationship
 from util.database import Base
-from adm.mod.Recurso import Recurso
+from des.mod.Fase import Fase
 
 class Permiso (Base):
     __tablename__ = 'permiso'
@@ -10,14 +10,14 @@ class Permiso (Base):
     id = Column('id', Integer, Sequence('permiso_id_seq'), primary_key=True)
     codigo = Column('codigo', String(50), unique=True)
     descripcion = Column('descripcion', String(100))
-    id_recurso = Column(Integer, ForeignKey('recurso.id'))
-    permisorecurso = relationship(Recurso, backref=backref('permisorecursos', lazy='dynamic'))
+    id_fase = Column(Integer, ForeignKey('fase.id'))
+    permisofase = relationship(Fase, backref=backref('permisosfases', lazy='dynamic'))
     
-    def __init__(self, codigo=None, descripcion=None, id_recurso=None):
+    def __init__(self, codigo=None, descripcion=None, id_fase=None):
         self.codigo = codigo
         self.descripcion = descripcion 
-        self.id_recurso = id_recurso
+        self.id_fase = id_fase
  
     def __repr__(self):
-        return '<Permiso %s %s %s>' % (self.codigo, self.descripcion, self.id_recurso)
+        return '<Permiso %s %s %s>' % (self.codigo, self.descripcion, self.id_fase)
     

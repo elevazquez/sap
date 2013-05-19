@@ -4,7 +4,6 @@ import sqlalchemy
 from sqlalchemy.orm import scoped_session, sessionmaker
 from flask import Flask, render_template, request, redirect, url_for, flash 
 from adm.mod.Permiso import Permiso
-from adm.mod.Recurso import Recurso
 from adm.mod.RolPermiso import RolPermiso
 from adm.permiso.PermisoFormulario import PermisoFormulario
 import flask, flask.views
@@ -34,7 +33,7 @@ def nuevopermiso():
         form = PermisoFormulario(request.form)
         if request.method == 'POST' and form.validate():
             init_db(db_session)
-            permiso = Permiso(form.codigo.data, form.descripcion.data, form.id_recurso.data)
+            permiso = Permiso(form.codigo.data, form.descripcion.data, form.id_fase.data)
             db_session.add(permiso)
             db_session.commit()
             flash('El permiso ha sido registrado con exito','info')

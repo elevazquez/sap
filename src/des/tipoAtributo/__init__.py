@@ -28,15 +28,17 @@ def flash_errors(form):
                 error
             ),'error')
 
-""" Funcion para agregar registros a la tabla TipoAtributo""" 
+
 @app.route('/tipoAtributo/nuevotipoAtributo', methods=['GET', 'POST'])
 def nuevotipoAtributo():
+    """ Funcion para agregar registros a la tabla TipoAtributo""" 
+    
     form = TipoAtributoFormulario(request.form)
     init_db(db_session)
     if request.method == 'POST' and form.validate():
-        init_db(db_session)
+        #init_db(db_session)
         try:
-            tipoAtributo = TipoAtributo(form.codigo.data, form.nombre.data, form.descripcion.data)
+            tipoAtributo = TipoAtributo( form.nombre.data, form.descripcion.data)
             db_session.add(tipoAtributo)
             db_session.commit()
             flash('El Tipo Atributo ha sido registrado con exito','info')
@@ -53,10 +55,11 @@ def nuevotipoAtributo():
 
 @app.route('/tipoAtributo/editartipoAtributo', methods=['GET', 'POST'])
 def editartipoAtributo():
+    """funcion que permite editar un Tipo de Atributo"""
     init_db(db_session)
-    f = db_session.query(TipoAtributo).filter_by(codigo=request.args.get('cod')).first()  
+    f = db_session.query(TipoAtributo).filter_by(nombre=request.args.get('nombre')).first()  
     form = TipoAtributoFormulario(request.form,f)
-    tipoAtributo = db_session.query(TipoAtributo).filter_by(codigo=form.codigo.data).first()  
+    tipoAtributo = db_session.query(TipoAtributo).filter_by(nombre=form.nombre.data).first()  
     if request.method == 'POST' and form.validate():
         try:
             form.populate_obj(tipoAtributo)
@@ -72,16 +75,17 @@ def editartipoAtributo():
 
 @app.route('/tipoAtributo/eliminartipoAtributo', methods=['GET', 'POST'])
 def eliminartipoAtributo():
+    """funcion que permite eliminar un tipo atributo"""
     init_db(db_session)
-    ta = db_session.query(TipoAtributo).filter_by(codigo=request.args.get('cod')).first()  
+    ta = db_session.query(TipoAtributo).filter_by(nombre=request.args.get('nombre')).first()  
     a = db_session.query(Atributo).filter_by(id_tipo_atributo=ta.id).first()
     if a != None :
         flash('No se puede eliminar el Tipo Atributo, esta asociado al Atributo ' + a.nombre,'info')
         return render_template('tipoAtributo/administrartipoAtributo.html')  
     try:
-        cod = request.args.get('cod')
+        cod = request.args.get('nombre')
         init_db(db_session)
-        tipoAtributo = db_session.query(TipoAtributo).filter_by(codigo=cod).first()  
+        tipoAtributo = db_session.query(TipoAtributo).filter_by(nombre=cod).first()  
         init_db(db_session)
         db_session.delete(tipoAtributo)
         db_session.commit()
@@ -92,11 +96,12 @@ def eliminartipoAtributo():
     
 @app.route('/tipoAtributo/buscartipoAtributo', methods=['GET', 'POST'])
 def buscartipoAtributo():
+    """funcion que permite buscar tipo de atributos"""
     valor = request.args['patron']
     parametro = request.args['parametro']
     init_db(db_session)
     if valor == "" : 
-        p = db_session.query(TipoAtributo).order_by(TipoAtributo.codigo)
+        p = db_session.query(TipoAtributo).order_by(TipoAtributo.nombre)
     else:
         p = db_session.query(TipoAtributo).from_statement("SELECT * FROM tipo_atributo where "+parametro+" ilike '%"+valor+"%' ").all()
     return render_template('tipoAtributo/administrartipoAtributo.html', tipoAtributos = p)
@@ -104,16 +109,18 @@ def buscartipoAtributo():
 @app.route('/tipoAtributo/administrartipoAtributo')
 def administrartipoAtributo():
     init_db(db_session)
-    tipoAtributos = db_session.query(TipoAtributo).order_by(TipoAtributo.codigo)
+    tipoAtributos = db_session.query(TipoAtributo).order_by(TipoAtributo.nombre)
     return render_template('tipoAtributo/administrartipoAtributo.html', tipoAtributos = tipoAtributos)
 
-"""Lanza un mensaje de error en caso de que la pagina solicitada no exista"""
+
 @app.errorhandler(404)
 def page_not_found(error):
+    """Lanza un mensaje de error en caso de que la pagina solicitada no exista"""
     return 'Esta Pagina no existe', 404
 
-"""Cierra la sesion de la conexion con la base de datos"""
+
 @app.after_request
 def shutdown_session(response):
+    """Cierra la sesion de la conexion con la base de datos"""
     db_session.remove()
     return response
