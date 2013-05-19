@@ -108,6 +108,8 @@ function addLoadEvent(func)
 
 // Ejecutamos directamente la función SelectMultiple 
 addLoadEvent(selectMultiple); 
+
+ 
 </SCRIPT> 
 
 <h1>Modificar Linea Base</h1>		
@@ -153,23 +155,26 @@ addLoadEvent(selectMultiple);
 		color: #fff;
 		border-bottom: 1px dotted #888;
 	}
+    
 </style> 
 <form id=editarlineabase method=post action="/lineaBase/editarlineabase">
 	<label>Seleccione los items a añadir:</label>
-		<select name="selecitems" multiple="multiple" style="height: 200px; width: 150px">
+		<select id=select1 name="selecitems" multiple="multiple" style="height: 200px; width: 150px">
 			{% for item in itemsdisp %}
 			<option value="{{ item.id }}" >{{item.codigo|e}}  {{item.nombre|e}}</option>
 			 {% endfor %}
-		</select>		
+		</select>
+		
 		
 
 	<label >Items en la Linea Base: </label>
 	
-		<select name="itemenlb" multiple="multiple"  style="height: 200px; width: 150px">
+		<select id=select2 name="itemenlb" multiple="multiple"  style="height: 200px; width: 150px">
 			{% for itemlb in itemslb %}
 			<option disabled >{{itemlb.codigo|e}}  {{itemlb.nombre|e}}</option>
 			 {% endfor %}
-		</select>		
+		</select>
+			
     
     
     

@@ -1,0 +1,50 @@
+{% extends "principal.html" %} 
+{% block content %}
+<div class="primary">
+	<h1>Reversion de Item</h1>
+	{% with errors = get_flashed_messages(category_filter=["error"]) %} 
+			{% if errors %}
+			<div class="block-message">
+				<a class="close" href="{{ url_for( 'agregaritem' ) }}"
+					dir="rtl">×</a>
+					<ul>
+						{%- for msg in errors %}
+							<li>{{ msg }}</li> {% endfor -%}
+					</ul>
+			</div>
+		{% endif %} 
+	{% endwith %}
+<form id=agregaritem method=post action="/lineaBase/agregaritem">
+	<table id="tablaitems" border="1">
+		<TR>
+			<TH class="c1"></TH>endif
+			<TH class="c2">Codigo</TH>
+			<TH class="c3">Nombre</TH>	
+			<TH class="c4">Descripción</TH>
+			<TH class="c5">Estado</TH>
+		</TR>
+		{% for item in items %}
+			<TR>
+				<TD class="c1"> <input type="checkbox" name="selectitem" value="{{ item.id }}"/> </TD>					
+				<TD class="c2"><SPAN>{{item.codigo|e}}</SPAN></TD>
+				<TD class="c3"><SPAN>{{item.nombre|e}}</SPAN></TD>
+				<TD class="c4"><SPAN>{{item.descripcion|e}}</SPAN></TD>
+				<TD class="c5"><SPAN>{{item.estado|e}}</SPAN></TD>
+			</TR>
+		{% else %}
+			<TR>
+				<em>La fase no cuenta con Items que pueden ser agregados.</em>
+			</TR>
+		{% endfor %}
+	</table>
+	<input type="text" name="id" value="{{ form.id.data }}" id="id" hidden="true"/>
+    <input type="text" name="descripcion" value="{{ form.descripcion.data }}" id="descripcion" readonly="true" hidden="true"/>
+ 	<input type="text" name="estado" value="{{ form.estado.data }}" id="estado" readonly="true" hidden="true"/> 
+ 	<input type="date" name="fecha" value="{{form.fecha_creacion.data}}"  id="fecha" readonly="true" hidden="true"/>
+	
+	<input type=submit name="Agregar" value="Agregar" />
+	<input type="button" value="Cancelar"  onClick="document.location.href='{{ url_for( 'administrarlineabase' ) }}';"> 
+</form>
+</div>
+{% endblock %}
+
