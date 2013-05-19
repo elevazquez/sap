@@ -37,7 +37,7 @@ def flash_errors(form):
 @app.route('/miembrosComite/nuevomiembrosComite', methods=['GET', 'POST'])
 def nuevomiembrosComite():
     """ Funcion para agregar registros a la tabla MiembrosComite""" 
-    init_db(db_session)
+    #init_db(db_session)
     pro = db_session.query(Proyecto).filter_by(id=session['pry']).first()
     u = db_session.query(Usuario).filter_by(usuario=request.args.get('usu')).first()  
     form = MiembrosComiteFormulario(request.form,u)
@@ -51,7 +51,7 @@ def nuevomiembrosComite():
         flash('No se pueden asignar Miembros al Comite de Cambios, numero maximo de miembros alcanzado','info')
         return render_template('miembrosComite/administrarmiembrosComite.html')  
     if request.method == 'POST' and form.validate():
-        init_db(db_session)
+        #init_db(db_session)
         try:
             miembrosComite = MiembrosComite(pro.id, usuario.id)
             db_session.add(miembrosComite)
@@ -71,7 +71,7 @@ def nuevomiembrosComite():
 @app.route('/miembrosComite/eliminarmiembrosComite', methods=['GET', 'POST'])
 def eliminarmiembrosComite():
     """ Funcion para eliminar registros de la tabla MiembrosComite""" 
-    init_db(db_session)
+    #init_db(db_session)
     r = db_session.query(Rol).filter_by(codigo='COMITE CAMBIOS').first()  
     pro = db_session.query(Proyecto).filter_by(id=session['pry']).first()
     if pro.estado != 'N' :
@@ -81,15 +81,15 @@ def eliminarmiembrosComite():
         flash('No se pueden desasignar al Lider de Proyecto del Comite de Cambios','info')
         return render_template('miembrosComite/administrarmiembrosComite.html')   
     try:
-        init_db(db_session)
+        #init_db(db_session)
         mc = db_session.query(MiembrosComite).filter_by(id=request.args.get('id_mc')).first()  
         ur = db_session.query(UsuarioRol).filter_by(id_rol=r.id).filter_by(id_usuario=mc.id_usuario).filter_by(id_proyecto=pro.id).first()  
-        init_db(db_session)
+        #init_db(db_session)
         db_session.delete(ur)
         db_session.commit()
         
         miembrosComite = db_session.query(MiembrosComite).filter_by(id=request.args.get('id_mc')).first()  
-        init_db(db_session)
+        #init_db(db_session)
         db_session.delete(miembrosComite)
         db_session.commit()
         return redirect('/miembrosComite/administrarmiembrosComite')
@@ -102,7 +102,7 @@ def buscarmiembrosComite():
     """ Funcion para buscar registros en la tabla MiembrosComite""" 
     valor = request.args['patron']
     parametro = request.args['parametro']
-    init_db(db_session)
+    #init_db(db_session)
     if valor == "" : 
         p = db_session.query(MiembrosComite).filter_by(id_proyecto=session['pry'])
     else :
@@ -114,7 +114,7 @@ def buscarmiembrosComite2():
     """ Funcion para buscar registros en la tabla MiembrosComite""" 
     valor = request.args['patron']
     parametro = request.args['parametro']
-    init_db(db_session)
+    #init_db(db_session)
     if valor == "" : 
         p = db_session.query(Usuario).from_statement("select * from usuario where id not in (select id_usuario from miembros_comite where id_proyecto='"+session['pry']+"')").all()
     else :
@@ -124,14 +124,14 @@ def buscarmiembrosComite2():
 @app.route('/miembrosComite/administrarmiembrosComite')
 def administrarmiembrosComite():
     """ Funcion para listar registros de la tabla MiembrosComite""" 
-    init_db(db_session)
+    #init_db(db_session)
     miembrosComites = db_session.query(MiembrosComite).filter_by(id_proyecto=session['pry']).order_by(MiembrosComite.id_usuario)
     return render_template('miembrosComite/administrarmiembrosComite.html', miembrosComites = miembrosComites)
 
 @app.route('/miembrosComite/listarusuarios')
 def listarusuarios():
     """ Funcion para listar registros de la tabla Usuarios""" 
-    init_db(db_session)
+    #init_db(db_session)
     usuarios = db_session.query(Usuario).from_statement("select * from usuario where id not in (select id_usuario from miembros_comite where id_proyecto='"+session['pry']+"')").all()
     return render_template('miembrosComite/listarusuarios.html', usuarios = usuarios)
     

@@ -44,7 +44,7 @@ def nuevousuario():
     """ Se un objeto md5 para encriptar la contrasenha del usuario """    
     con = md5.new()    
     if request.method == 'POST' and form.validate():
-        init_db(db_session)
+        #init_db(db_session)
         if form.fecha_nac.data > today :
             flash('Ingrese una fecha de nacimiento valida','error')
             return render_template('usuario/nuevousuario.html', form=form)  
@@ -79,7 +79,7 @@ def editarusuario():
     """ Se un objeto md5 para encriptar la contrasenha del usuario """    
     con = md5.new()
     conf = md5.new()    
-    init_db(db_session)
+    #init_db(db_session)
     p = db_session.query(Usuario).filter_by(usuario=request.args.get('usu')).first()  
     form = UsuarioFormulario(request.form,p)
     usuario = db_session.query(Usuario).filter_by(usuario=form.usuario.data).first()  
@@ -112,9 +112,9 @@ def eliminarusuario():
     """ Funcion para eliminar registros de la tabla Usuario""" 
     try:
         usu = request.args.get('usu')
-        init_db(db_session)
+        #init_db(db_session)
         usuario = db_session.query(Usuario).filter_by(usuario=usu).first()  
-        init_db(db_session)
+        #init_db(db_session)
         db_session.delete(usuario)
         db_session.commit()
         return redirect('/usuario/administrarusuario')
@@ -127,7 +127,7 @@ def buscarusuario():
     """ Funcion para buscar registros de la tabla Usuario""" 
     valor = request.args['patron']
     parametro = request.args['parametro']
-    init_db(db_session)
+    #init_db(db_session)
     if valor == "" : 
         administrarusuario()
     if parametro == 'fecha_nac':
@@ -136,7 +136,7 @@ def buscarusuario():
         p = db_session.query(Usuario).from_statement("SELECT * FROM usuario where "+parametro+" ilike '%"+valor+"%'").all()
     return render_template('usuario/administrarusuario.html', usuarios = p)   
     valor = request.args['patron']
-    init_db(db_session)
+    #init_db(db_session)
     r = db_session.query(Usuario).filter_by(usuario=valor)
     if r == None:
         return 'no existe concordancia'
@@ -145,7 +145,7 @@ def buscarusuario():
 @app.route('/usuario/administrarusuario')
 def administrarusuario():
     """ Funcion para listar registros de la tabla Usuario""" 
-    init_db(db_session)
+    #init_db(db_session)
     usuarios = db_session.query(Usuario).order_by(Usuario.nombre)
     return render_template('usuario/administrarusuario.html', usuarios = usuarios)
 
