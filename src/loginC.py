@@ -30,7 +30,7 @@ principal = Principal(app)
 
 #===============================================================================
 # El login manager contiene el codigo que permite que la aplicacion y Flasklogin trabajen juntos,
-# tal como cargar el usuario desde un id, donde enviar los suarios cuando ellos necesiten
+# tal como cargar el usuario desde un id, donde enviar los usuarios cuando ellos necesiten
 # iniciar sesion, y similares.
 #===============================================================================
 login_manager = LoginManager()
@@ -67,10 +67,10 @@ def on_identity_loaded(sender, identity):
             identity.provides.add(RoleNeed(role.usuariorolrol.codigo))
             permisos = db_session.query(Permiso).join(RolPermiso, RolPermiso.id_permiso == Permiso.id).filter(RolPermiso.id_rol == role.id).all()
             for p in permisos:
-                if p.id_fase == None:
-                    identity.provides.add(ItemNeed(p.codigo, role.id_proyecto , 'manage'))
-                else:
-                    identity.provides.add(ItemNeed(p.codigo, p.id_fase , 'manage'))
+              if p.id_fase == None and role.id_proyecto != None:
+                  identity.provides.add(ItemNeed(p.codigo, role.id_proyecto , 'manage'))
+              else:
+                  identity.provides.add(ItemNeed(p.codigo, p.id_fase , 'manage'))
 
 
 #===============================================================================
@@ -100,23 +100,25 @@ class Main(views.MethodView):
                 flash("Error: {0} es Requerido.".format(r))
                 return redirect(url_for('index'))
         username = request.form['username']
-        passwd = request.form['passwd'] 
+        passwd = request.form['passwd']
 
         """ Se un objeto md5 para encriptar la contrasenha del usuario """    
-        con = md5.new()    
-        con.update(request.form['passwd'])
-        passwd = con.hexdigest()
+        #=======================================================================
+        # con = md5.new()    
+        # con.update(request.form['passwd'])
+        # passwd = con.hexdigest()
+        #=======================================================================
         
         user = db_session.query(Usuario).filter_by(usuario=username,password= passwd ).first() 
         if user == None :
             flash("Usuario o Password Incorrecto", "success")
         else:
+            print 'existe usuario'
             #Keep the user info in the session using Flask-Login
             login_user(user)
             #Tell Flask-Principal the identity changed
             identity_changed.send(current_app._get_current_object(),
                                  identity=Identity(user.id))
-            
             is_administrador(user.id)
             #session['pry'] = 1
             #===================================================================
@@ -152,7 +154,7 @@ def is_administrador(userid):
     isadmin = False
     for rol in roles:
         if isadmin == False:
-            if rol.usuariorolrol.codigo == 'administrador' :
+            if rol.usuariorolrol.codigo == 'ADMINISTRADOR' :
                 session['is_administrador'] = True
                 isadmin=True
             else:

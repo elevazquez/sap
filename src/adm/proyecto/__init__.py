@@ -44,7 +44,7 @@ def nuevoproyecto():
     r2 = db_session.query(Rol).filter_by(codigo='LIDER PROYECTO').first()
     form.id_usuario_lider.choices= [(u.id, u.nombre + " " + u.apellido) for u in db_session.query(Usuario).order_by(Usuario.nombre).all()]  
     if request.method == 'POST' and form.validate():
-        init_db(db_session)
+        #init_db(db_session)
         if form.fecha_inicio.data > form.fecha_fin.data :
             flash('La fecha de inicio no puede ser mayor que la fecha de finalizacion','error')
             return render_template('proyecto/nuevoproyecto.html', form=form)
@@ -106,7 +106,7 @@ def nuevoproyecto():
 def editarproyecto():
     """ Se obtiene la fecha actual para almacenar la fecha de ultima actualizacion """
     today = datetime.date.today()
-    init_db(db_session)
+    #init_db(db_session)
     r2 = db_session.query(Rol).filter_by(codigo='LIDER PROYECTO').first()
     p = db_session.query(Proyecto).filter_by(nombre=request.args.get('nom')).first()  
     form = ProyFormulario(request.form,p)
@@ -143,12 +143,12 @@ def editarproyecto():
             db_session.commit()
             
             miembrosComite = db_session.query(MiembrosComite).filter_by(id_usuario=mc).filter_by(id_proyecto=proyecto.id).first()  
-            init_db(db_session)
+            #init_db(db_session)
             db_session.delete(miembrosComite)
             db_session.commit()
 
             lr = db_session.query(UsuarioRol).filter_by(id_rol=r2.id).filter_by(id_usuario=mc).filter_by(id_proyecto=proyecto.id).first()  
-            init_db(db_session)
+            #init_db(db_session)
             db_session.delete(lr)
             db_session.commit()
                     
@@ -175,7 +175,7 @@ def eliminarproyecto():
         r = db_session.query(Rol).filter_by(codigo='COMITE CAMBIOS').first()
         r2 = db_session.query(Rol).filter_by(codigo='LIDER PROYECTO').first()
         nom = request.args.get('nom')
-        init_db(db_session)
+        #init_db(db_session)
         proyecto = db_session.query(Proyecto).filter_by(nombre=nom).first()
         com = db_session.query(MiembrosComite).filter(MiembrosComite.id_usuario!=proyecto.id_usuario_lider).filter_by(id_proyecto=proyecto.id).first()  
         if proyecto.estado != 'N' :
@@ -186,12 +186,12 @@ def eliminarproyecto():
             return render_template('proyecto/administrarproyecto.html')
         
         mie = db_session.query(MiembrosComite).filter_by(id_usuario=proyecto.id_usuario_lider).filter_by(id_proyecto=proyecto.id).first()  
-        init_db(db_session)
+        #init_db(db_session)
         db_session.delete(mie)
         db_session.commit()
         
         li = db_session.query(UsuarioRol).filter_by(id_rol=r2.id).filter_by(id_usuario=proyecto.id_usuario_lider).filter_by(id_proyecto=proyecto.id).first()  
-        init_db(db_session)
+        #init_db(db_session)
         db_session.delete(li)
         db_session.commit()
         
@@ -199,19 +199,19 @@ def eliminarproyecto():
         per = db_session.query(Permiso).filter_by(id_recurso=re.id).filter_by(codigo='CONSULTAR PROYECTO').first()
         rp = db_session.query(RolPermiso).filter_by(id_rol=r.id).filter_by(id_permiso=per.id).first()
         
-        init_db(db_session)
+        #init_db(db_session)
         db_session.delete(rp)
         db_session.commit()
         
-        init_db(db_session)
+        #init_db(db_session)
         db_session.delete(per)
         db_session.commit()
         
-        init_db(db_session)
+        #init_db(db_session)
         db_session.delete(re)
         db_session.commit()
         
-        init_db(db_session)
+        #init_db(db_session)
         db_session.delete(proyecto)
         db_session.commit()
         return redirect('/proyecto/administrarproyecto')
@@ -224,7 +224,7 @@ def buscarproyecto():
     """ Funcion para buscar registros en la tabla Proyecto""" 
     valor = request.args['patron']
     parametro = request.args['parametro']
-    init_db(db_session)
+    #init_db(db_session)
     if valor == "" : 
         administrarproyecto()
     if parametro == 'cant_miembros' :
@@ -237,7 +237,7 @@ def buscarproyecto():
         p = db_session.query(Proyecto).from_statement("SELECT * FROM proyecto where "+parametro+" ilike '%"+valor+"%'").all()
     return render_template('proyecto/administrarproyecto.html', proyectos = p)   
     valor = request.args['patron']
-    init_db(db_session)
+    #init_db(db_session)
     r = db_session.query(Proyecto).filter_by(nombre=valor)
     if r == None:
         return 'no existe concordancia'
@@ -246,7 +246,7 @@ def buscarproyecto():
 @app.route('/proyecto/administrarproyecto')
 def administrarproyecto():
     """ Funcion para listar registros de la tabla Proyecto""" 
-    init_db(db_session)
+    #init_db(db_session)
     proyectos = db_session.query(Proyecto).order_by(Proyecto.nombre)
     return render_template('proyecto/administrarproyecto.html', proyectos = proyectos)
 
@@ -280,7 +280,7 @@ def proyectoActual():
 @app.route('/proyecto/iniciarproyecto')
 def iniciarproyecto():
     """Funcion para iniciar el Proyecto"""
-    init_db(db_session)
+    #init_db(db_session)
     nom = request.args.get('nom')
     pro = db_session.query(Proyecto).filter_by(nombre=nom).first()  
     fase = db_session.query(Fase).from_statement("SELECT * FROM fase WHERE id_proyecto='"+str(pro.id)+"' and nro_orden=(SELECT min(nro_orden) FROM fase WHERE id_proyecto='"+str(pro.id)+"')").first()

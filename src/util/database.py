@@ -5,9 +5,11 @@ from util import configDB
 
 engine = create_engine(configDB.DB_URI)
 
-db_session = scoped_session(sessionmaker(autocommit=False,
-                                         autoflush=False,
-                                         bind=engine))
+#===============================================================================
+# db_session = scoped_session(sessionmaker(autocommit=False,
+#                                         autoflush=False,
+#                                         bind=engine))
+#===============================================================================
 
 Base = declarative_base()                                        
 

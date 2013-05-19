@@ -28,11 +28,11 @@ def flash_errors(form):
 """ Funcion para agregar registros a la tabla Permiso""" 
 @app.route('/permiso/nuevopermiso', methods=['GET', 'POST'])
 def nuevopermiso():
-    permission = UserPermission('administrador')
+    permission = UserPermission('ADMINISTRADOR')
     if permission.can():
         form = PermisoFormulario(request.form)
         if request.method == 'POST' and form.validate():
-            init_db(db_session)
+            #init_db(db_session)
             permiso = Permiso(form.codigo.data, form.descripcion.data, form.id_fase.data)
             db_session.add(permiso)
             db_session.commit()
@@ -44,7 +44,7 @@ def nuevopermiso():
 
 @app.route('/permiso/editarpermiso', methods=['GET', 'POST'])
 def editarpermiso():
-    init_db(db_session)
+    #init_db(db_session)
     p = db_session.query(Permiso).filter_by(codigo=request.args.get('codigo')).first()
     form = PermisoFormulario(request.form,p)
     permiso = db_session.query(Permiso).filter_by(codigo=form.codigo.data).first()
@@ -60,7 +60,7 @@ def editarpermiso():
 @app.route('/permiso/eliminarpermiso', methods=['GET', 'POST'])
 def eliminarpermiso():
     cod = request.args.get('codigo')
-    init_db(db_session)
+    #init_db(db_session)
     rol = db_session.query(Permiso).filter_by(codigo=cod).first()
     db_session.delete(rol)
     db_session.commit()
@@ -71,7 +71,7 @@ def buscarpermiso():
     valor = request.args['patron']
     parametro = request.args['parametro']
     idrol =request.form.get('rol')
-    init_db(db_session)
+    #init_db(db_session)
     if valor=='' or valor == None:
         return administrarpermiso()
     else:

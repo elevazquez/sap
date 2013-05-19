@@ -32,7 +32,7 @@ def add():
     """ Funcion para agregar registros a la tabla Rol""" 
     form = RolFormulario(request.form)
     if request.method == 'POST' and form.validate():
-        init_db(db_session)
+        #init_db(db_session)
         try:
             rol = Rol(form.codigo.data, form.descripcion.data)
             db_session.add(rol)
@@ -52,7 +52,7 @@ def add():
 @app.route('/editar', methods=['GET', 'POST'])
 def editar():
     """ Funcion para editar registros de la tabla Rol""" 
-    init_db(db_session)
+    #init_db(db_session)
     r = db_session.query(Rol).filter_by(codigo=request.args.get('cod')).first()  
     form = RolFormulario(request.form,r)
     rol = db_session.query(Rol).filter_by(codigo=form.codigo.data).first()  
@@ -74,9 +74,9 @@ def eliminar():
     """ Funcion para eliminar registros de la tabla Rol""" 
     try:
         cod = request.args.get('cod')
-        init_db(db_session)
+        #init_db(db_session)
         rol = db_session.query(Rol).filter_by(codigo=cod).first()  
-        init_db(db_session)
+        #init_db(db_session)
         db_session.delete(rol)
         db_session.commit()
         return redirect('/administrarrol')
@@ -89,13 +89,13 @@ def buscar():
     """ Funcion para buscar registros de la tabla Rol""" 
     valor = request.args['patron']
     parametro = request.args['parametro']
-    init_db(db_session)
+    #init_db(db_session)
     if valor == "" : 
         administrarrol()
     p = db_session.query(Rol).from_statement("SELECT * FROM rol where "+parametro+" ilike '%"+valor+"%'").all()
     return render_template('rol/administrarrol.html', roles = p)
     valor = request.args['patron']
-    init_db(db_session)
+    #init_db(db_session)
     r = db_session.query(Rol).filter_by(codigo=valor)
     if r == None:
         return 'no existe concordancia'
@@ -104,7 +104,7 @@ def buscar():
 @app.route('/administrarrol', methods=['GET', 'POST'])
 def administrarrol():
     """ Funcion para listar registros de la tabla Rol""" 
-    init_db(db_session)
+    #init_db(db_session)
     roles = db_session.query(Rol).order_by(Rol.codigo)
     return render_template('rol/administrarrol.html', roles = roles)
 
