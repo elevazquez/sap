@@ -15,8 +15,7 @@
 		{% endif %} 
 	{% endwith %}
 	<form id=editar method=post action="/tipoAtributo/editartipoAtributo">
-  			<label>Código</label><input type="text" name="codigo" value="{{ form.codigo.data }}" id="codigo" readonly="true"/>
-  			<label>Nombre</label> {{ form.nombre() }}
+  			<label>Nombre</label><input type="text" name="nombre" value="{{ form.nombre.data }}" id="nombre" readonly="true"/>
     		<label>Descripción</label> {{ form.descripcion() }}
   		<p><input type=submit value=Guardar>
   		<input type="button" value="Cancelar"  onClick="document.location.href='{{ url_for( 'administrartipoAtributo' ) }}';"> 
