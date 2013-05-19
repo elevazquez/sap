@@ -1,8 +1,3 @@
-""" Formulario de la tabla Rol
-    Campos
-    - codigo
-    - descripcion """ 
-
 from wtforms import Form, TextField, validators
 
 class RolFormulario(Form):

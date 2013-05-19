@@ -1,9 +1,12 @@
+""" Modelo de la tabla Fase"""
 from sqlalchemy import *
 from sqlalchemy.orm import *
 from util.database import Base
+from adm.mod.Proyecto import Proyecto
 
 class Fase (Base):
     __tablename__ = 'fase'
+    __table_args__ = {'extend_existing': True}
     id = Column('id', Integer, Sequence('fase_id_seq'), primary_key=True)
     nro_orden = Column('nro_orden', Integer)
     nombre = Column('nombre', String(50))
@@ -12,7 +15,7 @@ class Fase (Base):
     fecha_inicio = Column('fecha_inicio', Date)
     fecha_fin = Column('fecha_fin', Date)
     id_proyecto = Column(Integer, ForeignKey('proyecto.id'))
-    proyecto = relationship('Proyecto', backref=backref('proyecto', lazy='dynamic'))
+    faseproyecto = relationship(Proyecto, backref=backref('faseproyectos', lazy='dynamic'))
     
     def __init__(self, nro_orden=None, nombre=None, descripcion=None, estado=None, fecha_inicio=None,
     fecha_fin=None, id_proyecto=None):

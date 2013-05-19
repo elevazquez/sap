@@ -1,8 +1,10 @@
+""" Modelo de la tabla Tipo Relacion"""
 from sqlalchemy import *
 from util.database import Base
 
 class TipoRelacion (Base):
     __tablename__ = 'tipo_relacion'
+    __table_args__ = {'extend_existing': True}
     id = Column('id', Integer, Sequence('tipo_relacion_id_seq'), primary_key=True)
     codigo = Column('codigo', String(50), unique=True)
     nombre = Column('nombre', String(50))

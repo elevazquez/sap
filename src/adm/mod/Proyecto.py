@@ -1,3 +1,4 @@
+""" Modelo de la tabla Proyecto """
 from sqlalchemy import Integer, Sequence, String, Column, Date, ForeignKey
 from sqlalchemy.orm import relationship, backref
 from util.database import Base
@@ -15,7 +16,7 @@ class Proyecto (Base):
     fecha_fin = Column('fecha_fin', Date)
     fecha_ultima_mod = Column('fecha_ultima_mod', Date)
     id_usuario_lider = Column(Integer, ForeignKey('usuario.id'))
-    usuario = relationship('Usuario', backref=backref('usuarios', lazy='dynamic'))
+    proyectousuario = relationship(Usuario, backref=backref('proyectousuarios', lazy='dynamic'))
     
     def __init__(self, nombre=None, descripcion=None, estado=None, cant_miembros=None, fecha_inicio=None,
     fecha_fin=None, fecha_ultima_mod=None, id_usuario_lider=None):

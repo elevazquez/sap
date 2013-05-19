@@ -1,3 +1,4 @@
+""" Modelo de la tabla Permiso """
 from sqlalchemy import Integer, Sequence, String, Column, ForeignKey
 from sqlalchemy.orm import backref, relationship
 from util.database import Base
@@ -10,7 +11,7 @@ class Permiso (Base):
     codigo = Column('codigo', String(50), unique=True)
     descripcion = Column('descripcion', String(100))
     id_recurso = Column(Integer, ForeignKey('recurso.id'))
-    recurso = relationship('Recurso', backref=backref('recursos', lazy='dynamic'))
+    permisorecurso = relationship(Recurso, backref=backref('permisorecursos', lazy='dynamic'))
     
     def __init__(self, codigo=None, descripcion=None, id_recurso=None):
         self.codigo = codigo

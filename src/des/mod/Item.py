@@ -1,3 +1,4 @@
+""" Modelo de la tabla Item"""
 from sqlalchemy import *
 from sqlalchemy.orm import *
 from util.database import Base
@@ -7,6 +8,7 @@ from des.mod.TipoItem import TipoItem
 
 class Item (Base):
     __tablename__ = 'item'
+    __table_args__ = {'extend_existing': True}
     id = Column('id', Integer, Sequence('item_id_seq'), primary_key=True)
     codigo = Column('codigo', String(50), unique=True)
     nombre = Column('nombre', String(50))  
@@ -20,11 +22,11 @@ class Item (Base):
     # mime = Column('mime', String(15), unique=True)
     version = Column('version', Integer)
     id_usuario = Column(Integer, ForeignKey('usuario.id'))
-    usuario = relationship('Usuario', backref=backref('usuariositem', lazy='dynamic'))
+    itemusuario = relationship(Usuario, backref=backref('itemusuarios', lazy='dynamic'))
     id_fase = Column(Integer, ForeignKey('fase.id'))
-    fase = relationship('Fase', backref=backref('fasesitem', lazy='dynamic'))
+    itemfase = relationship(Fase, backref=backref('itemfases', lazy='dynamic'))
     id_tipo_item = Column(Integer, ForeignKey('tipo_item.id'))
-    tipo_item = relationship('TipoItem', backref=backref('tipoitem_item', lazy='dynamic'))
+    itemtipo_item = relationship(TipoItem, backref=backref('itemtipo_items', lazy='dynamic'))
     
     def __init__(self, codigo=None, nombre=None, descripcion=None, estado=None, complejidad=None, 
                  fecha=None, costo=None , id_usuario=None, version=None,

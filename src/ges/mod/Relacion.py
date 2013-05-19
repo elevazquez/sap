@@ -1,21 +1,22 @@
+""" Modelo de la tabla Relacion"""
 from sqlalchemy import Column, Integer, Sequence, Date, String, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import relationship, backref
 from util.database import Base
 from des.mod.Item import Item
 from ges.mod.TipoRelacion import TipoRelacion 
 
-
 class Relacion (Base):
     __tablename__ = 'relacion'
+    __table_args__ = {'extend_existing': True}
     id = Column('id', Integer, Sequence('relacion_id_seq'), primary_key=True)
     fecha_creacion = Column('fecha_creacion', Date)
     fecha_modificacion = Column('fecha_modificacion', Date) 
     id_tipo_relacion = Column(Integer, ForeignKey('tipo_relacion.id'))
-    tipo_relacion = relationship('TipoRelacion', backref=backref('tipo_relaciones', lazy='dynamic'))
+    relaciontipo_relacion = relationship(TipoRelacion, backref=backref('relaciontipo_relacions', lazy='dynamic'))
     id_item = Column(Integer, ForeignKey('item.id'))
-    item = relationship('Item', backref=backref('itemrelacion', lazy='dynamic'), foreign_keys=[id_item])
+    relacionitem = relationship(Item, backref=backref('relacionitems', lazy='dynamic'), foreign_keys=[id_item])
     id_item_duenho = Column(Integer, ForeignKey('item.id'))
-    item_duenho = relationship('Item', backref=backref('itemrelacionduenho', lazy='dynamic'), foreign_keys=[id_item_duenho])
+    relacionitem_duenho = relationship(Item, backref=backref('relacionitem_duenhos', lazy='dynamic'), foreign_keys=[id_item_duenho])
     estado = Column('estado', String(1))
     __table_args__ = (UniqueConstraint('id_item', 'id_item_duenho', name='uq_relacion'),)
     
