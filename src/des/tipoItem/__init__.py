@@ -24,6 +24,7 @@ class TipoItemControlador(flask.views.MethodView):
         return flask.render_template('tipoItem.html')
     
 def flash_errors(form):
+    """funcion que captura los errores de Formulario"""
     for field, errors in form.errors.items():
         for error in errors:
             flash(u"Error in the %s field - %s" % (
@@ -31,9 +32,9 @@ def flash_errors(form):
                 error
             ),'error')
                 
-""" Funcion para agregar registros a la tabla de Tipo de Item""" 
 @app.route('/tipoItem/nuevotipoItem', methods=['GET', 'POST'])
 def nuevotipoItem():
+    """ Funcion para agregar registros a la tabla de Tipo de Item""" 
     form = TipoItemFormulario(request.form) 
     init_db(db_session)
     form.fase.choices= [(f.id, f.nombre) for f in db_session.query(Fase).filter_by(id_proyecto=session['pry']).order_by(Fase.nombre).all()]
@@ -72,6 +73,7 @@ def nuevotipoItem():
 
 @app.route('/tipoItem/editartipoItem', methods=['GET', 'POST'])
 def editartipoItem():
+    """ Funcion para editar registros de la tabla de Tipo de Item""" 
     init_db(db_session)   
     ti = db_session.query(TipoItem).filter_by(codigo=request.args.get('codigo')).first() 
     form = TipoItemFormularioEd(request.form,ti)  
@@ -103,6 +105,7 @@ def editartipoItem():
 
 @app.route('/tipoItem/eliminartipoItem', methods=['GET', 'POST'])
 def eliminartipoItem():
+    """ Funcion para eliminar registros de la tabla de Tipo de Item""" 
     try:
         cod = request.args.get('cod')
         init_db(db_session)
@@ -128,6 +131,7 @@ def eliminartipoItem():
     
 @app.route('/tipoItem/buscartipoItem', methods=['GET', 'POST'])
 def buscartipoItem():
+    """ Funcion para buscar registros de la tabla de Tipo de Item""" 
     valor = request.args['patron']
     parametro = request.args['parametro']
     init_db(db_session)
@@ -148,6 +152,7 @@ def buscartipoItem():
 
 @app.route('/tipoItem/buscartipoItem2', methods=['GET', 'POST'])
 def buscartipoItem2():
+    """ Funcion para buscar registros de la tabla de Tipo de Item""" 
     valor = request.args['patron']
     parametro = request.args['parametro']
     init_db(db_session)
@@ -168,6 +173,7 @@ def buscartipoItem2():
 
 @app.route('/tipoItem/administrartipoItem')
 def administrartipoItem():
+    """ Funcion para listar registros de la tabla de Tipo de Item""" 
     init_db(db_session)
     tipoItems = db_session.query(TipoItem).order_by(TipoItem.nombre)
     return render_template('tipoItem/administrartipoItem.html', tipoItems = tipoItems)
@@ -175,13 +181,14 @@ def administrartipoItem():
 
 @app.route('/tipoItem/listartipoItem')
 def listartipoItem():
+    """ Funcion para listar registros de la tabla de Tipo de Item""" 
     init_db(db_session)
     tipoItems2 = db_session.query(TipoItem).order_by(TipoItem.nombre)
     return render_template('tipoItem/listartipoItem.html', tipoItems2 = tipoItems2)
 
-""" Funcion para importar registros a la tabla de Tipo de Item""" 
 @app.route('/tipoItem/importartipoItem', methods=['GET', 'POST'])
 def importartipoItem():
+    """ Funcion para importar registros a la tabla de Tipo de Item""" 
     init_db(db_session)   
     ti = db_session.query(TipoItem).filter_by(codigo=request.args.get('codigo')).first() 
     form = TipoItemFormulario(request.form,ti)  
@@ -223,13 +230,13 @@ def importartipoItem():
         flash_errors(form) 
         return render_template('tipoItem/importartipoItem.html', form=form)
 
-"""Lanza un mensaje de error en caso de que la pagina solicitada no exista"""
 @app.errorhandler(404)
 def page_not_found(error):
+    """Lanza un mensaje de error en caso de que la pagina solicitada no exista"""
     return 'Esta Pagina no existe', 404
 
-"""Cierra la sesion de la conexion con la base de datos"""
 @app.after_request
 def shutdown_session(response):
+    """Cierra la sesion de la conexion con la base de datos"""
     db_session.remove()
     return response

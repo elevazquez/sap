@@ -26,6 +26,7 @@ class ProyControlador(flask.views.MethodView):
         return flask.render_template('proyecto.html')
     
 def flash_errors(form):
+    """ Funcion para capturar los errores de Formulario""" 
     for field, errors in form.errors.items():
         for error in errors:
             flash(u"Error in the %s field - %s" % (
@@ -33,9 +34,9 @@ def flash_errors(form):
                 error
             ),'error')
                 
-""" Funcion para agregar registros a la tabla Proyecto""" 
 @app.route('/proyecto/nuevoproyecto', methods=['GET', 'POST'])
 def nuevoproyecto():
+    """ Funcion para agregar registros a la tabla Proyecto""" 
     """ Se obtiene la fecha actual para almacenar la fecha de ultima actualizacion """
     today = datetime.date.today()
     form = ProyFormulario(request.form)
@@ -169,6 +170,7 @@ def editarproyecto():
 
 @app.route('/proyecto/eliminarproyecto', methods=['GET', 'POST'])
 def eliminarproyecto():
+    """ Funcion para eliminar registros de la tabla Proyecto""" 
     try:
         r = db_session.query(Rol).filter_by(codigo='COMITE CAMBIOS').first()
         r2 = db_session.query(Rol).filter_by(codigo='LIDER PROYECTO').first()
@@ -219,6 +221,7 @@ def eliminarproyecto():
     
 @app.route('/proyecto/buscarproyecto', methods=['GET', 'POST'])
 def buscarproyecto():
+    """ Funcion para buscar registros en la tabla Proyecto""" 
     valor = request.args['patron']
     parametro = request.args['parametro']
     init_db(db_session)
@@ -242,29 +245,32 @@ def buscarproyecto():
 
 @app.route('/proyecto/administrarproyecto')
 def administrarproyecto():
+    """ Funcion para listar registros de la tabla Proyecto""" 
     init_db(db_session)
     proyectos = db_session.query(Proyecto).order_by(Proyecto.nombre)
     return render_template('proyecto/administrarproyecto.html', proyectos = proyectos)
 
-"""Lanza un mensaje de error en caso de que la pagina solicitada no exista"""
 @app.errorhandler(404)
 def page_not_found(error):
+    """Lanza un mensaje de error en caso de que la pagina solicitada no exista"""
     return 'Esta Pagina no existe', 404
 
-"""Cierra la sesion de la conexion con la base de datos"""
 @app.after_request
 def shutdown_session(response):
+    """Cierra la sesion de la conexion con la base de datos"""
     db_session.remove()
     return response
 
 @app.route('/inicioproyecto')
 def getProyectoByUsuario():
+    """Funcion que obtiene la lista de los proyectos de un usuario"""
     usuario = request.args['id_usuario']
     p = db_session.query(Proyecto).join(Recurso, Proyecto.id == Recurso.id_proyecto).join(Permiso, Permiso.id_recurso == Recurso.id).join(RolPermiso, RolPermiso.id_permiso == Permiso.id).join(UsuarioRol, UsuarioRol.id_rol == RolPermiso.id_rol).filter(UsuarioRol.id_usuario == usuario)
     return render_template('proyecto/principal_proyecto.html', proyectos = p)
 
 @app.route('/proyectoActual')
 def proyectoActual():
+    """Funcion que obtiene el Proyecto Actual"""
     proyecto = request.args['pyo']
     session['pry'] = proyecto
     p = db_session.query(Proyecto).filter_by(id = proyecto).first()
@@ -273,6 +279,7 @@ def proyectoActual():
 
 @app.route('/proyecto/iniciarproyecto')
 def iniciarproyecto():
+    """Funcion para iniciar el Proyecto"""
     init_db(db_session)
     nom = request.args.get('nom')
     pro = db_session.query(Proyecto).filter_by(nombre=nom).first()  

@@ -20,6 +20,7 @@ class RolControlador(flask.views.MethodView):
         return flask.render_template('rol.html')
     
 def flash_errors(form):
+    """Funcion para capturar los errores del Formulario"""
     for field, errors in form.errors.items():
         for error in errors:
             flash(u"Error in the %s field - %s" % (
@@ -27,9 +28,9 @@ def flash_errors(form):
                 error
             ),'error')                
 
-""" Funcion para agregar registros a la tabla Rol""" 
 @app.route('/add', methods=['GET', 'POST'])
 def add():
+    """ Funcion para agregar registros a la tabla Rol""" 
     form = RolFormulario(request.form)
     if request.method == 'POST' and form.validate():
         init_db(db_session)
@@ -49,10 +50,9 @@ def add():
         flash_errors(form) 
     return render_template('rol/nuevorol.html', form=form)
 
-""" Funcion para editar registros a la tabla Rol""" 
 @app.route('/editar', methods=['GET', 'POST'])
 def editar():
-    """ Funcion para editar registros a la tabla Rol""" 
+    """ Funcion para editar registros de la tabla Rol""" 
     init_db(db_session)
     r = db_session.query(Rol).filter_by(codigo=request.args.get('cod')).first()  
     form = RolFormulario(request.form,r)
@@ -72,6 +72,7 @@ def editar():
 
 @app.route('/eliminar', methods=['GET', 'POST'])
 def eliminar():
+    """ Funcion para eliminar registros de la tabla Rol""" 
     try:
         cod = request.args.get('cod')
         init_db(db_session)
@@ -86,6 +87,7 @@ def eliminar():
 
 @app.route('/buscar', methods=['GET', 'POST'])
 def buscar():
+    """ Funcion para buscar registros de la tabla Rol""" 
     valor = request.args['patron']
     parametro = request.args['parametro']
     init_db(db_session)
@@ -102,12 +104,14 @@ def buscar():
 
 @app.route('/administrarrol', methods=['GET', 'POST'])
 def administrarrol():
+    """ Funcion para listar registros de la tabla Rol""" 
     init_db(db_session)
     roles = db_session.query(Rol).order_by(Rol.codigo)
     return render_template('rol/administrarrol.html', roles = roles)
 
 @app.route('/rol/asignarpermiso', methods=['GET', 'POST'])
 def asignarpermiso():
+    """ Funcion para asignar Permisos a cada Rol""" 
     idrol = request.args.get('idrol')
     if request.method == 'POST':
         rol = request.form.get('idrol')
@@ -133,13 +137,13 @@ def asignarpermiso():
         return redirect('/administrarrol')
     return redirect(url_for('administrarpermiso', isAdministrar = False, idrol = idrol))
 
-"""Lanza un mensaje de error en caso de que la pagina solicitada no exista"""
 @app.errorhandler(404)
 def page_not_found(error):
+    """Lanza un mensaje de error en caso de que la pagina solicitada no exista"""
     return 'Esta Pagina no existe', 404
 
-"""Cierra la sesion de la conexion con la base de datos"""
 @app.after_request
 def shutdown_session(response):
+    """Cierra la sesion de la conexion con la base de datos"""
     db_session.remove()
     return response
