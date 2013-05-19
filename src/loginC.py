@@ -23,7 +23,6 @@ from des.item import *
 from des.tipoAtributo import *
 from ges.relacion import *
 from ges.lineaBase import *
-from jinja2 import Environment
 
 
 #load the extension
