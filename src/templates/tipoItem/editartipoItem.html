@@ -1,6 +1,97 @@
 {% extends "principal.html" %} 
 {% block content %}
 <div class="primary">
+<SCRIPT> 
+function selectMultiple()
+{	
+	var selectAtt = document.getElementsByTagName('select');	
+	for(i = 0; i < selectAtt.length; i++)
+	{
+		if(selectAtt[i].multiple)
+		{
+			selectAtt[i].style.display = 'none';
+			selectAtt[i].style.visibility = 'hidden';
+			// Creamos el elemento UL de la nueva lista y le aplicamos una clase
+			var ulSelect = document.createElement("UL");
+				ulSelect.className = "selectMultiple";
+			// Aplicamos al "nuevo select" los estilos de posicion y tamaño que pudiera tener el original
+			if(selectAtt[i].style.width) ulSelect.style.width = selectAtt[i].style.width;
+			if(selectAtt[i].style.height) ulSelect.style.height = selectAtt[i].style.height;
+			if(selectAtt[i].style.position) ulSelect.style.position = selectAtt[i].style.position;
+			if(selectAtt[i].style.left) ulSelect.style.left = selectAtt[i].style.left;
+			if(selectAtt[i].style.top) ulSelect.style.top = selectAtt[i].style.top;
+			if(selectAtt[i].style.right) ulSelect.style.right = selectAtt[i].style.right;
+			if(selectAtt[i].style.bottom) ulSelect.style.bottom = selectAtt[i].style.bottom;
+			// Buscamos los value del SelectBox
+			liEls = selectAtt[i].getElementsByTagName("option");
+			for(e = 0; e < liEls.length; e++)
+			{
+				// Creamos la lista
+				liSelect = document.createElement("LI")
+				// Comprobamos si el SelectBox original tiene algún option seleccionado
+				if(liEls[e].selected == true)
+				{
+					liSelect.className = "selected";
+				}
+				// Creamos dos variables que nos muestre tanto el estado de selección del elemento como la posición que ocupa
+				liSelect.selected	= liEls[e].selected;
+				liSelect.selectC	= liEls[e];
+				liSelect.e			= e;
+				liSelect.i			= i;
+				// Creamos el texto para la lista
+				textLi = document.createTextNode(liEls[e].text);
+				// Acoplamos ese texto a cada lista
+				liSelect.appendChild(textLi);
+				// Incluimos el evento que nos permite marcar y desmarcar el elemento seleccionado
+				liSelect.onclick = function(e,i)
+									{
+										if(this.className && this.className == "selected")
+										{
+											// Eliminamos la clase, no sin antes aplicar la regla según el navegador >:-(
+											if (navigator.appName == 'Microsoft Internet Explorer')
+											{
+												this.removeAttribute("className");
+											} else {
+												this.removeAttribute("class");
+											}
+											// Deseleccionamos el elemento original
+											selectAtt[this.i].getElementsByTagName("option")[this.e].selected = false;
+										} else {
+											this.className = "selected";
+											// Seleccionamos el elemento original
+											selectAtt[this.i].getElementsByTagName("option")[this.e].selected = true;
+										}
+									}
+				// Y acoplamos ese elemento al UL principal
+				ulSelect.appendChild(liSelect);
+			}	
+			// Colocamos el nuevo SelectMultiple en el documento
+			document.body.appendChild(ulSelect);
+			// Y lo posicionamos justo antes del Select Original
+			selectAtt[i].parentNode.insertBefore(ulSelect,selectAtt[i]);
+		}
+	}
+}
+
+// Esta función nos permite añadir una acción al evento onLoad
+function addLoadEvent(func) 
+{
+	var oldonload = window.onload;
+	if (typeof window.onload != 'function') 
+		{
+			window.onload = func;
+		} else {
+			window.onload = function() 
+				{
+					oldonload();
+					func();
+				}
+		}
+}
+
+// Ejecutamos directamente la función SelectMultiple 
+addLoadEvent(selectMultiple); 
+</SCRIPT> 
 	<h1>Modificar Tipo Item</h1>
 	{% with errors = get_flashed_messages(category_filter=["error"]) %} 
 		{% if errors %}
@@ -14,11 +105,40 @@
 			</div>
 		{% endif %} 
 	{% endwith %}
+<style type="text/css">  
+  ul.selectMultiple {
+	width: 200px;
+	height: 150px;
+	margin:0;
+	padding:0;
+	background: #fff;
+	border: 1px solid #999;
+	
+	Zoutline: 1px solid #999999;
+	
+	overflow: auto;
+}
+
+	ul.selectMultiple li {
+		padding:5px;
+		font-family: verdana;
+		font-size: 11px;
+		font-color: #000;
+		list-style: none;
+		border-bottom: 1px solid #eee;
+		cursor: pointer;
+	}
+	ul.selectMultiple li.selected {
+		background: #999;
+		color: #fff;
+		border-bottom: 1px dotted #888;
+	}
+</style> 
 	<form id=editartipoItem method=post action="/tipoItem/editartipoItem">
 			<label>Código</label><input type="text" name="codigo" value="{{ form.codigo.data }}" id="codigo" readonly="true" />
     		<label>Nombre</label>{{ form.nombre() }}
     		<label>Descripción</label> {{ form.descripcion() }}
-    		<label>Fase</label><input type="text" name="id_fase" value="{{ form.id_fase.data }} " id="id_fase" readonly="true"/>
+    		<label>Fase</label> {{ form.id_fase() }} 
     		<label>Atributos</label> {{ form.lista_atributo() }}
 	<p><input type=submit value=Guardar>
   		<input type="button" value="Cancelar"  onClick="document.location.href='{{ url_for( 'administrartipoItem' ) }}';"> 

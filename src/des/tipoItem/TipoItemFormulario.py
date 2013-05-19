@@ -13,7 +13,7 @@ class TipoItemFormulario(Form):
     codigo = TextField('Codigo', [validators.Length(min=1, max=50), validators.Required()])
     nombre = TextField('Nombre', [validators.Length(min=2, max=50), validators.Required()])
     descripcion = TextField('Descripcion', [validators.Length(min=2, max=100), validators.Required()])
-    fase = SelectField('Fase',choices= [(f.id, f.nombre) for f in db_session.query(Fase)],coerce=int)                      
+    id_fase = SelectField('Fase',choices= [(f.id, f.nombre) for f in db_session.query(Fase)],coerce=int)                      
     lista_atributo = SelectMultipleField( 'Atributos', choices = [(f.id, f.nombre) for f in db_session.query(Atributo)],coerce=int)
     #,choices=[(f.id, f.nombre) for f in db_session.query(Atributo).order_by(Atributo.nombre).all()],
     #                                       option_widget= widgets.CheckboxInput())

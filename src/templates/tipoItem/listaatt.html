@@ -1,0 +1,47 @@
+{% extends "principal.html" %} 
+{% block content %}
+<div class="primary">
+<div >
+<h1>Nuevo Tipo Item</h1>		
+<p></p>
+{% with errors = get_flashed_messages(category_filter=["info"]) %}
+{% if errors %}
+<div class="block-message">
+  <a class="close" href="#" dir="rtl">×</a>
+  <ul>
+    {%- for msg in errors %}
+    <li>{{ msg }}</li>
+    {% endfor -%}
+  </ul>
+</div>
+{% endif %}
+{% endwith %}
+<em>Seleccione un Atributo:</em>
+<div style="height:250px;width:800px;overflow:auto;">
+<table border="1">
+	<TR>
+		<TH class="c1"></TH>
+		<TH class="c2">Codigo</TH>
+		<TH class="c3">Nombre</TH>
+		<TH class="c4">Descripción</TH>
+		<TH class="c5">Tipo Atributo</TH>
+	</TR>
+	{% for att in atts %}
+	<TR>
+		<TD class="c1" width="200"><a href="{{ url_for('agregaritems', cod_item=item.codigo, id_item=item.id, estado_item= item.estado) }}">Agregar</a></TD>
+		<TD class="c2"><SPAN>{{att.codigo|e}}</SPAN></TD>
+		<TD class="c3"><SPAN>{{att.nombre|e}}</SPAN></TD>
+		<TD class="c4"><SPAN>{{att.descripcion|e}}</SPAN></TD>
+		<TD class="c5"><SPAN>{{att.atributotipo_atributo.nombre|e}}</SPAN></TD>
+	</TR>
+	{% else %}
+  	<TR>
+		<em>Sin registro de Items</em>
+	</TR>
+	{% endfor %}
+</table>
+<a href="{{ url_for('nuevalineabase') }}"> >>Confirmar Items seleccionados</a>
+</div>
+</div>
+</div>
+{% endblock %}

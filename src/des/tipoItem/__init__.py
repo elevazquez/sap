@@ -7,8 +7,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 from des.mod.TipoItem import TipoItem
 from des.mod.Item import Item
 from sqlalchemy.exc import DatabaseError
-from des.tipoItem.TipoItemFormulario import TipoItemFormulario 
-from des.tipoItem.TipoItemFormularioEd import TipoItemFormularioEd 
+from des.tipoItem.TipoItemFormulario import TipoItemFormulario  
 from des.mod.TItemAtributo import TItemAtributo
 from des.mod.Atributo import Atributo
 from des.mod.Fase import Fase
@@ -37,19 +36,19 @@ def nuevotipoItem():
     """ Funcion para agregar registros a la tabla de Tipo de Item""" 
     form = TipoItemFormulario(request.form) 
     init_db(db_session)
-    form.fase.choices= [(f.id, f.nombre) for f in db_session.query(Fase).filter_by(id_proyecto=session['pry']).order_by(Fase.nombre).all()]
+    form.id_fase.choices= [(f.id, f.nombre) for f in db_session.query(Fase).filter_by(id_proyecto=session['pry']).filter_by(estado='I').order_by(Fase.nombre).all()]
     form.lista_atributo.choices = [(f.id, f.nombre) for f in db_session.query(Atributo).order_by(Atributo.nombre).all()]
     if request.method == 'POST' and form.validate():        
         try:
             """verifica si la fase esta en un estado inicial la cambia en progreso"""   
-            fase_selected = db_session.query(Fase).filter_by(id=form.fase.data).first()
+            fase_selected = db_session.query(Fase).filter_by(id=form.id_fase.data).first()
             if fase_selected.estado == "I" :
                 fase_selected.estado = "P"
                 db_session.merge(fase_selected)
                 db_session.commit()     
-                  
+            
             tipo = TipoItem( form.codigo.data, form.nombre.data, form.descripcion.data, 
-                    form.fase.data)
+                    form.id_fase.data)
             db_session.add(tipo)
             db_session.commit()
             
@@ -76,12 +75,21 @@ def editartipoItem():
     """ Funcion para editar registros de la tabla de Tipo de Item""" 
     init_db(db_session)   
     ti = db_session.query(TipoItem).filter_by(codigo=request.args.get('codigo')).first() 
-    form = TipoItemFormularioEd(request.form,ti)  
+    form = TipoItemFormulario(request.form,ti)  
     tipoItem = db_session.query(TipoItem).filter_by(codigo=form.codigo.data).first()
-    fase_selected= db_session.query(Fase).filter_by(id=tipoItem.id_fase ).first()       
+    form.id_fase.choices= [(f.id, f.nombre) for f in db_session.query(Fase).filter_by(id_proyecto=session['pry']).order_by(Fase.nombre).all()]
+    fa = tipoItem.id_fase
+    
+    #fase_selected= db_session.query(Fase).filter_by(id=tipoItem.id_fase ).first()       
     #form.id_fase.data= fase_selected.nombre
     atributos= db_session.query(Atributo).from_statement("Select a.* from atributo a , tipo_item ti, titem_atributo ta where ta.id_atributo= a.id and ta.id_tipo_item = ti.id and ti.id = '"+tipoItem.id.__repr__()+"'").all()
     form.lista_atributo.choices = [(f.id, f.nombre) for f in atributos ]
+    
+    items= db_session.query(Item).filter_by(id_tipo_item=tipoItem.id).first()
+    #se verifica si el tipo de item esta siendo utilizado, en tal caso no podra ser eliminado 
+    if items !=  None :
+        flash('El Tipo de Item no puede ser editado, ya que esta siendo utilizado por algun Item!','info')
+        return render_template('tipoItem/administrartipoItem.html')
     if request.method == 'POST' and form.validate():
        items= db_session.query(Item).filter_by(id_tipo_item= tipoItem.id).first()
        #se verifica si el tipo de item esta siendo utilizado, en tal caso no podra ser editado 
@@ -90,7 +98,7 @@ def editartipoItem():
           return render_template('tipoItem/editartipoItem.html', form=form)
        try:          
           form.populate_obj(tipoItem)
-          tipoItem.id_fase = fase_selected.id          
+          #tipoItem.id_fase = fase_selected.id          
           db_session.merge(tipoItem)
           db_session.commit()
           return redirect('/tipoItem/administrartipoItem')
@@ -101,8 +109,6 @@ def editartipoItem():
         flash_errors(form)
         return render_template('tipoItem/editartipoItem.html', form=form)
     
-
-
 @app.route('/tipoItem/eliminartipoItem', methods=['GET', 'POST'])
 def eliminartipoItem():
     """ Funcion para eliminar registros de la tabla de Tipo de Item""" 
@@ -113,9 +119,9 @@ def eliminartipoItem():
         items= db_session.query(Item).filter_by(id_tipo_item=tipoItem.id).first()
         cant = db_session.query(TItemAtributo).filter_by(id_tipo_item=tipoItem.id).count()
         cnt = 0
-       #se verifica si el tipo de item esta siendo utilizado, en tal caso no podra ser editado 
+       #se verifica si el tipo de item esta siendo utilizado, en tal caso no podra ser eliminado 
         if items !=  None :
-          flash('El Tipo de Item no puede ser eliminado, ya que esta siendo utilizado por algun recurso!','info')
+          flash('El Tipo de Item no puede ser eliminado, ya que esta siendo utilizado por algun Item!','info')
           return render_template('tipoItem/administrartipoItem.html')
         while cnt < cant :
             cnt = cnt + 1
@@ -186,6 +192,21 @@ def listartipoItem():
     tipoItems2 = db_session.query(TipoItem).order_by(TipoItem.nombre)
     return render_template('tipoItem/listartipoItem.html', tipoItems2 = tipoItems2)
 
+@app.route('/tipoItem/listaatt', methods=['GET', 'POST'])
+def listaatt():   
+    """ Funcion que lista los atributos posibles a formar parte de un Tipo Item"""     
+    init_db(db_session)
+    atts = db_session.query(Atributo).from_statement(" select * from atributo " )
+    return render_template('tipoItem/listaatt.html', atts = atts)  
+
+@app.route('/lineaBase/agregaritems', methods=['GET', 'POST'])
+def agregaritems():   
+    """ Funcion que agrega Atributos a un Tipo Item"""     
+    init_db(db_session)
+    selectedatt=  request.args.get('ti')    
+    atts = db_session.query(Atributo).from_statement(" select * from atributo  " )
+    return render_template('tipoItem/listaatt.html', atts = atts)  
+
 @app.route('/tipoItem/importartipoItem', methods=['GET', 'POST'])
 def importartipoItem():
     """ Funcion para importar registros a la tabla de Tipo de Item""" 
@@ -193,7 +214,7 @@ def importartipoItem():
     ti = db_session.query(TipoItem).filter_by(codigo=request.args.get('codigo')).first() 
     form = TipoItemFormulario(request.form,ti)  
     tipoItem = db_session.query(TipoItem).filter_by(codigo=form.codigo.data).first()
-    fase_selected= db_session.query(Fase).filter_by(id=form.fase.data).first()  
+    fase_selected= db_session.query(Fase).filter_by(id=form.id_fase.data).first()  
     #form.id_fase.data= fase_selected.nombre
     #atributos= db_session.query(Atributo).from_statement("Select a.* from atributo a , tipo_item ti, titem_atributo ta where ta.id_atributo= a.id and ta.id_tipo_item = ti.id and ti.id = '"+session['tip']+"'").all()
     atributos= db_session.query(Atributo).from_statement("Select a.* from atributo a").all()
@@ -201,17 +222,17 @@ def importartipoItem():
     if request.method == 'POST' and form.validate():        
         try:
             """verifica si la fase esta en un estado inicial la cambia en progreso"""   
-            fase_selected = db_session.query(Fase).filter_by(id=form.fase.data).first()
+            fase_selected = db_session.query(Fase).filter_by(id=form.id_fase.data).first()
             if fase_selected.estado == "I" :
                 fase_selected.estado = "P"
                 db_session.merge(fase_selected)
                 db_session.commit()     
                   
             tipo = TipoItem( form.codigo.data, form.nombre.data, form.descripcion.data, 
-                    form.fase.data)
+                    form.id_fase.data)
             db_session.add(tipo)
             db_session.commit()
-            
+        
             """almacena los atributos del tipo Item"""
             lista= form.lista_atributo.data
             for atr in lista:
@@ -219,7 +240,7 @@ def importartipoItem():
                 db_session.add(att)
                 db_session.commit()
             flash('El Tipo de Item ha sido importado con exito','info')
-            return redirect('/tipoItem/importartipoItem') 
+            return redirect('/tipoItem/administrartipoItem') 
         except DatabaseError, e:
             if e.args[0].find('duplicate key value violates unique')!=-1:
                 flash('Clave unica violada por favor ingrese otro CODIGO de Tipo de Item' ,'error')
