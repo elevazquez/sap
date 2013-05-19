@@ -4,8 +4,6 @@ from flask_principal import Principal, identity_changed, Identity, AnonymousIden
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from util.database import init_db, engine
 from sqlalchemy.orm import scoped_session, sessionmaker
-from adm.mod.UsuarioRol import UsuarioRol
-from adm.mod.Usuario import Usuario
 import md5
 
 app = Flask(__name__)
@@ -23,6 +21,8 @@ from des.item import *
 from des.tipoAtributo import *
 from ges.relacion import *
 from ges.lineaBase import *
+from adm.mod.UsuarioRol import *
+from adm.mod.Usuario import *
 
 
 #load the extension
@@ -65,7 +65,12 @@ def on_identity_loaded(sender, identity):
         roles = db_session.query(UsuarioRol).filter_by(id_usuario=current_user.id).all()
         for role in roles:
             identity.provides.add(RoleNeed(role.usuariorolrol.codigo))
-        identity.provides.add(ItemNeed('CONSULTAR FASE', 2, 'manage'))
+            permisos = db_session.query(Permiso).join(RolPermiso, RolPermiso.id_permiso == Permiso.id).filter(RolPermiso.id_rol == role.id).all()
+            for p in permisos:
+                if p.id_fase == None:
+                    identity.provides.add(ItemNeed(p.codigo, role.id_proyecto , 'manage'))
+                else:
+                    identity.provides.add(ItemNeed(p.codigo, p.id_fase , 'manage'))
 
 
 #===============================================================================
@@ -122,11 +127,11 @@ class Main(views.MethodView):
             return redirect(url_for('getProyectoByUsuario', id_usuario = current_user.id))
         return redirect(url_for('index'))
 
-""" funcion llamada cuando el usuario cierra sesion"""
 # el decorator indica que la vista requiere que los usuarios esten logueados
 @app.route('/logout')
 @login_required
-def logout():  
+def logout():
+    """ funcion llamada cuando el usuario cierra sesion"""
     # Remove the user information from the session
     logout_user()
 

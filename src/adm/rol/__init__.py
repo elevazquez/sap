@@ -1,5 +1,4 @@
 from loginC import app
-
 from util.database import init_db, engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.exc import DatabaseError
