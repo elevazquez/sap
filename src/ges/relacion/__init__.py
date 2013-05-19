@@ -87,7 +87,7 @@ def nuevarelacion():
 
 @app.route('/relacion/editarrelacion', methods=['GET', 'POST'])
 def editarrelacion():
-    init_db(db_session)
+    #init_db(db_session)
     p = db_session.query(Relacion).filter_by(codigo=request.args.get('cod')).first()
     form = RelacionFormulario(request.form,p)
     relacion = db_session.query(Relacion).filter_by(id=form.id.data).first()
@@ -103,7 +103,7 @@ def editarrelacion():
 @app.route('/relacion/eliminarrelacion', methods=['GET', 'POST'])
 def eliminarrelacion():
     cod = request.args.get('codigo')
-    init_db(db_session)
+    #init_db(db_session)
     relacion = db_session.query(Relacion).filter_by(id=cod).first()
     relacion.estado='E'
     db_session.merge(relacion)
@@ -115,7 +115,7 @@ def eliminarrelacion():
 def buscarrelacion():
     valor = request.args['patron']
     parametro = request.args['parametro']
-    init_db(db_session)
+    #init_db(db_session)
     if valor=='' or valor == None:
         return administrarrelacion()
     else:
@@ -134,7 +134,7 @@ def buscarrelacion():
 
 @app.route('/relacion/administrarrelacion')
 def administrarrelacion():
-    init_db(db_session)
+    #init_db(db_session)
     relaciones = getRelUltiVerEnProg()
     return render_template('relacion/administrarrelacion.html', relaciones = relaciones)
 
