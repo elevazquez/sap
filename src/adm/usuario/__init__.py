@@ -20,6 +20,7 @@ class ProyControlador(flask.views.MethodView):
         return flask.render_template('usuario.html')
     
 def flash_errors(form):
+    """Funcion que captura los errores de Formulario"""
     for field, errors in form.errors.items():
         for error in errors:
             flash(u"Error in the %s field - %s" % (
@@ -34,9 +35,9 @@ def flash_errors(form):
 #    print texto.hexdigest()
 #    print texto.hexdigest()
                 
-""" Funcion para agregar registros a la tabla Usuario""" 
 @app.route('/usuario/nuevousuario', methods=['GET', 'POST'])
 def nuevousuario():
+    """ Funcion para agregar registros a la tabla Usuario""" 
     """ Se obtiene la fecha actual para verificar la fecha de nacimiento """
     today = datetime.date.today()
     form = UsuarioFormulario(request.form)
@@ -72,6 +73,7 @@ def nuevousuario():
 
 @app.route('/usuario/editarusuario', methods=['GET', 'POST'])
 def editarusuario():
+    """ Funcion para editar registros de la tabla Usuario""" 
     """ Se obtiene la fecha actual para almacenar la fecha de ultima actualizacion """
     today = datetime.date.today()
     """ Se un objeto md5 para encriptar la contrasenha del usuario """    
@@ -107,6 +109,7 @@ def editarusuario():
 
 @app.route('/usuario/eliminarusuario', methods=['GET', 'POST'])
 def eliminarusuario():
+    """ Funcion para eliminar registros de la tabla Usuario""" 
     try:
         usu = request.args.get('usu')
         init_db(db_session)
@@ -121,6 +124,7 @@ def eliminarusuario():
     
 @app.route('/usuario/buscarusuario', methods=['GET', 'POST'])
 def buscarusuario():
+    """ Funcion para buscar registros de la tabla Usuario""" 
     valor = request.args['patron']
     parametro = request.args['parametro']
     init_db(db_session)
@@ -140,17 +144,18 @@ def buscarusuario():
 
 @app.route('/usuario/administrarusuario')
 def administrarusuario():
+    """ Funcion para listar registros de la tabla Usuario""" 
     init_db(db_session)
     usuarios = db_session.query(Usuario).order_by(Usuario.nombre)
     return render_template('usuario/administrarusuario.html', usuarios = usuarios)
 
-"""Lanza un mensaje de error en caso de que la pagina solicitada no exista"""
 @app.errorhandler(404)
 def page_not_found(error):
+    """Lanza un mensaje de error en caso de que la pagina solicitada no exista"""
     return 'Esta Pagina no existe', 404
 
-"""Cierra la sesion de la conexion con la base de datos"""
 @app.after_request
 def shutdown_session(response):
+    """Cierra la sesion de la conexion con la base de datos"""
     db_session.remove()
     return response

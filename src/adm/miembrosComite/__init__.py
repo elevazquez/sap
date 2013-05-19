@@ -26,6 +26,7 @@ class MiembrosComiteControlador(flask.views.MethodView):
         return flask.render_template('miembrosComite.html')
     
 def flash_errors(form):
+    """ Funcion para capturar los errores de Formulario""" 
     for field, errors in form.errors.items():
         for error in errors:
             flash(u"Error in the %s field - %s" % (
@@ -33,9 +34,9 @@ def flash_errors(form):
                 error
             ),'error')
 
-""" Funcion para agregar registros a la tabla MiembrosComite""" 
 @app.route('/miembrosComite/nuevomiembrosComite', methods=['GET', 'POST'])
 def nuevomiembrosComite():
+    """ Funcion para agregar registros a la tabla MiembrosComite""" 
     init_db(db_session)
     pro = db_session.query(Proyecto).filter_by(id=session['pry']).first()
     u = db_session.query(Usuario).filter_by(usuario=request.args.get('usu')).first()  
@@ -69,6 +70,7 @@ def nuevomiembrosComite():
 
 @app.route('/miembrosComite/eliminarmiembrosComite', methods=['GET', 'POST'])
 def eliminarmiembrosComite():
+    """ Funcion para eliminar registros de la tabla MiembrosComite""" 
     init_db(db_session)
     r = db_session.query(Rol).filter_by(codigo='COMITE CAMBIOS').first()  
     pro = db_session.query(Proyecto).filter_by(id=session['pry']).first()
@@ -97,6 +99,7 @@ def eliminarmiembrosComite():
     
 @app.route('/miembrosComite/buscarmiembrosComite', methods=['GET', 'POST'])
 def buscarmiembrosComite():
+    """ Funcion para buscar registros en la tabla MiembrosComite""" 
     valor = request.args['patron']
     parametro = request.args['parametro']
     init_db(db_session)
@@ -108,6 +111,7 @@ def buscarmiembrosComite():
 
 @app.route('/miembrosComite/buscarmiembrosComite2', methods=['GET', 'POST'])
 def buscarmiembrosComite2():
+    """ Funcion para buscar registros en la tabla MiembrosComite""" 
     valor = request.args['patron']
     parametro = request.args['parametro']
     init_db(db_session)
@@ -119,23 +123,25 @@ def buscarmiembrosComite2():
 
 @app.route('/miembrosComite/administrarmiembrosComite')
 def administrarmiembrosComite():
+    """ Funcion para listar registros de la tabla MiembrosComite""" 
     init_db(db_session)
     miembrosComites = db_session.query(MiembrosComite).filter_by(id_proyecto=session['pry']).order_by(MiembrosComite.id_usuario)
     return render_template('miembrosComite/administrarmiembrosComite.html', miembrosComites = miembrosComites)
 
 @app.route('/miembrosComite/listarusuarios')
 def listarusuarios():
+    """ Funcion para listar registros de la tabla Usuarios""" 
     init_db(db_session)
     usuarios = db_session.query(Usuario).from_statement("select * from usuario where id not in (select id_usuario from miembros_comite where id_proyecto='"+session['pry']+"')").all()
     return render_template('miembrosComite/listarusuarios.html', usuarios = usuarios)
     
-"""Lanza un mensaje de error en caso de que la pagina solicitada no exista"""
 @app.errorhandler(404)
 def page_not_found(error):
+    """Lanza un mensaje de error en caso de que la pagina solicitada no exista"""
     return 'Esta Pagina no existe', 404
 
-"""Cierra la sesion de la conexion con la base de datos"""
 @app.after_request
 def shutdown_session(response):
+    """Cierra la sesion de la conexion con la base de datos"""
     db_session.remove()
     return response
