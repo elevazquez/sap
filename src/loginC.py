@@ -64,7 +64,7 @@ def on_identity_loaded(sender, identity):
     # identity with the roles that the user provides
         roles = db_session.query(UsuarioRol).filter_by(id_usuario=current_user.id).all()
         for role in roles:
-            identity.provides.add(RoleNeed(role.rol.codigo))
+            identity.provides.add(RoleNeed(role.usuariorolrol.codigo))
 
 
 #===============================================================================
@@ -146,7 +146,7 @@ def is_administrador(userid):
     isadmin = False
     for rol in roles:
         if isadmin == False:
-            if rol.rol.codigo == 'administrador' :
+            if rol.usuariorolrol.codigo == 'administrador' :
                 session['is_administrador'] = True
                 isadmin=True
             else:
