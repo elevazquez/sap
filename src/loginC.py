@@ -1,6 +1,6 @@
 from flask import Flask, views, current_app, request, session, flash, redirect, url_for, render_template
 import os
-from flask_principal import Principal, identity_changed, Identity, AnonymousIdentity, identity_loaded, RoleNeed, UserNeed
+from flask_principal import Principal, identity_changed, Identity, AnonymousIdentity, identity_loaded, RoleNeed, UserNeed, ItemNeed
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from util.database import init_db, engine
 from sqlalchemy.orm import scoped_session, sessionmaker
@@ -65,6 +65,7 @@ def on_identity_loaded(sender, identity):
         roles = db_session.query(UsuarioRol).filter_by(id_usuario=current_user.id).all()
         for role in roles:
             identity.provides.add(RoleNeed(role.usuariorolrol.codigo))
+        identity.provides.add(ItemNeed('CONSULTAR FASE', 2, 'manage'))
 
 
 #===============================================================================
