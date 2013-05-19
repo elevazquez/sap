@@ -3,7 +3,7 @@
 <div class="primary">
 	<h1>Agregar Permiso</h1>
 	<form id=nuevopermiso method=post action="/permiso/nuevopermiso">
-    	{{ form.codigo.label }} {{ form.codigo.data}}
+    	{{ form.codigo.label }} {{ form.codigo() }}
     	{{ form.descripcion.label }} {{ form.descripcion() }}
     	{{ form.id_recurso.label }} {{ form.id_recurso() }}
   		<p><input type=submit value=Guardar>
