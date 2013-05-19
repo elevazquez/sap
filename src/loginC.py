@@ -122,9 +122,9 @@ class Main(views.MethodView):
             #===================================================================
             # session['username'] = username
             #===================================================================
-            #if 'is_administrador' in session:
-            #   if not session['is_administrador']:
-            return redirect(url_for('getProyectoByUsuario', id_usuario = current_user.id))
+            if 'is_administrador' in session:
+               if not session['is_administrador']:
+                   return redirect(url_for('getProyectoByUsuario', id_usuario = current_user.id))
         return redirect(url_for('index'))
 
 # el decorator indica que la vista requiere que los usuarios esten logueados

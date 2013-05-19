@@ -265,7 +265,7 @@ def shutdown_session(response):
 def getProyectoByUsuario():
     """Funcion que obtiene la lista de los proyectos de un usuario"""
     usuario = request.args['id_usuario']
-    p = db_session.query(Proyecto).join(Recurso, Proyecto.id == Recurso.id_proyecto).join(Permiso, Permiso.id_recurso == Recurso.id).join(RolPermiso, RolPermiso.id_permiso == Permiso.id).join(UsuarioRol, UsuarioRol.id_rol == RolPermiso.id_rol).filter(UsuarioRol.id_usuario == usuario)
+    p = db_session.query(Proyecto).join(UsuarioRol, Proyecto.id == UsuarioRol.id_proyecto).filter(UsuarioRol.id_usuario == usuario).group_by(Proyecto.id).all()
     return render_template('proyecto/principal_proyecto.html', proyectos = p)
 
 @app.route('/proyectoActual')

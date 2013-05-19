@@ -48,7 +48,7 @@
 			<TH class="c3"></TH>
 			<TH class="c3">Código</TH>
 			<TH class="c3">Descripción</TH>
-			<TH class="c3">Recurso</TH>
+			<TH class="c3">Fas</TH>
 		</TR>
 		{% for permiso in permisos %}
 			<TR>
@@ -78,7 +78,7 @@
 			{% endif %}
 				<TD class="c4" id="codpermiso"><SPAN>{{permiso.codigo|e}}</SPAN></TD>
 				<TD class="c4"><SPAN>{{permiso.descripcion|e}}</SPAN></TD>
-				<TD class="c4"><SPAN>{{permiso.permisorecurso.nombre|e}}</SPAN></TD>
+				<TD class="c4"><SPAN>{{permiso.permisofase.nombre|e}}</SPAN></TD>
 			</TR>
 		{% else %}
 			<TR>
