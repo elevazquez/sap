@@ -284,8 +284,12 @@ def iniciarproyecto():
     nom = request.args.get('nom')
     pro = db_session.query(Proyecto).filter_by(nombre=nom).first()  
     fase = db_session.query(Fase).from_statement("SELECT * FROM fase WHERE id_proyecto='"+str(pro.id)+"' and nro_orden=(SELECT min(nro_orden) FROM fase WHERE id_proyecto='"+str(pro.id)+"')").first()
+    cant = db_session.query(MiembrosComite).filter_by(id_proyecto=pro.id).count()
     if fase == None:
         flash('El Proyecto no puede ser iniciado porque no tiene Fases asociadas','info')
+        return redirect('/proyecto/administrarproyecto')
+    if cant != pro.cant_miembros:
+        flash('El Proyecto no puede ser iniciado porque no tiene la cantidad preestablecida de miembros en el Comite de Cambios','info')
         return redirect('/proyecto/administrarproyecto')
     if pro.estado == 'N':
         try:
@@ -293,9 +297,9 @@ def iniciarproyecto():
             db_session.merge(pro)
             db_session.commit()
             
-            fase.estado = 'P'
-            db_session.merge(fase)
-            db_session.commit()
+#            fase.estado = 'P'
+#            db_session.merge(fase)
+#            db_session.commit()
             flash('El Proyecto se ha iniciado con exito','info')
             return redirect('/proyecto/administrarproyecto')
         except DatabaseError, e:
