@@ -22,6 +22,7 @@ class FaseControlador(flask.views.MethodView):
         return flask.render_template('fase.html')
     
 def flash_errors(form):
+    """Funcion para capturar errores del Formulario"""
     for field, errors in form.errors.items():
         for error in errors:
             flash(u"Error in the %s field - %s" % (
@@ -29,9 +30,9 @@ def flash_errors(form):
                 error
             ),'error')
 
-""" Funcion para agregar registros a la tabla Fase""" 
 @app.route('/fase/nuevafase', methods=['GET', 'POST'])
 def nuevafase():
+    """ Funcion para agregar registros a la tabla Fase""" 
     form = FaseFormulario(request.form)
     init_db(db_session)
     n = db_session.query(func.max(Fase.nro_orden, type_=Integer)).filter_by(id_proyecto=session['pry']).scalar()
@@ -70,6 +71,7 @@ def nuevafase():
 
 @app.route('/fase/editarfase', methods=['GET', 'POST'])
 def editarfase():
+    """ Funcion para editar registros de la tabla Fase""" 
     init_db(db_session)
     pro = db_session.query(Proyecto).filter_by(id=session['pry']).first()
     f = db_session.query(Fase).filter_by(nro_orden=request.args.get('nro')).filter_by(id_proyecto=pro.id).first()  
@@ -117,6 +119,7 @@ def editarfase():
 
 @app.route('/fase/eliminarfase', methods=['GET', 'POST'])
 def eliminarfase():
+    """ Funcion para eliminar registros de la tabla Fase""" 
     init_db(db_session)
     pro = db_session.query(Proyecto).filter_by(id=session['pry']).first()
     if pro.estado != 'N' :
@@ -144,6 +147,7 @@ def eliminarfase():
     
 @app.route('/fase/buscarfase', methods=['GET', 'POST'])
 def buscarfase():
+    """ Funcion para buscar registros de la tabla Fase""" 
     valor = request.args['patron']
     parametro = request.args['parametro']
     init_db(db_session)
@@ -161,6 +165,7 @@ def buscarfase():
 
 @app.route('/fase/buscarfase2', methods=['GET', 'POST'])
 def buscarfase2():
+    """ Funcion para buscar registros de la tabla Fase""" 
     valor = request.args['patron']
     parametro = request.args['parametro']
     init_db(db_session)
@@ -178,19 +183,21 @@ def buscarfase2():
 
 @app.route('/fase/administrarfase')
 def administrarfase():
+    """ Funcion para listar registros de la tabla Fase""" 
     init_db(db_session)
     fases = db_session.query(Fase).filter_by(id_proyecto=session['pry']).order_by(Fase.nro_orden)
     return render_template('fase/administrarfase.html', fases = fases)
 
 @app.route('/fase/listarfase')
 def listarfase():
+    """ Funcion para listar registros de la tabla Fase""" 
     init_db(db_session)
     fases2 = db_session.query(Fase).order_by(Fase.id_proyecto, Fase.nro_orden)
     return render_template('fase/listarfase.html', fases2 = fases2)
 
-""" Funcion para importar registros a la tabla Fase""" 
 @app.route('/fase/importarfase', methods=['GET', 'POST'])
 def importarfase():
+    """ Funcion para importar registros a la tabla Fase""" 
     init_db(db_session)
     pro = db_session.query(Proyecto).filter_by(id=session['pry']).first()
     f = db_session.query(Fase).filter_by(nro_orden=request.args.get('nro')).filter_by(id_proyecto=request.args.get('py')).first()  
@@ -228,6 +235,7 @@ def importarfase():
 
 @app.route('/fase/finalizarfase')
 def finalizarfase():
+    """ Funcion para finalizar registros de la tabla Fase""" 
     init_db(db_session)
     nro = request.args.get('nro')
     fase = db_session.query(Fase).filter_by(nro_orden=nro).filter_by(id_proyecto=session['pry']).first()
@@ -266,13 +274,13 @@ def finalizarfase():
                 flash('Error en la Base de Datos' + e.args[0],'info')
                 return redirect('/fase/administrarfase')
         
-"""Lanza un mensaje de error en caso de que la pagina solicitada no exista"""
 @app.errorhandler(404)
 def page_not_found(error):
+    """Lanza un mensaje de error en caso de que la pagina solicitada no exista"""
     return 'Esta Pagina no existe', 404
 
-"""Cierra la sesion de la conexion con la base de datos"""
 @app.after_request
 def shutdown_session(response):
+    """Cierra la sesion de la conexion con la base de datos"""
     db_session.remove()
     return response
