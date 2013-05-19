@@ -17,7 +17,6 @@
 <form id=buscar method=get action="/tipoAtributo/buscartipoAtributo">
 			<input type="text" name="patron" /> 
 			<select name=parametro>
-				<option value="codigo">Código</option>
 				<option value="nombre">Nombre</option>
 				<option value="descripcion">Descripción</option>
 			</select> 
@@ -41,15 +40,13 @@
 <table border="1">
 	<TR>
 		<TH class="c1"></TH>
-		<TH class="c2">Código</TH>
 		<TH class="c3">Nombre</TH>
 		<TH class="c4">Descripción</TH>
 	</TR>
 	{% for tipoAtributo in tipoAtributos %}
 	<TR>
-		<TD class="c1"><a href="{{ url_for('editartipoAtributo', cod=tipoAtributo.codigo) }}" ><img src="../static/images/e.png" alt="Editar" height="20" width="20" title="Editar" style="vertical-align: middle;"></a>
-		<a href="{{ url_for('eliminartipoAtributo', cod=tipoAtributo.codigo) }}" onclick="javascript:return confirmar()"><img src="../static/images/b.png" alt="Eliminar" height="20" width="20" title="Eliminar" style="vertical-align: middle;"> </a></TD>
-		<TD class="c2"><SPAN>{{tipoAtributo.codigo|e}}</SPAN></TD>
+		<TD class="c1"><a href="{{ url_for('editartipoAtributo', nombre=tipoAtributo.nombre) }}" ><img src="../static/images/e.png" alt="Editar" height="20" width="20" title="Editar" style="vertical-align: middle;"></a>
+		<a href="{{ url_for('eliminartipoAtributo', nombre=tipoAtributo.nombre) }}" onclick="javascript:return confirmar()"><img src="../static/images/b.png" alt="Eliminar" height="20" width="20" title="Eliminar" style="vertical-align: middle;"> </a></TD>
 		<TD class="c3"><SPAN>{{tipoAtributo.nombre|e}}</SPAN></TD>
 		<TD class="c4"><SPAN>{{tipoAtributo.descripcion|e}}</SPAN></TD>
 	</TR>

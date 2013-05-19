@@ -15,7 +15,6 @@
 		{% endif %} 
 	{% endwith %}
 	<form id=nuevotipoAtributo method=post action="/tipoAtributo/nuevotipoAtributo">
-    		<label>Código</label> {{ form.codigo() }}
     		<label>Nombre</label> {{ form.nombre() }}
     		<label>Descripción</label> {{ form.descripcion() }}
     	<p><input type=submit value=Guardar>
