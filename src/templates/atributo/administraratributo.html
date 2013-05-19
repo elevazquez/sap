@@ -50,13 +50,13 @@
 		</TR>
 		{% for atributo in atributos %}
 			<TD class="c1" width="100">
-				<a href="{{ url_for('editaratributo', codigo=atributo.codigo, nom=atributo.nombre, des=atributo.descripcion, id_tipo_atributo=atributo.tipo_atributo.nombre) }}" >
+				<a href="{{ url_for('editaratributo', codigo=atributo.codigo, nom=atributo.nombre, des=atributo.descripcion, id_tipo_atributo=atributo.atributotipo_atributo.nombre) }}" >
 				<img src="../static/images/e.png" alt="Editar" height="20" width="20" title="Editar" style="vertical-align: middle;"></a>
 				<a href="{{ url_for('eliminaratributo',  codigo=atributo.codigo) }}" onclick="javascript:return confirmar()"><img src="../static/images/b.png" alt="Eliminar" height="20" width="20" title="Eliminar" style="vertical-align: middle;"> </a></TD>
 			<TD class="c2"><SPAN>{{atributo.codigo|e}}</SPAN></TD>
 			<TD class="c3"><SPAN>{{atributo.nombre|e}}</SPAN></TD>
 			<TD class="c4"><SPAN>{{atributo.descripcion|e}}</SPAN></TD>
-			<TD class="c5"><SPAN>{{atributo.tipo_atributo.nombre|e}}</SPAN></TD>
+			<TD class="c5"><SPAN>{{atributo.atributotipo_atributo.nombre|e}}</SPAN></TD>
 			
 		<TR>
 		{% else %}

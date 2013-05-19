@@ -7,8 +7,8 @@
 		<ul>
 			<li><label>Código item: </label>{{ firstItem.codigo }}</li>
 			<li><label>Nombre item: </label>{{ firstItem.nombre }}</li>
-			<li><label>Fase: </label>{{ firstItem.fase.nombre }}</li>
-			<li><label>Proyecto: </label>{{ firstItem.fase.proyecto.nombre }}</li>
+			<li><label>Fase: </label>{{ firstItem.itemfase.nombre }}</li>
+			<li><label>Proyecto: </label>{{ firstItem.itemfase.faseproyecto.nombre }}</li>
 		</ul>
 		<b>Paso 2: Seleccionar item como padre o antecesor</b>
 	{% endif %}
@@ -29,10 +29,10 @@
 				<TD class="c4"><SPAN>{{item.codigo|e}}</SPAN></TD>
 				<TD class="c4"><SPAN>{{item.nombre|e}}</SPAN></TD>
 				<TD class="c4"><SPAN>{{item.descripcion|e}}</SPAN></TD>
-				<TD class="c4"><SPAN>{{item.usuario.nombre|e}}</SPAN></TD>
-				<TD class="c4"><SPAN>{{item.fase.nombre|e}}</SPAN></TD>
-				<TD class="c4"><SPAN>{{item.fase.proyecto.nombre|e}}</SPAN></TD>
-				<TD class="c4"><SPAN>{{item.tipo_item.nombre|e}}</SPAN></TD>
+				<TD class="c4"><SPAN>{{item.itemusuario.nombre|e}}</SPAN></TD>
+				<TD class="c4"><SPAN>{{item.itemfase.nombre|e}}</SPAN></TD>
+				<TD class="c4"><SPAN>{{item.itemfase.faseproyecto.nombre|e}}</SPAN></TD>
+				<TD class="c4"><SPAN>{{item.itemtipo_item.nombre|e}}</SPAN></TD>
 			</TR> 
 		{% else %}
 			<TR>
