@@ -1,3 +1,4 @@
+""" Modelo de la tabla Rol """
 from sqlalchemy import Column, Integer, String, Sequence
 from util.database import Base
 

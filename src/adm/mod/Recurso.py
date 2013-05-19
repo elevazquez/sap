@@ -1,3 +1,4 @@
+""" Modelo de la tabla Recurso """
 from sqlalchemy import Integer, Sequence, String, Column, ForeignKey
 from sqlalchemy.orm import relationship, backref
 from util.database import Base
@@ -10,9 +11,9 @@ class Recurso (Base):
     id = Column('id', Integer, Sequence('recurso_id_seq'), primary_key=True)
     nombre = Column('nombre', String(100))
     id_proyecto = Column(Integer, ForeignKey('proyecto.id'))
-    proyecto = relationship('Proyecto', backref=backref('proyectos', lazy='dynamic'))
+    recursoproyecto = relationship(Proyecto, backref=backref('recursoproyectos', lazy='dynamic'))
     id_fase = Column(Integer, ForeignKey('fase.id'))
-    fase = relationship('Fase', backref=backref('fases', lazy='dynamic'))
+    recursofase = relationship(Fase, backref=backref('recursofases', lazy='dynamic'))
     
     def __init__(self, nombre=None, id_proyecto=None, id_fase=None):
         self.nombre = nombre
@@ -20,5 +21,5 @@ class Recurso (Base):
         self.id_fase = id_fase
  
     def __repr__(self):
-        return '<Recurso %s %s %s>' % (self.nombre, self.proyecto, self.fase)
+        return '<Recurso %s %s %s>' % (self.nombre, self.id_proyecto, self.id_fase)
     

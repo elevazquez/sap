@@ -1,8 +1,10 @@
+""" Modelo de la tabla Linea Base """
 from sqlalchemy import *
 from util.database import Base
 
 class LineaBase (Base):
     __tablename__ = 'linea_base'
+    __table_args__ = {'extend_existing': True}
     id = Column('id', Integer, Sequence('linea_base_id_seq'), primary_key=True)
     descripcion = Column('descripcion', String(100))
     estado = Column('estado', String(1))

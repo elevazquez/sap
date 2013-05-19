@@ -1,3 +1,4 @@
+""" Modelo de la tabla Usuario """
 from sqlalchemy import Column, Integer, Sequence, String, Date
 from util.database import Base
 #Para implementar una clase de usuario mas sencilla se hereda de UserMixin

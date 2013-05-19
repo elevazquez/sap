@@ -1,3 +1,4 @@
+""" Modelo de la tabla RolPermiso """
 from sqlalchemy import Column, Sequence, ForeignKey, Integer
 from sqlalchemy.orm import relationship, backref
 from util.database import Base
@@ -9,9 +10,9 @@ class RolPermiso (Base):
     __table_args__ = {'extend_existing': True}
     id = Column('id', Integer, Sequence('rol_permiso_id_seq'), primary_key=True)
     id_rol = Column(Integer, ForeignKey('rol.id'))
-    rol = relationship('Rol', backref=backref('rolespermisos', lazy='dynamic'))
+    rolpermisorol = relationship(Rol, backref=backref('rolpermisorols', lazy='dynamic'))
     id_permiso = Column(Integer, ForeignKey('permiso.id'))
-    permiso = relationship('Permiso', backref=backref('permisosroles', lazy='dynamic'))
+    rolpermisopermiso = relationship(Permiso, backref=backref('rolpermisopermisos', lazy='dynamic'))
     
     def __init__(self, id_rol=None, id_permiso=None):
         self.id_rol = id_rol
