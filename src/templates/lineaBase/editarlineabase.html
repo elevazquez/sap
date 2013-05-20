@@ -4,115 +4,7 @@
 <div class="primary">
 <div >
 
-<SCRIPT> 
-function selectMultiple()
-{	
-	var selectItem = document.getElementsByTagName('select');
-	
-	for(i = 0; i < selectItem.length; i++)
-	{
-		if(selectItem[i].multiple)
-		{
-			selectItem[i].style.display = 'none';
-			selectItem[i].style.visibility = 'hidden';
-			
-			// Creamos el elemento UL de la nueva lista y le aplicamos una clase
-			var ulSelect = document.createElement("UL");
-				ulSelect.className = "selectMultiple";
-				
-			// Aplicamos al "nuevo select" los estilos de posicion y tamaño que pudiera tener el original
-			if(selectItem[i].style.width) ulSelect.style.width = selectItem[i].style.width;
-			if(selectItem[i].style.height) ulSelect.style.height = selectItem[i].style.height;
-			if(selectItem[i].style.position) ulSelect.style.position = selectItem[i].style.position;
-			if(selectItem[i].style.left) ulSelect.style.left = selectItem[i].style.left;
-			if(selectItem[i].style.top) ulSelect.style.top = selectItem[i].style.top;
-			if(selectItem[i].style.right) ulSelect.style.right = selectItem[i].style.right;
-			if(selectItem[i].style.bottom) ulSelect.style.bottom = selectItem[i].style.bottom;
-			
-			// Buscamos los value del SelectBox
-			liEls = selectItem[i].getElementsByTagName("option");
-			
-			for(e = 0; e < liEls.length; e++)
-			{
-				// Creamos la lista
-				liSelect = document.createElement("LI")
-				
-				// Comprobamos si el SelectBox original tiene algún option seleccionado
-				if(liEls[e].selected == true)
-				{
-					liSelect.className = "selected";
-				}
-				
-				// Creamos dos variables que nos muestre tanto el estado de selección del elemento como la posición que ocupa
-				liSelect.selected	= liEls[e].selected;
-				liSelect.selectC	= liEls[e];
-				liSelect.e			= e;
-				liSelect.i			= i;
-				
-				// Creamos el texto para la lista
-				textLi = document.createTextNode(liEls[e].text);
-				
-				// Acoplamos ese texto a cada lista
-				liSelect.appendChild(textLi);
-				
-				// Incluimos el evento que nos permite marcar y desmarcar el elemento seleccionado
-				liSelect.onclick = function(e,i)
-									{
-										if(this.className && this.className == "selected")
-										{
-											// Eliminamos la clase, no sin antes aplicar la regla según el navegador >:-(
-											if (navigator.appName == 'Microsoft Internet Explorer')
-											{
-												this.removeAttribute("className");
-											} else {
-												this.removeAttribute("class");
-											}
-											
-											// Deseleccionamos el elemento original
-											selectItem[this.i].getElementsByTagName("option")[this.e].selected = false;
-										} else {
-											this.className = "selected";
-											// Seleccionamos el elemento original
-											selectItem[this.i].getElementsByTagName("option")[this.e].selected = true;
-										}
-									}
-				
-				// Y acoplamos ese elemento al UL principal
-				ulSelect.appendChild(liSelect);
-			}	
-			
-			// Colocamos el nuevo SelectMultiple en el documento
-			document.body.appendChild(ulSelect);
-			
-			// Y lo posicionamos justo antes del Select Original
-			selectItem[i].parentNode.insertBefore(ulSelect,selectItem[i]);
-		}
-	}
-}
-
-// Esta función nos permite añadir una acción al evento onLoad
-function addLoadEvent(func) 
-{
-	var oldonload = window.onload;
-	if (typeof window.onload != 'function') 
-		{
-			window.onload = func;
-		} else {
-			window.onload = function() 
-				{
-					oldonload();
-					func();
-				}
-		}
-}
-
-// Ejecutamos directamente la función SelectMultiple 
-addLoadEvent(selectMultiple); 
-
- 
-</SCRIPT> 
-
-<h1>Modificar Linea Base</h1>		
+<h1>Visualizar Linea Base</h1>		
 <p></p>
 {% with errors = get_flashed_messages(category_filter=["error"]) %} 
 		{% if errors %}
@@ -127,66 +19,49 @@ addLoadEvent(selectMultiple);
 		{% endif %} 
 {% endwith %}
 
-<style type="text/css">  
-  ul.selectMultiple {
-	width: 200px;
-	height: 150px;
-	margin:0;
-	padding:0;
-	background: #fff;
-	border: 1px solid #999;
-	
-	Zoutline: 1px solid #999999;
-	
-	overflow: auto;
-}
 
-	ul.selectMultiple li {
-		padding:5px;
-		font-family: verdana;
-		font-size: 11px;
-		font-color: #000;
-		list-style: none;
-		border-bottom: 1px solid #eee;
-		cursor: pointer;
-	}
-	ul.selectMultiple li.selected {
-		background: #999;
-		color: #fff;
-		border-bottom: 1px dotted #888;
-	}
-    
-</style> 
 <form id=editarlineabase method=post action="/lineaBase/editarlineabase">
-	<label>Seleccione los items a añadir:</label>
-		<select id=select1 name="selecitems" multiple="multiple" style="height: 200px; width: 150px">
-			{% for item in itemsdisp %}
-			<option value="{{ item.id }}" >{{item.codigo|e}}  {{item.nombre|e}}</option>
-			 {% endfor %}
-		</select>
-		
-		
-
-	<label >Items en la Linea Base: </label>
-	
-		<select id=select2 name="itemenlb" multiple="multiple"  style="height: 200px; width: 150px">
-			{% for itemlb in itemslb %}
-			<option disabled >{{itemlb.codigo|e}}  {{itemlb.nombre|e}}</option>
-			 {% endfor %}
-		</select>
-			
-    
-    
-    
-     
+   <label>Items en Linea Base</label> 
+  <div style="height:200px;width:400px;overflow:auto;">
+	<table id="tablaitems" border="1">
+		<TR>
+			<TH class="c2">Codigo</TH>
+			<TH class="c3">Nombre</TH>	
+			<TH class="c4">Descripción</TH>
+			<TH class="c5">Estado</TH>
+			<TH class="c6">Fecha </TH>
+			<TH class="c7">Complejidad</TH>
+			<TH class="c8">Costo</TH>
+			<TH class="c9">Version</TH>
+			<TH class="c10">Fase</TH>
+			<TH class="c11">Tipo</TH>
+		</TR>
+		{% for item in itemslb %}
+			<TR>				
+				<TD class="c2"><SPAN>{{item.codigo|e}}</SPAN></TD>
+				<TD class="c3"><SPAN>{{item.nombre|e}}</SPAN></TD>
+				<TD class="c4"><SPAN>{{item.descripcion|e}}</SPAN></TD>
+				<TD class="c5"><SPAN>{{'Abierto' if item.estado=='I' else 'En Progreso' if item.estado=='P' 
+					else 'Resuelto' if item.estado=='R' else 'Aprobado' if item.estado=='A' else 'Eliminado' if item.estado=='E'
+					else 'Rechazado' if item.estado=='Z' else 'Revision' if item.estado=='V' else 'Bloqueado' if item.estado=='B' }}</SPAN></TD>
+				<TD class="c6"><SPAN>{{item.fecha|e}}</SPAN></TD>
+				<TD class="c7"><SPAN>{{item.complejidad|e}}</SPAN></TD>
+				<TD class="c8"><SPAN>{{item.costo|e}}</SPAN></TD>
+				<TD class="c9"><SPAN>{{item.version|e}}</SPAN></TD>
+				<TD class="c10"><SPAN>{{item.itemfase.nombre|e}}</SPAN></TD>
+				<TD class="c11"><SPAN>{{item.itemtipo_item.nombre|e}}</SPAN></TD>
+			</TR>
+		{% endfor %}
+	</table>
+ </div>
     <p></p>	<p></p><p></p>
     <input type="text" name="id" value="{{ form.id.data }}" id="descripcion" hidden="true"/>
     <label>Descripción</label> <input type="text" name="descripcion" value="{{ form.descripcion.data }}" id="descripcion" readonly="true"/>
  	<label>Estado</label><input type="text" name="estado" value="{{ form.estado.data }}" id="estado" readonly="true"/> 
  	<label>Fecha Creacion </label> <input type="date" name="fecha" value="{{form.fecha_creacion.data}}"  id="fecha" readonly="true"/>
 
-    	<p><input type=submit value=Guardar>
-  		<input type="button" value="Cancelar"  onClick="document.location.href='{{ url_for( 'administrarlineabase' ) }}';">
+   <p>
+  		<input type="button" value="Salir"  onClick="document.location.href='{{ url_for( 'administrarlineabase' ) }}';">
 </form>
 
 </div>

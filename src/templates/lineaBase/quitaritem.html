@@ -1,14 +1,11 @@
 {% extends "principal.html" %} 
 {% block content %}
-
 <div class="primary">
-<div >
-<h1>Nueva Linea Base</h1>		
-<p></p>
-{% with errors = get_flashed_messages(category_filter=["error"]) %} 
-		{% if errors %}
+	<h1>Quitar Item a Linea Base</h1>
+	{% with errors = get_flashed_messages(category_filter=["error"]) %} 
+			{% if errors %}
 			<div class="block-message">
-				<a class="close" href="{{ url_for( 'nuevalineabase' ) }}"
+				<a class="close" href="{{ url_for( 'agregaritem' ) }}"
 					dir="rtl">×</a>
 					<ul>
 						{%- for msg in errors %}
@@ -16,10 +13,8 @@
 					</ul>
 			</div>
 		{% endif %} 
-{% endwith %}
-
-<form id=nuevalineabase method=post action="/lineaBase/nuevalineabase">
-	<label>Seleccione los items:</label>
+	{% endwith %}
+<form id=quitaritem method=post action="/lineaBase/quitaritem">
 	<table id="tablaitems" border="1">
 		<TR>
 			<TH class="c1"></TH>
@@ -38,21 +33,16 @@
 					else 'Resuelto' if item.estado=='R' else 'Aprobado' if item.estado=='A' else 'Eliminado' if item.estado=='E'
 					else 'Rechazado' if item.estado=='Z' else 'Revision' if item.estado=='V' else 'Bloqueado' if item.estado=='B' }}</SPAN></TD>
 			</TR>
-		{% else %}
-			<TR>
-				<em>La fase no cuenta con Items que pueden ser agregados.</em>
-			</TR>
 		{% endfor %}
 	</table>
-
-    <label>Descripción</label> {{ form.descripcion() }}
- 	<label>Estado</label>{{ form.estado() }} 
- 	<label>Fecha Creacion </label> <input type="date" name="fecha" value="{{form.fechaCreacion.data}}"  id="fecha" readonly="true"/>
-
-    	<p><input type=submit value=Guardar>
-  		<input type="button" value="Cancelar"  onClick="document.location.href='{{ url_for( 'administrarlineabase' ) }}';">
+	<input type="text" name="id" value="{{ form.id.data }}" id="id" hidden="true"/>
+    <input type="text" name="descripcion" value="{{ form.descripcion.data }}" id="descripcion" readonly="true" hidden="true"/>
+ 	<input type="text" name="estado" value="{{ form.estado.data }}" id="estado" readonly="true" hidden="true"/> 
+ 	<input type="date" name="fecha" value="{{form.fecha_creacion.data}}"  id="fecha" readonly="true" hidden="true"/>
+	
+	<input type=submit name="Quitar" value="Quitar" />
+	<input type="button" value="Cancelar"  onClick="document.location.href='{{ url_for( 'administrarlineabase' ) }}';"> 
 </form>
-
-</div>
 </div>
 {% endblock %}
+
