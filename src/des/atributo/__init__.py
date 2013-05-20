@@ -31,10 +31,10 @@ def flash_errors(form):
 def nuevoatributo():
         """ Funcion para agregar registros a la tabla ATributos""" 
         form = AtributoFormulario(request.form)
-        init_db(db_session)
+        #init_db(db_session)
         form.id_tipo_atributo.choices= [(t.id, t.nombre) for t in db_session.query(TipoAtributo).order_by(TipoAtributo.nombre).all()]
         if request.method == 'POST' and form.validate():
-            init_db(db_session)
+            #init_db(db_session)
             try: 
                 att = Atributo(form.nombre.data, form.descripcion.data, form.id_tipo_atributo.data)
                 db_session.add(att)
@@ -52,7 +52,7 @@ def nuevoatributo():
 @app.route('/atributo/editaratributo', methods=['GET', 'POST'])
 def editaratributo():
     """funcion que sirve para modificar atributos"""
-    init_db(db_session)
+    #init_db(db_session)
     a = db_session.query(Atributo).filter_by(nombre=request.args.get('nom')).first()  
     form = AtributoEdFormulario(request.form,a)
     tipo_selected= db_session.query(TipoAtributo).filter_by(nombre=request.args.get('tipo_atributo')).first() 
@@ -81,9 +81,9 @@ def eliminaratributo():
     """funcion que elimina un atributo"""
     try:
         cod = request.args.get('nom')
-        init_db(db_session)
+        #init_db(db_session)
         atributo = db_session.query(Atributo).filter_by(nombre=cod).first()
-        init_db(db_session)
+        #init_db(db_session)
         db_session.delete(atributo)
         db_session.commit()
         return redirect('/atributo/administraratributo')
@@ -96,7 +96,7 @@ def buscaratributo():
     """funcion que permite buscar un atributos"""
     valor = request.args['patron']
     parametro = request.args['parametro']
-    init_db(db_session)
+    #init_db(db_session)
     if valor == "" : 
         administraratributo()
     if parametro == 'id_tipo_atributo':
@@ -107,7 +107,7 @@ def buscaratributo():
     
     
     valor = request.args['patron']
-    init_db(db_session)
+    #init_db(db_session)
     r = db_session.query(Atributo).filter_by(nombre=valor)
     if r == None:
         return 'No existe concordancia'
@@ -116,7 +116,7 @@ def buscaratributo():
 @app.route('/atributo/administraratributo')
 def administraratributo():
     """funcion que lista todos los atributos"""
-    init_db(db_session)
+    #init_db(db_session)
     atributos = db_session.query(Atributo).order_by(Atributo.nombre)
     return render_template('atributo/administraratributo.html', atributos = atributos)
 
