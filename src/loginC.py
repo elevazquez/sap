@@ -89,7 +89,9 @@ class Main(views.MethodView):
         return render_template('index.html')
     
     def post(self):
-        init_db(db_session)
+        print 'datos en el post'
+        #init_db(db_session)
+        print 'luego del init del db_session'
         if 'logout' in request.form :
             session.pop('username', None)
             return redirect(url_for('index'))
