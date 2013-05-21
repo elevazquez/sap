@@ -14,8 +14,8 @@ from ges.mod.LineaBase import LineaBase
 from des.mod.ItemAtributo import ItemAtributo
 from des.mod.Atributo import Atributo
 from des.mod.TItemAtributo import TItemAtributo
-#from ges.mod.Relacion  import Relacion
-#from ges.mod.TipoRelacion import TipoRelacion
+from ges.mod.Relacion  import Relacion
+from ges.mod.TipoRelacion import TipoRelacion
 import flask, flask.views
 from sqlalchemy.exc import DatabaseError
 from UserPermission import *
@@ -28,7 +28,6 @@ ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
 
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
 
 fase_global= None;
 tipo_global = None; 
@@ -50,17 +49,19 @@ def flash_errors(form):
             ),'error')
  
  
-""" Funcion que lista las fases en la cual se creara el item"""     
+ 
 @app.route('/item/listafase', methods=['GET', 'POST'])
-def listafase():   
+def listafase(): 
+    """ Funcion que lista las fases en la cual se creara el item"""      
     init_db(db_session)
     fases = db_session.query(Fase).from_statement(" select * from fase where id_proyecto = "+str(session['pry'])+" and estado != 'A' order by nro_orden " )
     return render_template('item/listafase.html', fases = fases)  
     
  
-""" Funcion que lista los tipo de items posibles del item a crear"""     
+    
 @app.route('/item/listatipoitem', methods=['GET', 'POST'])
 def listatipoitem():   
+    """ Funcion que lista los tipo de items posibles del item a crear""" 
     init_db(db_session)
     tipo = db_session.query(TipoItem).from_statement(" select * from tipo_item where id_fase = "+request.args.get('id_fase')+" order by codigo " )
     global fase_global
@@ -68,18 +69,16 @@ def listatipoitem():
     return render_template('item/listatipoitem.html', tipos = tipo)  
     
                    
-""" Funcion para agregar registros a la tabla de Item""" 
+ 
 @app.route('/item/nuevoitem', methods=['GET', 'POST'])
 def nuevoitem():
+    """ Funcion para agregar registros a la tabla de Item"""
     today = datetime.date.today()
-   # atributo = db_session.query(Atributo).from_statement(" select a.* from tipo_item ti , titem_atributo ta, atributo a "+
-   #                                                     " where ti.id = ta.id_tipo_item and a.id = ta.id_atributo and ti.id=  " +str(request.args.get('id_tipo')) )
     atributo = db_session.query(Atributo).join(TItemAtributo , TItemAtributo.id_atributo == Atributo.id).join(TipoItem, TipoItem.id == TItemAtributo.id_tipo_item).filter(TipoItem.id == request.args.get('id_tipo')).all()
     
     form = ItemFormulario(request.form)
     init_db(db_session)
-    form.usuario.data = session['user_id']    
-    
+    form.usuario.data = session['user_id']     
     
     form.version.data= 1    
     form.fecha.data= today   
@@ -89,8 +88,6 @@ def nuevoitem():
         
     if request.method == 'POST' and form.validate():
         try:
-            #atributo = db_session.query(Atributo).from_statement(" select a.* from tipo_item ti , titem_atributo ta, atributo a "+
-            #                                            " where ti.id = ta.id_tipo_item and a.id = ta.id_atributo and ti.id=  " +str(tipo_global) )
             atributo = db_session.query(Atributo).join(TItemAtributo , TItemAtributo.id_atributo == Atributo.id).join(TipoItem, TipoItem.id == TItemAtributo.id_tipo_item).filter(TipoItem.id == tipo_global).all()
     
             
@@ -142,35 +139,74 @@ def nuevoitem():
     return render_template('item/nuevoitem.html', form=form, att=atributo)
 
 
-"""Funcion que permite realizar busqueda de items"""
+
 @app.route('/item/buscarItem', methods=['GET', 'POST'])
 def buscarItem():
+    """Funcion que permite realizar busqueda de items"""
     valor = request.args['patron']
     parametro = request.args['parametro']
-    init_db(db_session)
-    
+    #init_db(db_session)
+   
     if valor == "" : 
             administraritem()
     if parametro == 'id_fase' :
-            i = db_session.query(Item).from_statement("SELECT i.* FROM item i, fase f where i.id_fase = f.id  and lower( f.nombre)  ilike lower( '%"+valor+"%' ) ").all()
+            i = db_session.query(Item).from_statement("Select it.*  from item it, fase fa ,"+ 
+                        " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id "+
+                        " and f.id_proyecto = "+str(session['pry'])+"  group by codigo order by 1 ) s "+
+                        " where it.codigo = cod and it.version= vermax and it.estado != 'E' and it.id_fase = fa.id  and lower( fa.nombre)  ilike lower( '%"+valor+"%' ) order by it.codigo ").all()
     elif parametro == 'id_tipo_item':
-            i = db_session.query(Item).from_statement("SELECT i.* FROM item i, tipo_item f where  i.id_tipo_item = f.id  and lower( f.nombre )  ilike lower('%"+valor+"%')").all()
+            i = db_session.query(Item).from_statement("Select it.*  from item it, tipo_item ti, "+ 
+                        " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id "+
+                        " and f.id_proyecto = "+str(session['pry'])+"  group by codigo order by 1 ) s "+
+                        " where it.codigo = cod and it.version= vermax and it.estado != 'E' and it.id_tipo_item = ti.id  and lower( ti.nombre)  ilike lower( '%"+valor+"%' ) order by it.codigo ").all()
+    elif parametro == 'estado':
+        if valor == 'Abierto':
+            val= 'I'
+        elif valor == 'En Progreso':
+            val = 'P'
+        elif valor == 'Resuelto':
+            val= 'R'
+        elif valor == 'Aprobado':
+            val = 'A'
+        elif valor == 'Eliminado':
+            val = 'E'
+        elif valor == 'Rechazado':
+            val = 'Z'
+        elif valor == 'Revision' :
+            val = 'V'
+        elif valor ==  'Bloqueado':
+            val = 'B'
+        i = db_session.query(Item).from_statement("Select it.*  from item it,  "+  
+                        " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id "+
+                        " and f.id_proyecto = "+str(session['pry'])+"  group by codigo order by 1 ) s "+
+                        " where it.codigo = cod and it.version= vermax and it.estado != 'E' and it.estado ilike '%"+val+"%'  order by it.codigo ").all()
+
+
     else:
-            i = db_session.query(Item).from_statement("SELECT * FROM item where "+parametro+" ilike '%"+valor+"%'").all()
-            return render_template('item/administraritem.html', items = i)    
+        i = db_session.query(Item).from_statement("Select it.*  from item it,  "+ 
+                        " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id "+
+                        " and f.id_proyecto = "+str(session['pry'])+"  group by codigo order by 1 ) s "+
+                        " where it.codigo = cod and it.version= vermax and it.estado != 'E' and lower( it."+parametro+" )  ilike lower( '%"+valor+"%' ) order by it.codigo ").all()
+
+    return render_template('item/administraritem.html', items = i)    
     valor = request.args['patron']
-    init_db(db_session)
-    r = db_session.query(Item).filter_by(nombre=valor)
+    #r = db_session.query(Item).filter_by(nombre=valor)
+    r = db_session.query(Item).from_statement("Select it.*  from item it,  "+ 
+                        " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id "+
+                        " and f.id_proyecto = "+str(session['pry'])+"  group by codigo order by 1 ) s "+
+                        " where it.codigo = cod and it.version= vermax and it.estado != 'E' and lower( it.nombre )  ilike lower( '%"+valor+"%' ) order by it.codigo  ").all()
+
     if r == None:
         return 'no existe concordancia'
     return render_template('item/administraritem.html', items = r)
 
 
-"""Funcion que permite editar un item"""
+
 @app.route('/item/editaritem', methods=['GET', 'POST'])
-def editaritem():   
+def editaritem():  
+    """Funcion que permite editar un item""" 
     today = datetime.date.today()
-    init_db(db_session)      
+    # init_db(db_session)      
     i = db_session.query(Item).filter_by(codigo=request.args.get('codigo')).filter_by(id=request.args.get('id')).first() 
     form = ItemEditarFormulario(request.form,i)             
     item = db_session.query(Item).filter_by(nombre=form.nombre.data).filter_by(id=request.args.get('id')).first()  
@@ -257,13 +293,14 @@ def editaritem():
     return render_template('item/editaritem.html', form=form, att=atributo ,vals=valoresatr )
 
 
-"""funcion que permite eliminar items"""
+
 @app.route('/item/eliminaritem', methods=['GET', 'POST'])
 def eliminaritem():
+    """funcion que permite eliminar items"""
     today = datetime.date.today()
     try:
         id_item = request.args.get('id')
-        init_db(db_session)
+    #    init_db(db_session)
         item = db_session.query(Item).filter_by(id= id_item).first()
         atributo = db_session.query(Atributo).from_statement(" select a.* from tipo_item ti , titem_atributo ta, atributo a "+
                                                         " where ti.id = ta.id_tipo_item and a.id = ta.id_atributo and ti.id=  " +str(request.args.get('tipo')) )
@@ -274,7 +311,7 @@ def eliminaritem():
             items = Item(item.codigo, item.nombre, item.descripcion, 
                      'P' , item.complejidad, today, item.costo, 
                     session['user_id']  , item.version +1 , item.id_fase , item.id_tipo_item, None )       
-            init_db(db_session)
+            #init_db(db_session)
             db_session.add(items)
             db_session.commit()
             item= items  
@@ -306,19 +343,21 @@ def eliminaritem():
             return render_template('item/administraritem.html')
      
 
-"""funcion que lista los item a escoger para la reversion"""     
+   
 @app.route('/item/listarreversionitem', methods=['GET', 'POST'])
 def listarreversionitem():   
-    init_db(db_session)
+    """funcion que lista los item a escoger para la reversion"""  
+    #init_db(db_session)
     item2 = db_session.query(Item).from_statement(" select * from item where codigo = '"+str(request.args.get('cod'))+"' and id != "+str(request.args.get('id'))+" order by version " )
     return render_template('item/listarreversionitem.html', items2 = item2)  
     
      
-"""funcion que permite la reversion de items"""     
+   
 @app.route('/item/reversionaritem', methods=['GET', 'POST'])
 def reversionaritem():  
+    """funcion que permite la reversion de items"""  
     today = datetime.date.today()
-    init_db(db_session)      
+    #init_db(db_session)      
     i = db_session.query(Item).filter_by(codigo=request.args.get('cod')).filter_by(id=request.args.get('id')).first() 
     atributo = db_session.query(Atributo).from_statement(" select a.* from tipo_item ti , titem_atributo ta, atributo a "+
                                                         " where ti.id = ta.id_tipo_item and a.id = ta.id_atributo and ti.id=  " +str(request.args.get('tipo')) )
@@ -359,10 +398,8 @@ def reversionaritem():
         global estado_global
         estado_global = estado
 
-
- 
     if request.method == 'POST' and form.validate():
-        init_db(db_session)
+       # init_db(db_session)
         try:
             
             maxversionitem = db_session.query(Item.version).from_statement("select *  from item where codigo = '"+form.codigo.data+"' and version = ( "+ 
@@ -398,19 +435,21 @@ def reversionaritem():
     return render_template('item/reversionaritem.html', form=form, att=atributo, vals=valoresatr)
     
 
-"""funcion que lista los items a ser revividos"""
+
 @app.route('/item/listarreviviritem', methods=['GET', 'POST'])
 def listarreviviritem():   
-    init_db(db_session)
+    """funcion que lista los items a ser revividos"""
+    #init_db(db_session)
     item2 = db_session.query(Item).from_statement(" select i.* from item i where i.estado = 'E' and version = (Select max(i2.version) from item i2 where i2.codigo = i.codigo ) order by i.codigo " )
     return render_template('item/listarreviviritem.html', items2 = item2)  
     
     
-"""funcion que permite revivir un item"""
+
 @app.route('/item/reviviritem', methods=['GET', 'POST'])
 def reviviritem():   
+    """funcion que permite revivir un item"""
     today = datetime.date.today()
-    init_db(db_session)      
+    #init_db(db_session)      
     i = db_session.query(Item).filter_by(codigo=request.args.get('cod')).filter_by(id=request.args.get('id')).first() 
     form = ItemEditarFormulario(request.form,i)             
     item = db_session.query(Item).filter_by(nombre=form.nombre.data).filter_by(id=request.args.get('id')).first()  
@@ -455,7 +494,7 @@ def reviviritem():
     #verifica si puede ser modificado:
    
     if request.method == 'POST' and form.validate():
-        init_db(db_session)
+        #init_db(db_session)
         try:   
             item_aux = db_session.query(Item).from_statement("select * from item where codigo= '"+form.codigo.data+"' and version = "+str(form.version.data)+"-1 " ).first()
             atributo = db_session.query(Atributo).from_statement(" select a.* from tipo_item ti , titem_atributo ta, atributo a "+
@@ -495,23 +534,26 @@ def reviviritem():
 
 @app.route('/item/administraritem')
 def administraritem():
-    init_db(db_session)
+    """Lista los items, su ultima version """
+    #init_db(db_session)
     item = db_session.query(Item).from_statement("Select it.*  from item it, "+ 
                         " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id "+
                         " and f.id_proyecto = "+str(session['pry'])+"  group by codigo order by 1 ) s "+
-                        " where it.codigo = cod and it.version= vermax and it.estado != 'E' " )
+                        " where it.codigo = cod and it.version= vermax and it.estado != 'E' order by it.codigo " )
     
     return render_template('item/administraritem.html', items = item)
 
 
-"""Lanza un mensaje de error en caso de que la pagina solicitada no exista"""
+
 @app.errorhandler(404)
 def page_not_found(error):
+    """Lanza un mensaje de error en caso de que la pagina solicitada no exista"""
     return 'Esta Pagina no existe', 404
 
-"""Cierra la sesion de la conexion con la base de datos"""
+
 @app.after_request
 def shutdown_session(response):
+    """Cierra la sesion de la conexion con la base de datos"""
     db_session.remove()
     return response
 
