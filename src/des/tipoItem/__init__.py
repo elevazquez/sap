@@ -36,7 +36,8 @@ def nuevotipoItem():
     """ Funcion para agregar registros a la tabla de Tipo de Item""" 
     form = TipoItemFormulario(request.form) 
     init_db(db_session)
-    form.id_fase.choices= [(f.id, f.nombre) for f in db_session.query(Fase).filter_by(id_proyecto=session['pry']).filter_by(estado='I').order_by(Fase.nombre).all()]
+    #form.id_fase.choices= [(f.id, f.nombre) for f in db_session.query(Fase).filter_by(id_proyecto=session['pry']).filter_by(estado='I').order_by(Fase.nombre).all()]
+    form.id_fase.choices= [(f.id, f.nombre) for f in db_session.query(Fase).from_statement("select * from fase where id_proyecto="+str(session['pry'])+" and (estado='I' or estado='P') order by nombre ").all()] 
     form.lista_atributo.choices = [(f.id, f.nombre) for f in db_session.query(Atributo).order_by(Atributo.nombre).all()]
     if request.method == 'POST' and form.validate():        
         try:
@@ -77,7 +78,8 @@ def editartipoItem():
     ti = db_session.query(TipoItem).filter_by(codigo=request.args.get('codigo')).first() 
     form = TipoItemFormulario(request.form,ti)  
     tipoItem = db_session.query(TipoItem).filter_by(codigo=form.codigo.data).first()
-    form.id_fase.choices= [(f.id, f.nombre) for f in db_session.query(Fase).filter_by(id_proyecto=session['pry']).order_by(Fase.nombre).all()]
+    #form.id_fase.choices= [(f.id, f.nombre) for f in db_session.query(Fase).filter_by(id_proyecto=session['pry']).order_by(Fase.nombre).all()]
+    form.id_fase.choices= [(f.id, f.nombre) for f in db_session.query(Fase).from_statement("select * from fase where id_proyecto="+str(session['pry'])+" and (estado='I' or estado='P') order by nombre ").all()] 
     fa = tipoItem.id_fase
     
     #fase_selected= db_session.query(Fase).filter_by(id=tipoItem.id_fase ).first()       
@@ -183,7 +185,6 @@ def administrartipoItem():
     init_db(db_session)
     tipoItems = db_session.query(TipoItem).order_by(TipoItem.nombre)
     return render_template('tipoItem/administrartipoItem.html', tipoItems = tipoItems)
-
 
 @app.route('/tipoItem/listartipoItem')
 def listartipoItem():
