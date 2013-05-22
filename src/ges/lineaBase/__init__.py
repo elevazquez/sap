@@ -9,6 +9,8 @@ from des.mod.Item import Item
 from adm.mod.Proyecto import Proyecto
 from ges.mod.LineaBase import LineaBase
 from des.mod.LbItem import LbItem
+from des.mod.Atributo import Atributo
+from des.mod.ItemAtributo import ItemAtributo
 from ges.lineaBase.LineaBaseFormulario import LineaBaseFormulario
 from ges.lineaBase.LineaBaseModifFormulario import LineaBaseModifFormulario
 import flask, flask.views
@@ -84,6 +86,7 @@ def nuevalineabase():
         
     if request.method == 'POST' and form.validate():                
         try:      
+            
             linea = LineaBase( form.descripcion.data, form.estado.data, form.fechaCreacion.data, None)
             db_session.add(linea)
             db_session.commit()  
@@ -92,13 +95,26 @@ def nuevalineabase():
             
             #se cambia el estado de los items involucrados
             for it in multiselect :
-                i = db_session.query(Item).filter_by(id=it).first()    
+                i = db_session.query(Item).filter_by(id=it).first()  
+                atributo = db_session.query(Atributo).from_statement(" select a.* from tipo_item ti , titem_atributo ta, atributo a "+
+                                                        " where ti.id = ta.id_tipo_item and a.id = ta.id_atributo and ti.id=  " +str(i.id_tipo_item) )
+    
+                valores_atr = db_session.query(ItemAtributo).from_statement(" select ia.* from item_atributo ia where ia.id_item= " +str(i.id) )
+                            
                 item = Item(i.codigo, i.nombre, i.descripcion, 'B', i.complejidad, today, i.costo, 
                     session['user_id']  , i.version +1 , i.id_fase , i.id_tipo_item , i.archivo)            
                 db_session.add(item)
                 db_session.commit()
                 list_aux.append(item)
-                id_fase= i.id_fase            
+                id_fase= i.id_fase  
+                # se actualizan los atributos del item si es que tienen
+                if atributo != None:
+                    for atr in atributo:
+                        for val in valores_atr:   
+                            if val.id_atributo == atr.id:                  
+                                ia= ItemAtributo(val.valor, item.id, atr.id)
+                                db_session.add(ia)
+                                db_session.commit()       
             
             #se guarda la linea base junto con los item pertenecientes al mismo          
             for it in list_aux:
