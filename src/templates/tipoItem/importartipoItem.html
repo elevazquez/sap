@@ -138,7 +138,7 @@ addLoadEvent(selectMultiple);
 			<label>Código</label> {{ form.codigo() }}
     		<label>Nombre</label> {{ form.nombre() }}
     		<label>Descripción</label> {{ form.descripcion() }}
-    		<label>Fase</label> {{ form.fase() }}
+    		<label>Fase</label> {{ form.id_fase() }}
     		<label>Atributos</label> {{ form.lista_atributo() }}
 		<p><input type=submit value=Guardar>
   		<input type="button" value="Cancelar"  onClick="document.location.href='{{ url_for( 'administrartipoItem' ) }}';"> 
