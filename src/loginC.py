@@ -60,8 +60,8 @@ def on_identity_loaded(sender, identity):
     # Add the UserNeed to the identity
     if hasattr(current_user, 'id'):
         identity.provides.add(UserNeed(current_user.id))
-    # Assuming the User model has a list of roles, update the
-    # identity with the roles that the user provides
+        # Assuming the User model has a list of roles, update the
+        # identity with the roles that the user provides
         roles = db_session.query(UsuarioRol).filter_by(id_usuario=current_user.id).all()
         for role in roles:
             identity.provides.add(RoleNeed(role.usuariorolrol.codigo))
@@ -69,8 +69,10 @@ def on_identity_loaded(sender, identity):
             for p in permisos:
               if p.id_fase == None and role.id_proyecto != None:
                   identity.provides.add(ItemNeed(p.codigo, role.id_proyecto , 'manage'))
-              else:
+              elif p.id_fase !=None :
                   identity.provides.add(ItemNeed(p.codigo, p.id_fase , 'manage'))
+              else:
+                  identity.provides.add(ItemNeed(p.codigo, None , 'manage'))
 
 
 #===============================================================================
@@ -127,8 +129,11 @@ class Main(views.MethodView):
             # session['username'] = username
             #===================================================================
             if 'is_administrador' in session:
-               if not session['is_administrador']:
-                   return redirect(url_for('getProyectoByUsuario', id_usuario = current_user.id))
+                if not session['is_administrador']:
+                    return redirect(url_for('getProyectoByUsuario', id_usuario = current_user.id))
+                else:
+                    permission = UserRol('ADMINISTRADOR')
+                    session['permission_admin'] = permission
         return redirect(url_for('index'))
 
 # el decorator indica que la vista requiere que los usuarios esten logueados
