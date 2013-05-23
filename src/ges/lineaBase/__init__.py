@@ -62,8 +62,7 @@ def listaitem():
 def agregaritems():   
     """ Funcion que agrega a una lista los items seleccionados para formar parte de la LB""" 
     #init_db(db_session)
-    selecteditem=  request.args.get('id_item')    
-    
+    selecteditem=  request.args.get('id_item')      
     items = db_session.query(Item).from_statement(" select * from item where id_fase = "+request.args.get('id_fase')+" and (estado = 'A' and estado != 'B') order by codigo " )
     return render_template('lineaBase/listaitem.html', items = items)  
    
@@ -170,7 +169,6 @@ def agregaritem():
                         " and f.id_proyecto = "+str(session['pry'])+"  group by codigo order by 1 ) s "+
                         " where it.codigo = cod and it.version= vermax and (it.estado = 'A' and it.estado != 'B') and it.id_fase= "+str(item_aux.id_fase)+" and it.id not in (select  id_item from lb_item ) order by it.codigo " )
        
-       
     
     if request.method == 'POST' and form.validate(): 
         items=request.form.getlist('selectitem')
@@ -178,12 +176,25 @@ def agregaritem():
             list_aux=[]
             #se cambia el estado de los items a ser agregados
             for it in items :
+                atri = db_session.query(Atributo).from_statement(" select at.* from tipo_item ti , titem_atributo ta, atributo at "+
+                                                        " where ti.id = ta.id_tipo_item and at.id = ta.id_atributo and ti.id=  " +str(it.id_tipo_item) )
+    
+                valores_atr = db_session.query(ItemAtributo).from_statement(" select ia.* from item_atributo ia where ia.id_item= " +str(it.id) )
+                    
                 i = db_session.query(Item).filter_by(id=it).first()    
                 item = Item(i.codigo, i.nombre, i.descripcion, 'B', i.complejidad, today, i.costo, 
                   session['user_id']  , i.version +1 , i.id_fase , i.id_tipo_item , i.archivo)            
                 db_session.add(item)
                 db_session.commit()
                 list_aux.append(item)
+                # se actualizan los atributos del item si es que tienen
+                if atri != None :
+                        for atr in atri :
+                            for val in valores_atr :   
+                                if val.id_atributo == atr.id :                  
+                                    ia= ItemAtributo(val.valor, item.id, atr.id)
+                                    db_session.add(ia)
+                                    db_session.commit()   
                 
             #se guarda la linea base junto con los item pertenecientes al mismo          
             for it in list_aux:
@@ -240,12 +251,25 @@ def quitaritem():
                 return redirect('/lineaBase/administrarlineabase')
             #se cambia el estado de los items a ser quitados de la Linea Base
             for it in items :
+                atri = db_session.query(Atributo).from_statement(" select at.* from tipo_item ti , titem_atributo ta, atributo at "+
+                                                        " where ti.id = ta.id_tipo_item and at.id = ta.id_atributo and ti.id=  " +str(it.id_tipo_item) )
+    
+                valores_atr = db_session.query(ItemAtributo).from_statement(" select ia.* from item_atributo ia where ia.id_item= " +str(it.id) )
+                 
                 i = db_session.query(Item).filter_by(id=it).first()    
                 item = Item(i.codigo, i.nombre, i.descripcion, 'A', i.complejidad, today, i.costo, 
                   session['user_id']  , i.version +1 , i.id_fase , i.id_tipo_item , i.archivo)            
                 db_session.add(item)
                 db_session.commit()
                 list_aux.append(i)
+                # se actualizan los atributos del item si es que tienen
+                if atri != None :
+                        for atr in atri :
+                            for val in valores_atr :   
+                                if val.id_atributo == atr.id :                  
+                                    ia= ItemAtributo(val.valor, item.id, atr.id)
+                                    db_session.add(ia)
+                                    db_session.commit()   
                 
             #se elimina el id de los item de la linea base          
             for it in list_aux:
@@ -301,13 +325,26 @@ def editarlineabase():
             multiselect = request.form.getlist('selecitems')
             list_aux=[]
             #se cambia el estado de los items a ser agregados
-            for it in multiselect :
+            for it in multiselect : 
+                atri = db_session.query(Atributo).from_statement(" select at.* from tipo_item ti , titem_atributo ta, atributo at "+
+                                                        " where ti.id = ta.id_tipo_item and at.id = ta.id_atributo and ti.id=  " +str(it.id_tipo_item) )
+    
+                valores_atr = db_session.query(ItemAtributo).from_statement(" select ia.* from item_atributo ia where ia.id_item= " +str(it.id) )
+                 
                 i = db_session.query(Item).filter_by(id=it).first()    
                 item = Item(i.codigo, i.nombre, i.descripcion, 'B', i.complejidad, today, i.costo, 
                     session['user_id']  , i.version +1 , i.id_fase , i.id_tipo_item , i.archivo)            
                 db_session.add(item)
                 db_session.commit()
                 list_aux.append(item)
+                # se actualizan los atributos del item si es que tienen
+                if atri != None :
+                        for atr in atri :
+                            for val in valores_atr :   
+                                if val.id_atributo == atr.id :                  
+                                    ia= ItemAtributo(val.valor, item.id, atr.id)
+                                    db_session.add(ia)
+                                    db_session.commit()   
                 
             #se guarda la linea base junto con los item pertenecientes al mismo          
             for it in list_aux:
@@ -375,6 +412,11 @@ def liberarlineabase():
             itemslb=  db_session.query(Item).join(LbItem, Item.id== LbItem.id_item).filter(LbItem.id_linea_base== id_linea ).filter(Item.estado=='B').all()   
    
             for i in itemslb :
+                atri = db_session.query(Atributo).from_statement(" select at.* from tipo_item ti , titem_atributo ta, atributo at "+
+                                                        " where ti.id = ta.id_tipo_item and at.id = ta.id_atributo and ti.id=  " +str(i.id_tipo_item) )
+    
+                valores_atr = db_session.query(ItemAtributo).from_statement(" select ia.* from item_atributo ia where ia.id_item= " +str(i.id) )
+                 
                 #i = db_session.query(Item).filter_by(id=it).first()    
                 item = Item(i.codigo, i.nombre, i.descripcion, 'A', i.complejidad, today, i.costo, 
                     session['user_id']  , i.version + 1 , i.id_fase , i.id_tipo_item , i.archivo)            
@@ -382,6 +424,14 @@ def liberarlineabase():
                 db_session.commit()
                 list_aux.append(i) #sale
                 list_aux2.append(item)#liberado
+                # se actualizan los atributos del item si es que tienen
+                if atri != None :
+                        for atr in atri :
+                            for val in valores_atr :   
+                                if val.id_atributo == atr.id :                  
+                                    ia= ItemAtributo(val.valor, item.id, atr.id)
+                                    db_session.add(ia)
+                                    db_session.commit()  
                 
             linea.estado='L'            
             linea.fecha_ruptura = today
