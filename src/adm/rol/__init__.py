@@ -57,89 +57,109 @@ def add():
 @app.route('/editar', methods=['GET', 'POST'])
 def editar():
     """ Funcion para editar registros de la tabla Rol""" 
-    #init_db(db_session)
-    r = db_session.query(Rol).filter_by(codigo=request.args.get('cod')).first()  
-    form = RolFormulario(request.form,r)
-    rol = db_session.query(Rol).filter_by(codigo=form.codigo.data).first()  
-    if request.method == 'POST' and form.validate():
-        try:
-            form.populate_obj(rol)
-            db_session.merge(rol)
-            db_session.commit()
-            return redirect('/administrarrol')
-        except DatabaseError, e:
-            flash('Error en la Base de Datos' + e.args[0],'error')
-            return render_template('rol/editarrol.html', form=form)
+    permission = UserRol('ADMINISTRADOR')
+    if permission.can():
+        #init_db(db_session)
+        r = db_session.query(Rol).filter_by(codigo=request.args.get('cod')).first()  
+        form = RolFormulario(request.form,r)
+        rol = db_session.query(Rol).filter_by(codigo=form.codigo.data).first()  
+        if request.method == 'POST' and form.validate():
+            try:
+                form.populate_obj(rol)
+                db_session.merge(rol)
+                db_session.commit()
+                return redirect('/administrarrol')
+            except DatabaseError, e:
+                flash('Error en la Base de Datos' + e.args[0],'error')
+                return render_template('rol/editarrol.html', form=form)
+        else:
+            flash_errors(form)
+        return render_template('rol/editarrol.html', form=form)
     else:
-        flash_errors(form)
-    return render_template('rol/editarrol.html', form=form)
+        return 'sin permisos'
 
 @app.route('/eliminar', methods=['GET', 'POST'])
 def eliminar():
     """ Funcion para eliminar registros de la tabla Rol""" 
-    try:
-        cod = request.args.get('cod')
-        #init_db(db_session)
-        rol = db_session.query(Rol).filter_by(codigo=cod).first()  
-        #init_db(db_session)
-        db_session.delete(rol)
-        db_session.commit()
-        return redirect('/administrarrol')
-    except DatabaseError, e:
+    permission = UserRol('ADMINISTRADOR')
+    if permission.can():
+        try:
+            cod = request.args.get('cod')
+            #init_db(db_session)
+            rol = db_session.query(Rol).filter_by(codigo=cod).first()  
+            #init_db(db_session)
+            db_session.delete(rol)
+            db_session.commit()
+            return redirect('/administrarrol')
+        except DatabaseError, e:
             flash('Error en la Base de Datos' + e.args[0],'info')
             return render_template('rol/administrarrol.html')
+    else:
+        return 'sin permisos'
 
 @app.route('/buscar', methods=['GET', 'POST'])
 def buscar():
     """ Funcion para buscar registros de la tabla Rol""" 
-    valor = request.args['patron']
-    parametro = request.args['parametro']
-    #init_db(db_session)
-    if valor == "" : 
-        administrarrol()
-    p = db_session.query(Rol).from_statement("SELECT * FROM rol where "+parametro+" ilike '%"+valor+"%'").all()
-    return render_template('rol/administrarrol.html', roles = p)
-    valor = request.args['patron']
-    #init_db(db_session)
-    r = db_session.query(Rol).filter_by(codigo=valor)
-    if r == None:
-        return 'no existe concordancia'
-    return render_template('rol/administrarrol.html', roles = r)
+    permission = UserRol('ADMINISTRADOR')
+    if permission.can():
+        valor = request.args['patron']
+        parametro = request.args['parametro']
+        #init_db(db_session)
+        if valor == "" : 
+            administrarrol()
+        p = db_session.query(Rol).from_statement("SELECT * FROM rol where "+parametro+" ilike '%"+valor+"%'").all()
+        return render_template('rol/administrarrol.html', roles = p)
+        valor = request.args['patron']
+        #init_db(db_session)
+        r = db_session.query(Rol).filter_by(codigo=valor)
+        if r == None:
+            return 'no existe concordancia'
+        return render_template('rol/administrarrol.html', roles = r)
+    else:
+        return 'sin permisos'
 
 @app.route('/administrarrol', methods=['GET', 'POST'])
 def administrarrol():
     """ Funcion para listar registros de la tabla Rol""" 
-    #init_db(db_session)
-    roles = db_session.query(Rol).order_by(Rol.codigo)
-    return render_template('rol/administrarrol.html', roles = roles)
+    permission = UserRol('ADMINISTRADOR')
+    if permission.can():
+        #init_db(db_session)
+        roles = db_session.query(Rol).order_by(Rol.codigo)
+        return render_template('rol/administrarrol.html', roles = roles)
+    else:
+        return 'sin permisos'
 
 @app.route('/rol/asignarpermiso', methods=['GET', 'POST'])
 def asignarpermiso():
-    """ Funcion para asignar Permisos a cada Rol""" 
-    idrol = request.args.get('idrol')
-    if request.method == 'POST':
-        rol = request.form.get('idrol')
-        permisos=request.form.getlist('permisos')
-        ps= getPermisosByRol(rol)
-        for per in ps:
-            #===================================================================
-            # Elimina los permisos de los roles que ya no se encuentran seleccionados
-            #===================================================================
-            if not (permisos.count(per.id) > 0) :
-                rp= db_session.query(RolPermiso).filter_by(id_rol=rol, id_permiso=per.id).first()
-                db_session.delete(rp)
-                db_session.commit()
-        #=======================================================================
-        # Inserta los roles permisos seleccionados, si no existe realiza el merge y confirma los cambios
-        #=======================================================================
-        for p in permisos :
-            rolper = RolPermiso(rol, p)
-            exits = db_session.query(RolPermiso).filter_by(id_rol=rol, id_permiso=p).first()
-            if not exits:
-                db_session.merge(rolper)
-                db_session.commit()
-        return redirect('/administrarrol')
-    return redirect(url_for('administrarpermiso', isAdministrar = False, idrol = idrol))
+    """ Funcion para asignar Permisos a cada Rol"""
+    permission = UserRol('ADMINISTRADOR')
+    if permission.can(): 
+        idrol = request.args.get('idrol')
+        if request.method == 'POST':
+            rol = request.form.get('idrol')
+            permisos=request.form.getlist('permisos')
+            ps= getPermisosByRol(rol)
+            for per in ps:
+                #===================================================================
+                # Elimina los permisos de los roles que ya no se encuentran seleccionados
+                #===================================================================
+                if not (permisos.count(per.id) > 0) :
+                    rp= db_session.query(RolPermiso).filter_by(id_rol=rol, id_permiso=per.id).first()
+                    db_session.delete(rp)
+                    db_session.commit()
+            #=======================================================================
+            # Inserta los roles permisos seleccionados, si no existe realiza el merge y confirma los cambios
+            #=======================================================================
+            for p in permisos :
+                rolper = RolPermiso(rol, p)
+                exits = db_session.query(RolPermiso).filter_by(id_rol=rol, id_permiso=p).first()
+                if not exits:
+                    db_session.merge(rolper)
+                    db_session.commit()
+            return redirect('/administrarrol')
+        return redirect(url_for('administrarpermiso', isAdministrar = False, idrol = idrol))
+    else:
+        return 'sin permisos'
 
 @app.errorhandler(404)
 def page_not_found(error):
