@@ -8,6 +8,7 @@ from adm.permiso import administrarpermiso
 from adm.rol.RolFormulario import RolFormulario
 from adm.mod.RolPermiso import RolPermiso
 from adm.permiso import getPermisosByRol
+from UserPermission import UserPermission, UserRol
 import flask, flask.views
 import os
 
@@ -29,25 +30,29 @@ def flash_errors(form):
 
 @app.route('/add', methods=['GET', 'POST'])
 def add():
-    """ Funcion para agregar registros a la tabla Rol""" 
-    form = RolFormulario(request.form)
-    if request.method == 'POST' and form.validate():
-        #init_db(db_session)
-        try:
-            rol = Rol(form.codigo.data, form.descripcion.data)
-            db_session.add(rol)
-            db_session.commit()
-            flash('El rol ha sido registrado con exito','info')
-            return redirect('/administrarrol') #/listarol
-        except DatabaseError, e:
-            if e.args[0].find('duplicate key value violates unique')!=-1:
-                flash('Clave unica violada por favor ingrese otro CODIGO de Rol' ,'error')
-            else:
-                flash('Error en la Base de Datos' + e.args[0],'error')
-            return render_template('rol/nuevorol.html', form=form)
+    """ Funcion para agregar registros a la tabla Rol"""
+    permission = UserRol('ADMINISTRADOR')
+    if permission.can():
+        form = RolFormulario(request.form)
+        if request.method == 'POST' and form.validate():
+            #init_db(db_session)
+            try:
+                rol = Rol(form.codigo.data, form.descripcion.data)
+                db_session.add(rol)
+                db_session.commit()
+                flash('El rol ha sido registrado con exito','info')
+                return redirect('/administrarrol') #/listarol
+            except DatabaseError, e:
+                if e.args[0].find('duplicate key value violates unique')!=-1:
+                    flash('Clave unica violada por favor ingrese otro CODIGO de Rol' ,'error')
+                else:
+                    flash('Error en la Base de Datos' + e.args[0],'error')
+                return render_template('rol/nuevorol.html', form=form)
+        else:
+            flash_errors(form) 
+        return render_template('rol/nuevorol.html', form=form)
     else:
-        flash_errors(form) 
-    return render_template('rol/nuevorol.html', form=form)
+        return 'sin permisos'
 
 @app.route('/editar', methods=['GET', 'POST'])
 def editar():

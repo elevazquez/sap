@@ -5,6 +5,8 @@ from flask_login import LoginManager, login_user, logout_user, login_required, c
 from util.database import init_db, engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 import md5
+from adm.mod.UsuarioRol import *
+from adm.mod.Usuario import *
 
 app = Flask(__name__)
 app.secret_key="sap"
@@ -21,9 +23,6 @@ from des.item import *
 from des.tipoAtributo import *
 from ges.relacion import *
 from ges.lineaBase import *
-from ges.solicitud import *
-from adm.mod.UsuarioRol import *
-from adm.mod.Usuario import *
 
 
 #load the extension
