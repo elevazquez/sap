@@ -10,12 +10,13 @@ db_session = scoped_session(sessionmaker(autocommit=False,
                                        bind=engine))
 
 class ItemEditarFormulario(Form): 
+    id = IntegerField('Id', [validators.Required()])  
     codigo = TextField('Codigo', [validators.Length(min=2, max=50), validators.Required()])    
     nombre = TextField('Nombre', [validators.Length(min=2, max=50), validators.Required()])
     descripcion = TextField('Descripcion', [validators.Length(min=2, max=100), validators.Required()])
     estado= TextField('Estado',[validators.Required()])
-    #estado = SelectField('Estado', choices=[('I', 'Abierto'), ('P', 'En Progreso'), ('R', 'Resuelto'), ('A', 'Aprobado'), 
-    #                                      ('Z', 'Rechazado'), ('V', 'Revision'),  ('B', 'Bloqueado')   ])
+   # estado = SelectField('Estado', choices=[('I', 'Abierto'), ('P', 'En Progreso'), ('R', 'Resuelto'), ('A', 'Aprobado'), 
+   #                                       ('Z', 'Rechazado'), ('V', 'Revision'),  ('B', 'Bloqueado')   ])
     
     complejidad = IntegerField('Complejidad', [validators.Required()]) 
     fecha = DateField('Fecha', format='%Y-%m-%d' )
@@ -23,5 +24,7 @@ class ItemEditarFormulario(Form):
     version = IntegerField('Version', [validators.Required()]) 
     usuario = IntegerField('Usuario', [validators.Required()]) 
     fase = TextField('Fase',[validators.Required()])   
+    id_fase_f = IntegerField('Id_fase', [validators.Required()]) 
     tipo_item = TextField('Tipo Item',[validators.Required()]) 
+    id_tipo_f = IntegerField('Id_tipo', [validators.Required()])
     
