@@ -1,4 +1,4 @@
-from wtforms import Form, TextField, validators, IntegerField, SelectField, DateField,DecimalField
+from wtforms import Form, TextField, validators, IntegerField, DateField,DecimalField
 from adm.mod.Usuario import  Usuario
 from des.mod.Fase import Fase
 from des.mod.TipoItem import TipoItem
@@ -15,9 +15,6 @@ class ItemEditarFormulario(Form):
     nombre = TextField('Nombre', [validators.Length(min=2, max=50), validators.Required()])
     descripcion = TextField('Descripcion', [validators.Length(min=2, max=100), validators.Required()])
     estado= TextField('Estado',[validators.Required()])
-   # estado = SelectField('Estado', choices=[('I', 'Abierto'), ('P', 'En Progreso'), ('R', 'Resuelto'), ('A', 'Aprobado'), 
-   #                                       ('Z', 'Rechazado'), ('V', 'Revision'),  ('B', 'Bloqueado')   ])
-    
     complejidad = IntegerField('Complejidad', [validators.Required()]) 
     fecha = DateField('Fecha', format='%Y-%m-%d' )
     costo = DecimalField('Costo', [validators.Required()]) 

@@ -101,7 +101,7 @@ def nuevoitem():
            
             # f = open(form.archivo.file, 'rb')
             #binary = f.read()
-            file = request.files['file']
+            #############file = request.files['file']
             #mypic = open(form.archivo.data, 'rb').read()
             #curs.execute("insert into blobs (file) values (%s)",
     
@@ -882,6 +882,42 @@ def administraritem():
     return render_template('item/administraritem.html', items = item)
 
 
+def obtenerCostoItem(id_item):
+        """funcion que relorna el costo de un item"""
+        item = db_session.query(Item).filter_by(id=id_item).first()  
+        return item.costo 
+     
+def obtenerCostoTotal(listitem):
+        """funcion que relorna el costo Total de un conjunto de  item"""
+        costoTotal= 0
+        if listitem != None:
+            for item in listitem :
+                costoTotal = costoTotal + item.costo
+        return costoTotal
+
+def obtenerCostoTotalRelaciones(id_item):
+        """funcion que retorna el costo Total de un item junto con el costo de sus relaciones directas"""
+        #items padres y sus relaciones
+        list_item_padres = db_session.query(Item).from_statement(" select * from item where id in ( select r.id_item  from item i, relacion r "+
+                                                            " where i.id = r.id_item_duenho and r.id_item_duenho= "+str(id_item)+" ) ")
+
+        list_item_hijos = db_session.query(Item).from_statement(" select * from item where id in ( select r.id_item_duenho   from item i, relacion r "+
+                                                            " where i.id = r.id_item and r.id_item = "+str(id_item)+" ) ")
+    
+        costoTotal= 0
+        #COSTO DEL ITEM
+        item = db_session.query(Item).filter_by(id=id_item).first()  
+        costoTotal = costoTotal + item.costo
+        #COSTO DE LAS RELACIONES
+        if list_item_padres != None:
+            for item1 in list_item_padres :
+                costoTotal = costoTotal + item1.costo
+        if list_item_hijos != None:
+            for item1 in list_item_hijos :
+                costoTotal = costoTotal + item1.costo       
+                
+        return costoTotal 
+     
 
 @app.errorhandler(404)
 def page_not_found(error):
