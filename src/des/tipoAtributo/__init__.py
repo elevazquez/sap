@@ -34,9 +34,9 @@ def nuevotipoAtributo():
     """ Funcion para agregar registros a la tabla TipoAtributo""" 
     
     form = TipoAtributoFormulario(request.form)
-    #init_db(db_session)
+    ##init_db(db_session)
     if request.method == 'POST' and form.validate():
-        #init_db(db_session)
+        ##init_db(db_session)
         try:
             tipoAtributo = TipoAtributo( form.nombre.data, form.descripcion.data)
             db_session.add(tipoAtributo)
@@ -56,7 +56,7 @@ def nuevotipoAtributo():
 @app.route('/tipoAtributo/editartipoAtributo', methods=['GET', 'POST'])
 def editartipoAtributo():
     """funcion que permite editar un Tipo de Atributo"""
-    #init_db(db_session)
+    ##init_db(db_session)
     f = db_session.query(TipoAtributo).filter_by(nombre=request.args.get('nombre')).first()  
     form = TipoAtributoFormulario(request.form,f)
     tipoAtributo = db_session.query(TipoAtributo).filter_by(nombre=form.nombre.data).first()  
@@ -76,7 +76,7 @@ def editartipoAtributo():
 @app.route('/tipoAtributo/eliminartipoAtributo', methods=['GET', 'POST'])
 def eliminartipoAtributo():
     """funcion que permite eliminar un tipo atributo"""
-    #init_db(db_session)
+    ##init_db(db_session)
     ta = db_session.query(TipoAtributo).filter_by(nombre=request.args.get('nombre')).first()  
     a = db_session.query(Atributo).filter_by(id_tipo_atributo=ta.id).first()
     if a != None :
@@ -84,9 +84,9 @@ def eliminartipoAtributo():
         return render_template('tipoAtributo/administrartipoAtributo.html')  
     try:
         cod = request.args.get('nombre')
-        #init_db(db_session)
+        ##init_db(db_session)
         tipoAtributo = db_session.query(TipoAtributo).filter_by(nombre=cod).first()  
-        #init_db(db_session)
+        ##init_db(db_session)
         db_session.delete(tipoAtributo)
         db_session.commit()
         return redirect('/tipoAtributo/administrartipoAtributo')
@@ -99,7 +99,7 @@ def buscartipoAtributo():
     """funcion que permite buscar tipo de atributos"""
     valor = request.args['patron']
     parametro = request.args['parametro']
-    #init_db(db_session)
+    ##init_db(db_session)
     if valor == "" : 
         p = db_session.query(TipoAtributo).order_by(TipoAtributo.nombre)
     else:
@@ -108,7 +108,7 @@ def buscartipoAtributo():
 
 @app.route('/tipoAtributo/administrartipoAtributo')
 def administrartipoAtributo():
-    #init_db(db_session)
+    ##init_db(db_session)
     tipoAtributos = db_session.query(TipoAtributo).order_by(TipoAtributo.nombre)
     return render_template('tipoAtributo/administrartipoAtributo.html', tipoAtributos = tipoAtributos)
 

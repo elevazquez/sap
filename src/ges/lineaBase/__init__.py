@@ -42,7 +42,7 @@ def flash_errors(form):
 @app.route('/lineaBase/listafaselb', methods=['GET', 'POST'])
 def listafaselb():   
     """ Funcion que lista las fases de la cual se escoge una para la creacion de la LB"""   
-    #init_db(db_session)
+    ##init_db(db_session)
     fases = db_session.query(Fase).from_statement(" select * from fase where id_proyecto = "+str(session['pry'])+" and estado !='I' order by nro_orden " )
     return render_template('lineaBase/listafaselb.html', fases = fases)  
 
@@ -51,7 +51,7 @@ def listafaselb():
 @app.route('/lineaBase/listaitem', methods=['GET', 'POST'])
 def listaitem():   
     """ Funcion que lista los items posibles a formar parte de una linea base""" 
-    #init_db(db_session)
+    ##init_db(db_session)
     items = db_session.query(Item).from_statement(" select * from item where id_fase = "+request.args.get('id_fase')+" and (estado = 'A' and estado != 'B') order by codigo " )
     return render_template('lineaBase/listaitem.html', items = items)  
 
@@ -61,7 +61,7 @@ def listaitem():
 @app.route('/lineaBase/agregaritems', methods=['GET', 'POST'])
 def agregaritems():   
     """ Funcion que agrega a una lista los items seleccionados para formar parte de la LB""" 
-    #init_db(db_session)
+    ##init_db(db_session)
     selecteditem=  request.args.get('id_item')      
     items = db_session.query(Item).from_statement(" select * from item where id_fase = "+request.args.get('id_fase')+" and (estado = 'A' and estado != 'B') order by codigo " )
     return render_template('lineaBase/listaitem.html', items = items)  
@@ -76,7 +76,7 @@ def nuevalineabase():
     today = datetime.date.today()
     form =  LineaBaseFormulario(request.form)
     form.fechaCreacion.data= today
-    #init_db(db_session)       
+    ##init_db(db_session)       
     items = db_session.query(Item).from_statement("Select it.*  from item it, "+ 
                         " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id "+
                         " and f.id_proyecto = "+str(session['pry'])+"  group by codigo order by 1 ) s "+
@@ -141,7 +141,7 @@ def nuevalineabase():
 def agregaritem():
     """ Funcion para asignar Items a una linea base""" 
     today = datetime.date.today()
-    #init_db(db_session)   
+    ##init_db(db_session)   
     lin = db_session.query(LineaBase).filter_by(id=request.args.get('id_linea')).first()  
    
     if  request.args.get('id_linea') == None:
@@ -216,7 +216,7 @@ def agregaritem():
 def quitaritem():
     """ Funcion para quitar Items de una linea base""" 
     today = datetime.date.today()
-    #init_db(db_session)   
+    ##init_db(db_session)   
     lin = db_session.query(LineaBase).filter_by(id=request.args.get('id_linea')).first()  
    
     if  request.args.get('id_linea') == None:
@@ -292,7 +292,7 @@ def quitaritem():
 def editarlineabase():
     """Funcion para buscar una Linea Base"""
     today = datetime.date.today()
-    #init_db(db_session)   
+    ##init_db(db_session)   
     lin = db_session.query(LineaBase).filter_by(id=request.args.get('id_linea')).first()  
    
     if  request.args.get('id_linea') == None:
@@ -366,7 +366,7 @@ def buscarlineabase():
     """"Funcion para buscar una linea Base"""
     valor = request.args['patron']
     parametro = request.args['parametro']
-    #init_db(db_session)
+    ##init_db(db_session)
     if valor == "" : 
         administrarlineabase()
     p = db_session.query(LineaBase).from_statement("SELECT * FROM linea_base where "+parametro+" ilike '%"+valor+"%' ").all()
@@ -382,7 +382,7 @@ def buscarlineabase():
 def liberarlineabase():  
     """funcion que permite la liberacion de lineas base"""  
     today = datetime.date.today()
-    #init_db(db_session)   
+    ##init_db(db_session)   
     lin = db_session.query(LineaBase).filter_by(id=request.args.get('id_linea')).first()  
    
     if  request.args.get('id_linea') == None:
@@ -464,7 +464,7 @@ def liberarlineabase():
 @app.route('/lineaBase/administrarlineabase')
 def administrarlineabase():
     """Funcion que lista todas las lineas Bases"""
-    init_db(db_session)
+    #init_db(db_session)
     LB = db_session.query(LineaBase).join(LbItem, LineaBase.id== LbItem.id_linea_base).join(Item, LbItem.id_item== Item.id).join(Fase,Item.id_fase ==Fase.id).filter(Fase.id_proyecto==session['pry']).all()    
     return render_template('lineaBase/administrarlineabase.html', lineas = LB)
 
