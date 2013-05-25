@@ -21,16 +21,67 @@ def flash_errors(form):
                 error
             ),'error')
 
-""" Funcion para calcular impacto""" 
 @app.route('/calculoimpacto', methods=['GET', 'POST'])
-def calculoImpacto():
-    caminos = []
-    item=[1]
-    items = getItemsPadres()
-    for i in items:
-        item.append(i.id)
+def calculoImpactoAll():
+    caminos = getAllCaminos(1)
+    caminoImpacto = []
+    for camino in caminos :
+        impacto = 0
+        for item in camino :
+            impacto = impacto + item.complejidad
+        caminoImpacto.append(impacto)
+    
+    return
         
+def getAllCaminos(item):
+    """ Funcion para calcular impacto"""
+    caminos = []
+    unicoCamino = [item]
+    caminos.append(unicoCamino)
+    caminosItem = getCaminos(caminos)
+    return caminosItem
     
-def getItemsPadres():
-    return db_session.query(Item).join(Relacion, Relacion.id_item == Item.id).filter(Relacion.estado == 'A')
+def getItemsPadres(idItem):
+    return db_session.query(Item).join(Relacion, Relacion.id_item == Item.id).filter(Item.id == idItem).filter(Relacion.estado == 'A')
     
+def getListas(listaItem, ultimoItem, itemsAAnhadir):
+    listaNueva=[]
+    for i in itemsAAnhadir:
+        auxiliar = listaItem
+        auxiliar.append(i)
+        listaNueva.append(auxiliar)
+    return listaNueva
+
+def getCaminos(listaCamino):
+    bandera= True
+    unicoCamino = listaCamino[0]
+    tamanho = len(unicoCamino) - 1
+    ultimoItem = listaCamino[tamanho]
+    itemsAAnhadir = getItemsPadres(ultimoItem.id)
+    unicoCamino = listaCamino.pop(0)
+    while bandera:
+        listaNuevoCamino = getListas(unicoCamino, ultimoItem , itemsAAnhadir)
+        for camino in listaNuevoCamino :
+            listaCamino.append(camino)
+        
+        tamanho = len(listaCamino) - 1
+        unicoCamino = listaCamino.pop(0)
+        posicion = len(unicoCamino) - 1
+        ultimoItem = unicoCamino[posicion]
+        itemsAAnhadir = getItemsPadres(ultimoItem)
+        s = 0
+        while itemsAAnhadir == None and s < tamanho :
+            listaCamino.append(unicoCamino)
+            unicoCamino = listaCamino.pop(0)
+            posicion = len(unicoCamino) - 1
+            ultimoItem = unicoCamino[posicion]
+            itemsAAnhadir = getItemsPadres(ultimoItem)
+            s = s + 1
+        
+        if itemsAAnhadir != None :
+            bandera =  True
+        else:
+            if s == tamanho :
+                bandera = False
+                listaCamino.append(unicoCamino)
+    return listaCamino
