@@ -344,8 +344,9 @@ def quitaritemsol():
         return render_template('solicitud/administrarsolicitud.html')     
     form = SolicitudFormulario(request.form,sol) 
     #solicitud = db_session.query(SolicitudCambio).filter_by(id= sol.id).first() 
-    #itemssol=  db_session.query(SolicitudCambio).join(SolicitudCambio, Item.id== SolicitudItem.id_item).filter(SolicitudItem.id_solicitud== id_sol ).filter(Item.estado=='B').all()   
-    itemssol=  db_session.query(SolicitudItem).join(Item, SolicitudItem.id_item== Item.id).filter(SolicitudItem.id_solicitud== sol.id ).all()   
+    #itemssol=  db_session.query(SolicitudItem).join(Item, SolicitudItem.id_item== Item.id).filter(SolicitudItem.id_solicitud== sol.id ).all()   
+    #itemssol=  db_session.query(SolicitudItem).from_statement("select * from item where id in(select id_item from solicitud_item where id_solicitud='"+str(sol.id)+"')")
+    itemssol=  db_session.query(Item).join(SolicitudItem, SolicitudItem.id_item== Item.id).filter(SolicitudItem.id_solicitud== sol.id ).all()   
     if request.method == 'POST' and form.validate(): 
         items=request.form.getlist('selectitem')
         try:
