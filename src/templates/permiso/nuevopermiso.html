@@ -5,7 +5,7 @@
 	<form id=nuevopermiso method=post action="/permiso/nuevopermiso">
     	{{ form.codigo.label }} {{ form.codigo() }}
     	{{ form.descripcion.label }} {{ form.descripcion() }}
-    	{{ form.id_recurso.label }} {{ form.id_recurso() }}
+    	{{ form.id_fase.label }} {{ form.id_fase() }}
   		<p><input type=submit value=Guardar>
   		<input type="button" value="Cancelar"  onClick="document.location.href='{{ url_for( 'administrarpermiso' ) }}';">
 	</form>
