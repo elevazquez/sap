@@ -1,0 +1,49 @@
+{% extends "principal.html" %} 
+{% block content %}
+<div class="primary">
+<div >
+<h1>Nueva Solicitud de Cambio</h1>		
+<p></p>
+{% with errors = get_flashed_messages(category_filter=["info"]) %}
+{% if errors %}
+<div class="block-message">
+  <a class="close" href="{{ url_for( 'listaritem' ) }}" dir="rtl">×</a>
+  <ul>
+    {%- for msg in errors %}
+    <li>{{ msg }}</li>
+    {% endfor -%}
+  </ul>
+</div>
+{% endif %}
+{% endwith %}
+<em>Seleccione un Item:</em>
+<div style="height:250px;width:800px;overflow:auto;">
+<table border="1">
+	<TR>
+		<TH class="c1"></TH>
+		<TH class="c2">Codigo</TH>
+		<TH class="c3">Nombre</TH>
+		<TH class="c4">Descripción</TH>
+		<TH class="c7">Complejidad</TH>
+		<TH class="c8">Costo</TH>
+	</TR>
+	{% for item in items %}
+	<TR>
+		<TD class="c1" width="200"><a href="{{ url_for('agregaritemssol', cod_item=item.codigo, id_item=item.id, estado_item= item.estado) }}">Agregar</a></TD>
+		<TD class="c2"><SPAN>{{item.codigo|e}}</SPAN></TD>
+		<TD class="c3"><SPAN>{{item.nombre|e}}</SPAN></TD>
+		<TD class="c4"><SPAN>{{item.descripcion|e}}</SPAN></TD>
+		<TD class="c7"><SPAN>{{item.complejidad|e}}</SPAN></TD>
+		<TD class="c8"><SPAN>{{item.costo|e}}</SPAN></TD>
+	</TR>
+	{% else %}
+  	<TR>
+		<em>Sin registro de Items</em>
+	</TR>
+	{% endfor %}
+</table>
+<a href="{{ url_for('nuevasolicitud') }}"> >>Confirmar Ítems seleccionados</a>
+</div>
+</div>
+</div>
+{% endblock %}
