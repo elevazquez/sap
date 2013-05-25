@@ -5,6 +5,8 @@ from flask_login import LoginManager, login_user, logout_user, login_required, c
 from util.database import init_db, engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 import md5
+from adm.mod.UsuarioRol import *
+from adm.mod.Usuario import *
 
 app = Flask(__name__)
 app.secret_key="sap"
@@ -21,9 +23,6 @@ from des.item import *
 from des.tipoAtributo import *
 from ges.relacion import *
 from ges.lineaBase import *
-from ges.solicitud import *
-from adm.mod.UsuarioRol import *
-from adm.mod.Usuario import *
 
 
 #load the extension
@@ -61,8 +60,8 @@ def on_identity_loaded(sender, identity):
     # Add the UserNeed to the identity
     if hasattr(current_user, 'id'):
         identity.provides.add(UserNeed(current_user.id))
-    # Assuming the User model has a list of roles, update the
-    # identity with the roles that the user provides
+        # Assuming the User model has a list of roles, update the
+        # identity with the roles that the user provides
         roles = db_session.query(UsuarioRol).filter_by(id_usuario=current_user.id).all()
         for role in roles:
             identity.provides.add(RoleNeed(role.usuariorolrol.codigo))
@@ -70,8 +69,10 @@ def on_identity_loaded(sender, identity):
             for p in permisos:
               if p.id_fase == None and role.id_proyecto != None:
                   identity.provides.add(ItemNeed(p.codigo, role.id_proyecto , 'manage'))
-              else:
+              elif p.id_fase !=None :
                   identity.provides.add(ItemNeed(p.codigo, p.id_fase , 'manage'))
+              else:
+                  identity.provides.add(ItemNeed(p.codigo, None , 'manage'))
 
 
 #===============================================================================
@@ -90,7 +91,9 @@ class Main(views.MethodView):
         return render_template('index.html')
     
     def post(self):
-        init_db(db_session)
+        print 'datos en el post'
+        #init_db(db_session)
+        print 'luego del init del db_session'
         if 'logout' in request.form :
             session.pop('username', None)
             return redirect(url_for('index'))
@@ -126,8 +129,11 @@ class Main(views.MethodView):
             # session['username'] = username
             #===================================================================
             if 'is_administrador' in session:
-               if not session['is_administrador']:
-                   return redirect(url_for('getProyectoByUsuario', id_usuario = current_user.id))
+                if not session['is_administrador']:
+                    return redirect(url_for('getProyectoByUsuario', id_usuario = current_user.id))
+                else:
+                    permission = UserRol('ADMINISTRADOR')
+                    session['permission_admin'] = permission
         return redirect(url_for('index'))
 
 # el decorator indica que la vista requiere que los usuarios esten logueados

@@ -7,7 +7,7 @@ from adm.mod.Permiso import Permiso
 from adm.mod.RolPermiso import RolPermiso
 from adm.permiso.PermisoFormulario import PermisoFormulario
 import flask, flask.views
-from UserPermission import *
+from UserPermission import UserPermission, UserRol
 import os
 
 db_session = scoped_session(sessionmaker(autocommit=False,
@@ -28,7 +28,7 @@ def flash_errors(form):
 """ Funcion para agregar registros a la tabla Permiso""" 
 @app.route('/permiso/nuevopermiso', methods=['GET', 'POST'])
 def nuevopermiso():
-    permission = UserPermission('ADMINISTRADOR')
+    permission = UserRol('ADMINISTRADOR')
     if permission.can():
         form = PermisoFormulario(request.form)
         if request.method == 'POST' and form.validate():
@@ -45,64 +45,80 @@ def nuevopermiso():
 @app.route('/permiso/editarpermiso', methods=['GET', 'POST'])
 def editarpermiso():
     #init_db(db_session)
-    p = db_session.query(Permiso).filter_by(codigo=request.args.get('codigo')).first()
-    form = PermisoFormulario(request.form,p)
-    permiso = db_session.query(Permiso).filter_by(codigo=form.codigo.data).first()
-    if request.method == 'POST' and form.validate():
-        form.populate_obj(permiso)
-        db_session.merge(permiso)
+    permission = UserRol('ADMINISTRADOR')
+    if permission.can():
+        p = db_session.query(Permiso).filter_by(codigo=request.args.get('codigo')).first()
+        form = PermisoFormulario(request.form,p)
+        permiso = db_session.query(Permiso).filter_by(codigo=form.codigo.data).first()
+        if request.method == 'POST' and form.validate():
+            form.populate_obj(permiso)
+            db_session.merge(permiso)
+            db_session.commit()
+            return redirect('/permiso/administrarpermiso')
+        else:
+            flash_errors(form)
+        return render_template('permiso/editarpermiso.html', form=form)
+    else:
+        return 'sin permisos'
+    
+@app.route('/permiso/eliminarpermiso', methods=['GET', 'POST'])
+def eliminarpermiso():
+    permission = UserRol('ADMINISTRADOR')
+    if permission.can():
+        cod = request.args.get('codigo')
+        #init_db(db_session)
+        rol = db_session.query(Permiso).filter_by(codigo=cod).first()
+        db_session.delete(rol)
         db_session.commit()
         return redirect('/permiso/administrarpermiso')
     else:
-        flash_errors(form)
-    return render_template('permiso/editarpermiso.html', form=form)
-
-@app.route('/permiso/eliminarpermiso', methods=['GET', 'POST'])
-def eliminarpermiso():
-    cod = request.args.get('codigo')
-    #init_db(db_session)
-    rol = db_session.query(Permiso).filter_by(codigo=cod).first()
-    db_session.delete(rol)
-    db_session.commit()
-    return redirect('/permiso/administrarpermiso')
+        return 'sin permisos'
 
 @app.route('/permiso/buscarpermiso', methods=['GET', 'POST'])
 def buscarpermiso():
-    valor = request.args['patron']
-    parametro = request.args['parametro']
-    idrol =request.form.get('rol')
-    #init_db(db_session)
-    if valor=='' or valor == None:
-        return administrarpermiso()
-    else:
-        if parametro == 'id_recurso':
-            p = db_session.query(Permiso).from_statement("SELECT * FROM permiso where to_char("+parametro+", '99999') ilike '%"+valor+"%'").all()
-            #p = db_session.query(Permiso).from_statement("SELECT * FROM permiso where "+parametro+" = CAST("+valor+" AS Int)").all()
+    permission = UserRol('ADMINISTRADOR')
+    if permission.can():
+        valor = request.args['patron']
+        parametro = request.args['parametro']
+        idrol =request.form.get('rol')
+        #init_db(db_session)
+        if valor=='' or valor == None:
+            return administrarpermiso()
         else:
-            p = db_session.query(Permiso).from_statement("SELECT * FROM permiso where "+parametro+" ilike '%"+valor+"%'").all()
-    #p = db_session.query(Permiso).filter(Permiso.codigo.like('%'+valor+'%'))
-    if idrol != '' and idrol != None:
-        yourPermiso=getPermisosByRol(idrol)
-        lista = []
-        for per in yourPermiso:
-            lista.append(per)
-        return render_template('permiso/administrarpermiso.html', permisos = p, isAdministrar = False, idrol = idrol, asignados = lista)
-    return render_template('permiso/administrarpermiso.html', permisos = p, isAdministrar = True)
+            if parametro == 'id_recurso':
+                p = db_session.query(Permiso).from_statement("SELECT * FROM permiso where to_char("+parametro+", '99999') ilike '%"+valor+"%'").all()
+                #p = db_session.query(Permiso).from_statement("SELECT * FROM permiso where "+parametro+" = CAST("+valor+" AS Int)").all()
+            else:
+                p = db_session.query(Permiso).from_statement("SELECT * FROM permiso where "+parametro+" ilike '%"+valor+"%'").all()
+                #p = db_session.query(Permiso).filter(Permiso.codigo.like('%'+valor+'%'))
+        if idrol != '' and idrol != None:
+            yourPermiso=getPermisosByRol(idrol)
+            lista = []
+            for per in yourPermiso:
+                lista.append(per)
+            return render_template('permiso/administrarpermiso.html', permisos = p, isAdministrar = False, idrol = idrol, asignados = lista)
+        return render_template('permiso/administrarpermiso.html', permisos = p, isAdministrar = True)
+    else:
+        return 'sin permisos'
 
 @app.route('/permiso/administrarpermiso')
 def administrarpermiso():
-    isAdmin = request.args.get('value')
-    rol = request.args.get('idrol')
-    permisos = db_session.query(Permiso).order_by(Permiso.id)
-    lista = []
-    if not isAdmin :
-        #=======================================================================
-        # en esta lista se inserta los permisos que estan asignados a un rol
-        #=======================================================================
-        yourPermiso=getPermisosByRol(rol)
-        for p in yourPermiso:
-            lista.append(p)
-    return render_template('permiso/administrarpermiso.html', permisos = permisos, isAdministrar = isAdmin, idrol = rol, asignados = lista)
+    permission = UserRol('ADMINISTRADOR')
+    if permission.can():
+        isAdmin = request.args.get('value')
+        rol = request.args.get('idrol')
+        permisos = db_session.query(Permiso).order_by(Permiso.id)
+        lista = []
+        if not isAdmin :
+            #=======================================================================
+            # en esta lista se inserta los permisos que estan asignados a un rol
+            #=======================================================================
+            yourPermiso=getPermisosByRol(rol)
+            for p in yourPermiso:
+                lista.append(p)
+        return render_template('permiso/administrarpermiso.html', permisos = permisos, isAdministrar = isAdmin, idrol = rol, asignados = lista)
+    else:
+        return 'sin permisos'
 
 """Lanza un mensaje de error en caso de que la pagina solicitada no exista"""
 @app.errorhandler(404)

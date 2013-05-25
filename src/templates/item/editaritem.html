@@ -11,25 +11,28 @@
 						{%- for msg in errors %}
 							<li>{{ msg }}</li> {% endfor -%}
 					</ul>
-			</div>Required
+			</div>
 		{% endif %} 
 	{% endwith %}
 	<form id=editaritem method=post action="/item/editaritem">
 			<label>Fase</label> <input type="text" name="fase" value="{{ form.fase.data }} " id="fase" readonly="true"/> 
     		<label>Tipo Item</label> <input type="text" name="tipo_item" value="{{ form.tipo_item.data }} " id="tipo_item" readonly="true"/> 
+    		<input type="text" name="id" value="{{ form.id.data }}" id="id" hidden="true"/>
+    		<input type="text" name="id_fase_f" value="{{ form.id_fase_f.data }}" id="id_fase_f" hidden="true"/>
+    		<input type="text" name="id_tipo_f" value="{{ form.id_tipo_f.data }}" id="id_tipo_f" hidden="true"/>
     		<label>Código</label> <input type="text" name="codigo" value="{{ form.codigo.data }}" id="codigo" readonly="true" />
     		<label>Nombre</label> {{ form.nombre()}}
     		<label>Descripción</label> {{ form.descripcion() }}
-    		<label>Estado</label> <input type="text" name="estado" value="{{ form.estado.data }}" id="estado" readonly="true"/> 
+    		<label>Estado</label> {{ form.estado() }} <!-- input type="text" name="estado" value="{{ form.estado.data }}" id="estado" readonly="true"/--> 
     		<label>Fecha </label> <input type="date" name="fecha" value="{{ form.fecha.data }}"  id="fecha"/>
     		<label>Complejidad</label> {{ form.complejidad() }}
     		<label>Costo</label> {{ form.costo() }}
     		<label>Versión</label><input type="number" name="version" value="{{ form.version.data }}" id="version" readonly="true" /> 
     		<p><label>Atributos del Item</label>
     	{% for atr in att %}
-    	   {% for val in vals %}
+    		{% for val in vals %}
     			{% if val.id_atributo == atr.id %}
-    		<label>{{atr.nombre|e}}</label>  <input name={{atr.nombre|e}} value={{val.valor|e}} type="text"  />
+    		<label>{{atr.nombre|e}}</label>  <input name={{atr.nombre}} value={{val.valor}} type="text" />
     			{% endif %} 
     		{% endfor %}
     	{% else %}

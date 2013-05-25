@@ -35,7 +35,7 @@ def flash_errors(form):
 def nuevotipoItem():
     """ Funcion para agregar registros a la tabla de Tipo de Item""" 
     form = TipoItemFormulario(request.form) 
-    init_db(db_session)
+    #init_db(db_session)
     #form.id_fase.choices= [(f.id, f.nombre) for f in db_session.query(Fase).filter_by(id_proyecto=session['pry']).filter_by(estado='I').order_by(Fase.nombre).all()]
     form.id_fase.choices= [(f.id, f.nombre) for f in db_session.query(Fase).from_statement("select * from fase where id_proyecto="+str(session['pry'])+" and (estado='I' or estado='P') order by nombre ").all()] 
     form.lista_atributo.choices = [(f.id, f.nombre) for f in db_session.query(Atributo).order_by(Atributo.nombre).all()]
@@ -74,7 +74,7 @@ def nuevotipoItem():
 @app.route('/tipoItem/editartipoItem', methods=['GET', 'POST'])
 def editartipoItem():
     """ Funcion para editar registros de la tabla de Tipo de Item""" 
-    init_db(db_session)   
+    #init_db(db_session)   
     ti = db_session.query(TipoItem).filter_by(codigo=request.args.get('codigo')).first() 
     form = TipoItemFormulario(request.form,ti)  
     tipoItem = db_session.query(TipoItem).filter_by(codigo=form.codigo.data).first()
@@ -116,7 +116,7 @@ def eliminartipoItem():
     """ Funcion para eliminar registros de la tabla de Tipo de Item""" 
     try:
         cod = request.args.get('cod')
-        init_db(db_session)
+        #init_db(db_session)
         tipoItem = db_session.query(TipoItem).filter_by(codigo=cod).first()  
         items= db_session.query(Item).filter_by(id_tipo_item=tipoItem.id).first()
         cant = db_session.query(TItemAtributo).filter_by(id_tipo_item=tipoItem.id).count()
@@ -142,7 +142,7 @@ def buscartipoItem():
     """ Funcion para buscar registros de la tabla de Tipo de Item""" 
     valor = request.args['patron']
     parametro = request.args['parametro']
-    init_db(db_session)
+    #init_db(db_session)
     if valor == "" : 
         administrartipoItem()
     if parametro == 'id_fase':
@@ -152,7 +152,7 @@ def buscartipoItem():
     return render_template('tipoItem/administrartipoItem.html', tipoItems = ti)    
     
     valor = request.args['patron']
-    init_db(db_session)
+    #init_db(db_session)
     r = db_session.query(TipoItem).filter_by(nombre=valor)
     if r == None:
         return 'no existe concordancia'
@@ -163,7 +163,7 @@ def buscartipoItem2():
     """ Funcion para buscar registros de la tabla de Tipo de Item""" 
     valor = request.args['patron']
     parametro = request.args['parametro']
-    init_db(db_session)
+    #init_db(db_session)
     if valor == "" : 
         administrartipoItem()
     if parametro == 'id_fase':
@@ -173,7 +173,7 @@ def buscartipoItem2():
     return render_template('tipoItem/listartipoItem.html', tipoItems2 = ti)    
     
     valor = request.args['patron']
-    init_db(db_session)
+    #init_db(db_session)
     r = db_session.query(TipoItem).filter_by(nombre=valor)
     if r == None:
         return 'no existe concordancia'
@@ -182,28 +182,28 @@ def buscartipoItem2():
 @app.route('/tipoItem/administrartipoItem')
 def administrartipoItem():
     """ Funcion para listar registros de la tabla de Tipo de Item""" 
-    init_db(db_session)
+    #init_db(db_session)
     tipoItems = db_session.query(TipoItem).order_by(TipoItem.nombre)
     return render_template('tipoItem/administrartipoItem.html', tipoItems = tipoItems)
 
 @app.route('/tipoItem/listartipoItem')
 def listartipoItem():
     """ Funcion para listar registros de la tabla de Tipo de Item""" 
-    init_db(db_session)
+    #init_db(db_session)
     tipoItems2 = db_session.query(TipoItem).order_by(TipoItem.nombre)
     return render_template('tipoItem/listartipoItem.html', tipoItems2 = tipoItems2)
 
 @app.route('/tipoItem/listaatt', methods=['GET', 'POST'])
 def listaatt():   
     """ Funcion que lista los atributos posibles a formar parte de un Tipo Item"""     
-    init_db(db_session)
+    #init_db(db_session)
     atts = db_session.query(Atributo).from_statement(" select * from atributo " )
     return render_template('tipoItem/listaatt.html', atts = atts)  
 
 @app.route('/lineaBase/agregaritems', methods=['GET', 'POST'])
 def agregaritems():   
     """ Funcion que agrega Atributos a un Tipo Item"""     
-    init_db(db_session)
+    #init_db(db_session)
     selectedatt=  request.args.get('ti')    
     atts = db_session.query(Atributo).from_statement(" select * from atributo  " )
     return render_template('tipoItem/listaatt.html', atts = atts)  
@@ -211,7 +211,7 @@ def agregaritems():
 @app.route('/tipoItem/importartipoItem', methods=['GET', 'POST'])
 def importartipoItem():
     """ Funcion para importar registros a la tabla de Tipo de Item""" 
-    init_db(db_session)   
+    #init_db(db_session)   
     ti = db_session.query(TipoItem).filter_by(codigo=request.args.get('codigo')).first() 
     form = TipoItemFormulario(request.form,ti)  
     tipoItem = db_session.query(TipoItem).filter_by(codigo=form.codigo.data).first()
