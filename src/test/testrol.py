@@ -2,16 +2,34 @@ import unittest
 from loginC import app
 
 from test_helper import login
+from UserPermission import UserRol
+from flask import Flask, Response
+
+from flask_principal import Principal, Permission, Denial, RoleNeed, \
+    PermissionDenied, identity_changed, Identity, identity_loaded
+
+anon_permission = Permission()
+admin_permission = Permission(RoleNeed('ADMINISTRADOR'))
+admin_or_editor = Permission(RoleNeed('ADMINISTRADOR'), RoleNeed('ADMINISTRADOR'))
+editor_permission = Permission(RoleNeed('ADMINISTRADOR'))
+admin_denied = Denial(RoleNeed('ADMINISTRADOR'))
+
+def _on_principal_init(sender, identity):
+        if identity.id == 'admin':
+            identity.provides.add(RoleNeed('ADMINISTRADOR'))
+            identity.provides.add(UserRol('ADMINISTRADOR'))
 
 
 class RolTestCase(unittest.TestCase):
     """Clase que implementa los test para el caso de uso Rol."""
-    
+   
+        
     def setUp(self):
         """se llama al metodo antes de iniciar el test"""        
         print "Iniciando test"
         self.app = app.test_client()
         self.acceso = login(self.app)
+        identity_loaded.connect(_on_principal_init)
 
     def tearDown(self):
         """ se llama al metodo al terminar el test"""
@@ -21,7 +39,16 @@ class RolTestCase(unittest.TestCase):
     def test_get_all_roles(self):
         """verifica si se puede acceder al listado de roles """
         request = self.app.get('/administrarrol', follow_redirects=True)
-        assert 'administrador' in request.data
+        print "preueba "+request.data
+        assert 'sin permisos' in request.data
+        print "No posee permisos"
+        
+        
+    def test_get_all_roles2(self):
+        """verifica si se puede acceder al listado de roles """
+        request = self.app.get('/administrarrol', follow_redirects=True)
+        print "preueba2 "+request.data
+        assert 'ADMINISTRADOR' in request.data
         self.assertEqual(request._status, '200 OK')
    
    

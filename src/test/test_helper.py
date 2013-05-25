@@ -3,8 +3,9 @@ import xml.etree.ElementTree as ET
 #from BeautifulSoup import BeautifulSoup
 
 
-TEST_USER = 'raquel'
-TEST_PASS = 'raquel'
+TEST_USER = 'admin'
+TEST_PASS = 'admin'
+
 
 
 def login(app, usuario=TEST_USER, password=TEST_PASS):
@@ -14,10 +15,10 @@ def login(app, usuario=TEST_USER, password=TEST_PASS):
     @param nombre: nombre de usuario
     @param contrasenha: contrasenha del usuario
     """
+   
     access = app.post('/', data=dict(
         usuario=usuario,
         password=password
         ), follow_redirects=True)
-
     return access
-
+    
