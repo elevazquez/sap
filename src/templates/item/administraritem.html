@@ -60,7 +60,7 @@
 	{% for item in items %}
 	<TR>
 		<TD class="c1"><a href="{{ url_for('editaritem', codigo=item.codigo , fase=item.id_fase, id=item.id, tipo=item.id_tipo_item, es=item.estado ) }}" > <img src="../static/images/e.png" alt="Editar" height="20" width="20" title="Editar" style="vertical-align: middle;"></a>
-		<a href="{{ url_for('eliminaritem', cod=item.codigo, id=item.id, es=item.estado, tipo=item.id_tipo_item ) }}" onclick="javascript:return confirmar()"><img src="../static/images/b.png" alt="Eliminar" height="20" width="20" title="Eliminar" style="vertical-align: middle;"> </a>
+		<a href="{{ url_for('eliminaritem', cod=item.codigo, id=item.id, es=item.estado,fase=item.id_fase, tipo=item.id_tipo_item ) }}" onclick="javascript:return confirmar()"><img src="../static/images/b.png" alt="Eliminar" height="20" width="20" title="Eliminar" style="vertical-align: middle;"> </a>
 		<a href="{{ url_for('listarreversionitem', cod=item.codigo, id=item.id ) }}" ><img src="../static/images/r.png" alt="Reversion" height="20" width="20" title="Reversion" style="vertical-align: middle;"> </a> </TD>
 		<TD class="c2"><SPAN>{{item.codigo|e}}</SPAN></TD>
 		<TD class="c3"><SPAN>{{item.nombre|e}}</SPAN></TD>
