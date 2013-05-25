@@ -1,0 +1,55 @@
+{% extends "principal.html" %} 
+{% block content %}
+<div class="primary">
+	<h1>Agregar Ítem a Solicitud de Cambio</h1>
+	{% with errors = get_flashed_messages(category_filter=["error"]) %} 
+			{% if errors %}
+			<div class="block-message">
+				<a class="close" href="{{ url_for( 'agregaritemsol' ) }}"
+					dir="rtl">×</a>
+					<ul>
+						{%- for msg in errors %}
+							<li>{{ msg }}</li> {% endfor -%}
+					</ul>
+			</div>
+		{% endif %} 
+	{% endwith %}
+<form id=agregaritem method=post action="/solicitud/agregaritemsol">
+	<table id="tablaitems" border="1">
+		<TR>
+			<TH class="c1"></TH>
+			<TH class="c2">Codigo</TH>
+			<TH class="c3">Nombre</TH>	
+			<TH class="c4">Descripción</TH>
+			<TH class="c5">Estado</TH>
+		</TR>
+		{% for item in items %}
+			<TR>
+				<TD class="c1"> <input type="checkbox" name="selectitem" value="{{ item.id }}"/> </TD>					
+				<TD class="c2"><SPAN>{{item.codigo|e}}</SPAN></TD>
+				<TD class="c3"><SPAN>{{item.nombre|e}}</SPAN></TD>
+				<TD class="c4"><SPAN>{{item.descripcion|e}}</SPAN></TD>
+				<TD class="c5"><SPAN>{{'Abierto' if item.estado=='I' else 'En Progreso' if item.estado=='P' 
+					else 'Resuelto' if item.estado=='R' else 'Aprobado' if item.estado=='A' else 'Eliminado' if item.estado=='E'
+					else 'Rechazado' if item.estado=='Z' else 'Revision' if item.estado=='V' else 'Bloqueado' if item.estado=='B' }}</SPAN></TD>
+			</TR>
+		{% else %}
+			<TR>
+				<em>La Fase seleccionada no cuenta con Items que pueden ser agregados a la Solicitud de Cambios.</em>
+			</TR>
+		{% endfor %}
+	</table>
+	<input type="text" name="id" value="{{ form.id.data }}" id="id" readonly="true" hidden="true"/>
+	<input type="text" name="descripcion" value="{{ form.descripcion.data }}" id="descripcion" readonly="true" hidden="true"/>
+    <input type="date" name="fecha" value="{{ form.fecha.data }}" id="fecha" readonly="true" hidden="true"/>
+    <input type="text" name="estado" value="{{ form.estado.data }}" id="estado" readonly="true" hidden="true"/>
+    <input type="text" name="id_usuario" value="{{ form.id_usuario.data }}" id="id_usuario" readonly="true" hidden="true"/>
+    <input type="text" name="id_proyecto" value="{{ form.id_proyecto.data }}" id="id_proyecto" readonly="true" hidden="true"/>
+    <input type="text" name="cant_votos" value="{{ form.cant_votos.data }}" id="cant_votos" readonly="true" hidden="true"/>
+	
+	<input type=submit name="Agregar" value="Agregar" />
+	<input type="button" value="Cancelar"  onClick="document.location.href='{{ url_for( 'administrarsolicitud' ) }}';"> 
+</form>
+</div>
+{% endblock %}
+

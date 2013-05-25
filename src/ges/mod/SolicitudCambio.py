@@ -9,7 +9,7 @@ class SolicitudCambio (Base):
     __tablename__ = 'solicitud_cambio'
     __table_args__ = {'extend_existing': True}
     id = Column('id', Integer, Sequence('proyecto_id_seq'), primary_key=True)
-    descripcion = Column('descripcion', String(100))
+    descripcion = Column('descripcion', String(2000))
     estado = Column('estado', String(1))
     fecha = Column('fecha', Date)
     cant_votos = Column('cant_votos', Integer)
