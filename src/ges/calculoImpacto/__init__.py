@@ -23,7 +23,9 @@ def flash_errors(form):
 
 @app.route('/calculoimpacto', methods=['GET', 'POST'])
 def calculoImpactoAll():
-    caminos = getAllCaminos(1)
+    idItem = request.args.get('id')
+    item = db_session.query(Item).filter(Item.id == idItem).first()
+    caminos = getAllCaminos(item)
     caminoImpacto = []
     for camino in caminos :
         impacto = 0
@@ -31,7 +33,7 @@ def calculoImpactoAll():
             impacto = impacto + item.complejidad
         caminoImpacto.append(impacto)
     
-    return
+    return caminoImpacto + ' ' + caminos
         
 def getAllCaminos(item):
     """ Funcion para calcular impacto"""
@@ -55,10 +57,10 @@ def getListas(listaItem, ultimoItem, itemsAAnhadir):
 def getCaminos(listaCamino):
     bandera= True
     unicoCamino = listaCamino[0]
-    tamanho = len(unicoCamino) - 1
-    ultimoItem = listaCamino[tamanho]
+    posicion = len(unicoCamino) - 1
+    ultimoItem = unicoCamino[posicion]
     itemsAAnhadir = getItemsPadres(ultimoItem.id)
-    unicoCamino = listaCamino.pop(0)
+    listaCamino.pop(0)
     while bandera:
         listaNuevoCamino = getListas(unicoCamino, ultimoItem , itemsAAnhadir)
         for camino in listaNuevoCamino :

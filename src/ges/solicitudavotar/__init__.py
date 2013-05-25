@@ -8,6 +8,10 @@ from ges.mod.SolicitudCambio import SolicitudCambio
 from adm.mod.MiembrosComite import MiembrosComite
 from ges.mod.ResolucionMiembros import ResolucionMiembros
 from adm.mod.Proyecto import Proyecto
+from ges.mod.SolicitudCambio import SolicitudCambio
+from flask_login import current_user
+from des.mod.Item import Item
+from ges.solicitud.SolicitudFormulario import SolicitudFormulario
 
 db_session = scoped_session(sessionmaker(autocommit=False,
                                          autoflush=False,
@@ -34,10 +38,30 @@ def administraravotar():
 
 @app.route('/solicitudavotar/veritems', methods=['GET', 'POST'])  
 def veritems():
-    return 'prueba'
+    """ Funcion para editar registros de la tabla Solicitud""" 
+#    init_db(db_session)
+    #today = datetime.date.today()
+    pro = db_session.query(Proyecto).filter_by(id=session['pry']).first()
+    if  request.args.get('id') == None:
+        id_sol= request.form.get('id')
+    else:
+        id_sol=request.args.get('id')
+    s = db_session.query(SolicitudCambio).filter_by(id=id_sol).filter_by(id_proyecto=session['pry']).first()
+    itemssol=  db_session.query(Item).from_statement("select * from item where id in(select id_item from solicitud_item where id_solicitud="+str(id_sol)+")")  
+    form = SolicitudFormulario(request.form,s)
+    solicitud = db_session.query(SolicitudCambio).filter_by(id=id_sol).filter_by(id_proyecto=session['pry']).first()  
+    #form.fecha.data = today
+    form.id_proyecto.data = pro.nombre
+    form.id_usuario.data = current_user.usuario
+    #form.cant_votos.data = 0
+    if solicitud.estado=='E':
+        form.estado.data='Enviada'
+    return render_template('solicitudavotar/itemssolicitud.html', form=form, items=itemssol)
+
 
 def aprobarSolicitud():
     idproyecto=1
     idsolicitud=1
     cantidadaprobado = db_session.query(func.count(ResolucionMiembros)).filter(ResolucionMiembros.id_solicitud_cambio == idsolicitud).filter(ResolucionMiembros.voto == True);
     db_session.query(Proyecto).filter(Proyecto.id == idproyecto);
+    

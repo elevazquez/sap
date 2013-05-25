@@ -15,6 +15,7 @@
 		{% endif %} 
 	{% endwith %}
 <form id=agregaritem method=post action="/solicitud/agregaritemsol">
+	<div style="height:250px;width:500px;overflow:auto;">
 	<table id="tablaitems" border="1">
 		<TR>
 			<TH class="c1"></TH>
@@ -39,6 +40,7 @@
 			</TR>
 		{% endfor %}
 	</table>
+	</div>
 	<input type="text" name="id" value="{{ form.id.data }}" id="id" readonly="true" hidden="true"/>
 	<input type="text" name="descripcion" value="{{ form.descripcion.data }}" id="descripcion" readonly="true" hidden="true"/>
     <input type="date" name="fecha" value="{{ form.fecha.data }}" id="fecha" readonly="true" hidden="true"/>

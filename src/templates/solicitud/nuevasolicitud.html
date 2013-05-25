@@ -16,6 +16,7 @@
 	{% endwith %}
 	<form id=asignar method=post action="/solicitud/nuevasolicitud">
 	<label>Seleccione los items:</label>
+	<div style="height:250px;width:500px;overflow:auto;">
 	<table id="tablaitems" border="1">
 		<TR>
 			<TH class="c1"></TH>
@@ -40,6 +41,7 @@
 			</TR>
 		{% endfor %}
 	</table>
+	</div>
 			<label>Descripción</label>{{ form.descripcion() }}
   			<label>Fecha</label><input type="date" name="fecha" value="{{ form.fecha.data }}" id="fecha" readonly="true"/>
     		<label>Estado</label> <input type="text" name="estado" value="{{ form.estado.data }}" id="estado" readonly="true"/>

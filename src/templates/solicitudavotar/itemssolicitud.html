@@ -1,7 +1,7 @@
 {% extends "principal.html" %} 
 {% block content %}
 <div class="primary">
-	<h1>Editar Solicitud de Cambio</h1>
+	<h1>Solicitud de Cambio</h1>
 	{% with errors = get_flashed_messages(category_filter=["error"]) %} 
 			{% if errors %}
 			<div class="block-message">
@@ -19,6 +19,7 @@
 	<div style="height:250px;width:500px;overflow:auto;">
 	<table id="tablaitems" border="1">
 		<TR>
+			<TH class="c2"></TH>
 			<TH class="c2">Código</TH>
 			<TH class="c3">Nombre</TH>	
 			<TH class="c4">Descripción</TH>
@@ -27,6 +28,7 @@
 		</TR>
 		{% for item in items %}
 			<TR>
+				<TD class="c2"><SPAN><a href="{{ url_for('calculoImpactoAll', id=item.id) }}" ><img src="../static/images/e.png" alt="Ver costo" height="20" width="20" title="Ver items" style="vertical-align: middle;"></a></SPAN></TD>
 				<TD class="c2"><SPAN>{{item.codigo|e}}</SPAN></TD>
 				<TD class="c3"><SPAN>{{item.nombre|e}}</SPAN></TD>
 				<TD class="c4"><SPAN>{{item.descripcion|e}}</SPAN></TD>
@@ -41,14 +43,14 @@
 	</table>
 	</div>
 			<input type="text" name="id" value="{{ form.id.data }}" id="id" readonly="true" hidden="true"/>
-			<label>Descripción</label>{{ form.descripcion() }}
+			<label>Descripción</label><input type="text" name="descripcion" value="{{ form.descripcion.data }}" id="descripcion" readonly="true"/>
   			<label>Fecha</label><input type="date" name="fecha" value="{{ form.fecha.data }}" id="fecha" readonly="true"/>
     		<label>Estado</label> <input type="text" name="estado" value="{{ form.estado.data }}" id="estado" readonly="true"/>
     		<label>Usuario</label> <input type="text" name="id_usuario" value="{{ form.id_usuario.data }}" id="id_usuario" readonly="true"/>
     		<label>Proyecto</label> <input type="text" name="id_proyecto" value="{{ form.id_proyecto.data }}" id="id_proyecto" readonly="true"/>
     		<label>Votos</label> <input type="text" name="cant_votos" value="{{ form.cant_votos.data }}" id="cant_votos" readonly="true"/>
-  		<p><input type=submit value=Guardar>
-  		<input type="button" value="Cancelar"  onClick="document.location.href='{{ url_for( 'administrarsolicitud' ) }}';"> 
+  		<p><input type=submit value=Votar>
+  		<input type="button" value="Cancelar"  onClick="document.location.href='{{ url_for( 'administraravotar' ) }}';"> 
 	</form>
 </div>
 {% endblock %}
