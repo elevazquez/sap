@@ -32,7 +32,7 @@
     	{% for atr in att %}
     		{% for val in vals %}
     			{% if val.id_atributo == atr.id %}
-    		<label>{{atr.nombre|e}}</label>  <input name={{atr.nombre}} value={{val.valor}} type="text" />
+    		<label>{{atr.nombre|e}}</label>  <input name={{atr.nombre|e}} value={{val.valor|e}} type="text" />
     			{% endif %} 
     		{% endfor %}
     	{% else %}
