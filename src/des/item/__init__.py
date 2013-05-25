@@ -220,23 +220,22 @@ def editaritem():
     today = datetime.date.today()
     # #init_db(db_session)      
     i = db_session.query(Item).filter_by(codigo=request.args.get('codigo')).filter_by(id=request.args.get('id')).first() 
-    print "ed1"
-    
+       
     if  request.args.get('id') == None:
         id_itemg= request.form.get('id')
     else:
         id_itemg=request.args.get('id')
-    print "ed2"     
+       
     if  request.args.get('tipo') == None:
         id_tipog= request.form.get('id_tipo_f')
     else:
         id_tipog=request.args.get('tipo')
-    print "ed3"
+  
     if  request.args.get('fase') == None:
         id_faseg= request.form.get('id_fase_f')
     else:
         id_faseg=request.args.get('fase')
-    print "ed4"    
+      
     form = ItemModFormulario(request.form,i)    
     item = db_session.query(Item).filter_by(nombre=form.nombre.data).filter_by(id=id_itemg).first()  
     form.usuario.data = session['user_id']  
@@ -250,7 +249,7 @@ def editaritem():
     form.estado.choices = [('I', 'Abierto'), ('P', 'En Progreso'), ('R', 'Resuelto'), ('A', 'Aprobado'), 
                                           ('Z', 'Rechazado'), ('V', 'Revision'),  ('B', 'Bloqueado')   ]     
     #estado= request.args.get('es')    
-    print "ed5"   
+   
     if request.method != 'POST':   
         fase_selected= db_session.query(Fase).filter_by(id=id_faseg).first()      
         tipo_selected= db_session.query(TipoItem).filter_by(id= id_tipog ).first()
@@ -265,7 +264,7 @@ def editaritem():
     if enlb != None or estado_global == 'E' :
         flash('El Item no puede ser modificado, ya que se encuebra en una Linea Base o esta Eliminado!','error')
         return render_template('item/editaritem.html', form=form, att=atributo, vals=valoresatr)
-    print "ed6"
+
     if request.method == 'POST' and form.validate():
         # #init_db(db_session)
         try:           
@@ -286,18 +285,18 @@ def editaritem():
             
             db_session.add(item)
             db_session.commit()
-            print "ed7"
+          
             if atributo != None :
                 for atr in atributo:
                     valor =  request.form.get(atr.nombre)                  
                     ia= ItemAtributo(valor, item.id, atr.id)
                     db_session.add(ia)
                     db_session.commit()
-            print "ed7.1" 
+            
             # --------------------------------------------------------------------------------------------------
             #  # si el item posee alguna relacion, se cambia el estado de sus relaciones directas a Revision
             #---------------------------------------------------------------------------------------------------
-            print "ed8"
+           
             #items padres y sus relaciones
             list_item_padres = db_session.query(Item).from_statement(" select * from item where id in ( select r.id_item  from item i, relacion r "+
                                                             " where i.id = r.id_item_duenho and r.id_item_duenho= "+str(id_itemg)+" ) ")
@@ -357,7 +356,7 @@ def editaritem():
                         relacion= Relacion(rel_padre.fecha_creacion, today, rel_padre.id_tipo_relacion, item3.id, item.id,  'A')
                         db_session.add(relacion)
                         db_session.commit() 
-            print "ed10"  
+         
             flash('El Item ha sido modificado con Exito','info')
             return redirect('/item/administraritem')     
         except DatabaseError, e:
@@ -375,7 +374,8 @@ def eliminaritem():
     today = datetime.date.today()
     
     try:
-        permission = UserPermission('ELIMINAR ITEM F', request.args.get('fase'))
+        var = "ELIMINAR ITEM F" + str(request.args.get('fase'))
+        permission = UserPermission(var, int(request.args.get('fase')))
         if permission.can() == False:
             flash('No posee los permisos suficientes para realizar la Operacion','info')
             return render_template('item/administraritem.html')
