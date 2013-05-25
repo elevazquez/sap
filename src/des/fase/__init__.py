@@ -34,7 +34,7 @@ def flash_errors(form):
 def nuevafase():
     """ Funcion para agregar registros a la tabla Fase""" 
     form = FaseFormulario(request.form)
-    init_db(db_session)
+    ##init_db(db_session)
     n = db_session.query(func.max(Fase.nro_orden, type_=Integer)).filter_by(id_proyecto=session['pry']).scalar()
     if n != None :
         form.nro_orden.default = n + 1
@@ -47,7 +47,7 @@ def nuevafase():
         flash('No se pueden agregar Fases al Proyecto','info')
         return render_template('fase/administrarfase.html') 
     if request.method == 'POST' and form.validate():
-        init_db(db_session)
+        #init_db(db_session)
         if form.fecha_inicio.data > form.fecha_fin.data :
             flash('La fecha de inicio no puede ser mayor que la fecha de finalizacion','error')
             return render_template('fase/nuevafase.html', form=form) 
@@ -72,7 +72,7 @@ def nuevafase():
 @app.route('/fase/editarfase', methods=['GET', 'POST'])
 def editarfase():
     """ Funcion para editar registros de la tabla Fase""" 
-    init_db(db_session)
+    #init_db(db_session)
     pro = db_session.query(Proyecto).filter_by(id=session['pry']).first()
     f = db_session.query(Fase).filter_by(nro_orden=request.args.get('nro')).filter_by(id_proyecto=pro.id).first()  
     form = FaseFormulario(request.form,f)
@@ -120,7 +120,7 @@ def editarfase():
 @app.route('/fase/eliminarfase', methods=['GET', 'POST'])
 def eliminarfase():
     """ Funcion para eliminar registros de la tabla Fase""" 
-    init_db(db_session)
+    #init_db(db_session)
     pro = db_session.query(Proyecto).filter_by(id=session['pry']).first()
     if pro.estado != 'N' :
         flash('No se pueden eliminar Fases del Proyecto','info')
@@ -135,9 +135,9 @@ def eliminarfase():
         return render_template('fase/administrarfase.html')  
     try:
         nro = request.args.get('nro')
-        init_db(db_session)
+        #init_db(db_session)
         fase = db_session.query(Fase).filter_by(nro_orden=nro).filter_by(id_proyecto=session['pry']).first()  
-        init_db(db_session)
+        #init_db(db_session)
         db_session.delete(fase)
         db_session.commit()
         return redirect('/fase/administrarfase')
@@ -150,7 +150,7 @@ def buscarfase():
     """ Funcion para buscar registros de la tabla Fase""" 
     valor = request.args['patron']
     parametro = request.args['parametro']
-    init_db(db_session)
+    #init_db(db_session)
     if valor == "" : 
         p = db_session.query(Fase).filter_by(id_proyecto=session['pry']).order_by(Fase.nro_orden)
     elif parametro == 'nro_orden' :
@@ -168,7 +168,7 @@ def buscarfase2():
     """ Funcion para buscar registros de la tabla Fase""" 
     valor = request.args['patron']
     parametro = request.args['parametro']
-    init_db(db_session)
+    #init_db(db_session)
     if valor == "" : 
         p = db_session.query(Fase).order_by(Fase.nro_orden)
     elif parametro == 'nro_orden' :
@@ -184,21 +184,21 @@ def buscarfase2():
 @app.route('/fase/administrarfase')
 def administrarfase():
     """ Funcion para listar registros de la tabla Fase""" 
-    init_db(db_session)
+    #init_db(db_session)
     fases = db_session.query(Fase).filter_by(id_proyecto=session['pry']).order_by(Fase.nro_orden)
     return render_template('fase/administrarfase.html', fases = fases)
 
 @app.route('/fase/listarfase')
 def listarfase():
     """ Funcion para listar registros de la tabla Fase""" 
-    init_db(db_session)
+    #init_db(db_session)
     fases2 = db_session.query(Fase).order_by(Fase.id_proyecto, Fase.nro_orden)
     return render_template('fase/listarfase.html', fases2 = fases2)
 
 @app.route('/fase/importarfase', methods=['GET', 'POST'])
 def importarfase():
     """ Funcion para importar registros a la tabla Fase""" 
-    init_db(db_session)
+    #init_db(db_session)
     pro = db_session.query(Proyecto).filter_by(id=session['pry']).first()
     f = db_session.query(Fase).filter_by(nro_orden=request.args.get('nro')).filter_by(id_proyecto=request.args.get('py')).first()  
     form = FaseFormulario(request.form,f)
@@ -211,7 +211,7 @@ def importarfase():
         flash('No se pueden importar Fases al Proyecto','info')
         return render_template('fase/administrarfase.html') 
     if request.method == 'POST' and form.validate():
-        init_db(db_session)
+        #init_db(db_session)
         if form.fecha_inicio.data > form.fecha_fin.data :
             flash('La fecha de inicio no puede ser mayor que la fecha de finalizacion','error')
             return render_template('fase/importarfase.html', form=form) 
@@ -236,7 +236,7 @@ def importarfase():
 @app.route('/fase/finalizarfase')
 def finalizarfase():
     """ Funcion para finalizar registros de la tabla Fase""" 
-    init_db(db_session)
+    #init_db(db_session)
     nro = request.args.get('nro')
     fase = db_session.query(Fase).filter_by(nro_orden=nro).filter_by(id_proyecto=session['pry']).first()
     fase2 = db_session.query(Fase).filter_by(nro_orden=str(fase.nro_orden+1)).filter_by(id_proyecto=session['pry']).first()
