@@ -9,7 +9,7 @@ db_session = scoped_session(sessionmaker(autocommit=False,
 
 class SolicitudFormulario(Form):
     id = IntegerField('Id')     
-    descripcion = TextAreaField('Descripcion', [validators.Length(min=2, max=2000), validators.Required()])
+    descripcion = TextAreaField('Descripcion',[validators.Length(min=2, max=2000), validators.Required()])
     fecha = DateField('Fecha', format='%Y-%m-%d' )
     estado = TextField('Estado')
     id_usuario = TextField('Usuario')

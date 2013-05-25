@@ -22,7 +22,8 @@
 			<TH class="c2">Código</TH>
 			<TH class="c3">Nombre</TH>	
 			<TH class="c4">Descripción</TH>
-			<TH class="c5">Estado</TH>
+			<TH class="c5">Compl</TH>
+			<TH class="c5">Costo</TH>
 		</TR>
 		{% for item in items %}
 			<TR>
@@ -30,9 +31,8 @@
 				<TD class="c2"><SPAN>{{item.codigo|e}}</SPAN></TD>
 				<TD class="c3"><SPAN>{{item.nombre|e}}</SPAN></TD>
 				<TD class="c4"><SPAN>{{item.descripcion|e}}</SPAN></TD>
-				<TD class="c5"><SPAN>{{'Abierto' if item.estado=='I' else 'En Progreso' if item.estado=='P' 
-					else 'Resuelto' if item.estado=='R' else 'Aprobado' if item.estado=='A' else 'Eliminado' if item.estado=='E'
-					else 'Rechazado' if item.estado=='Z' else 'Revision' if item.estado=='V' else 'Bloqueado' if item.estado=='B' }}</SPAN></TD>
+				<TD class="c4"><SPAN>{{item.complejidad|e}}</SPAN></TD>
+				<TD class="c4"><SPAN>{{item.costo|e}}</SPAN></TD>
 			</TR>
 		{% else %}
 			<TR>
@@ -40,7 +40,7 @@
 			</TR>
 		{% endfor %}
 	</table>
-			<label>Descripción</label><textarea rows="1" cols="60" name=descripcion value="{{ form.descripcion.data }}" id=descripcion></textarea>
+			<label>Descripción</label>{{ form.descripcion() }}
   			<label>Fecha</label><input type="date" name="fecha" value="{{ form.fecha.data }}" id="fecha" readonly="true"/>
     		<label>Estado</label> <input type="text" name="estado" value="{{ form.estado.data }}" id="estado" readonly="true"/>
     		<label>Usuario</label> <input type="text" name="id_usuario" value="{{ form.id_usuario.data }}" id="id_usuario" readonly="true"/>

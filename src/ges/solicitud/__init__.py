@@ -99,9 +99,14 @@ def editarsolicitud():
 #    init_db(db_session)
     today = datetime.date.today()
     pro = db_session.query(Proyecto).filter_by(id=session['pry']).first()
-    s = db_session.query(SolicitudCambio).filter_by(id=request.args.get('id')).filter_by(id_proyecto=session['pry']).first()  
+    if  request.args.get('id') == None:
+        id_sol= request.form.get('id')
+    else:
+        id_sol=request.args.get('id')
+    s = db_session.query(SolicitudCambio).filter_by(id=id_sol).filter_by(id_proyecto=session['pry']).first()
+    itemssol=  db_session.query(Item).from_statement("select * from item where id in(select id_item from solicitud_item where id_solicitud="+str(id_sol)+")")  
     form = SolicitudFormulario(request.form,s)
-    solicitud = db_session.query(SolicitudCambio).filter_by(id=request.args.get('id')).filter_by(id_proyecto=session['pry']).first()  
+    solicitud = db_session.query(SolicitudCambio).filter_by(id=id_sol).filter_by(id_proyecto=session['pry']).first()  
     form.fecha.data = today
     form.id_proyecto.data = pro.nombre
     form.id_usuario.data = current_user.usuario
@@ -126,10 +131,10 @@ def editarsolicitud():
             return redirect('/solicitud/administrarsolicitud')
         except DatabaseError, e:
             flash('Error en la Base de Datos' + e.args[0],'error')
-            return render_template('solicitud/editarsolicitud.html', form=form)
+            return render_template('solicitud/editarsolicitud.html', form=form, items=itemssol)
     else:
         flash_errors(form) 
-    return render_template('solicitud/editarsolicitud.html', form=form)
+    return render_template('solicitud/editarsolicitud.html', form=form, items=itemssol)
 
 @app.route('/solicitud/enviarsolicitud', methods=['GET', 'POST'])
 def enviarsolicitud():
@@ -156,7 +161,11 @@ def enviarsolicitud():
 def eliminarsolicitud():
     """ Funcion para eliminar registros de la tabla Solicitud""" 
 #    init_db(db_session)
-    s = db_session.query(SolicitudCambio).filter_by(id=request.args.get('id')).filter_by(id_proyecto=session['pry']).first()
+    if  request.args.get('id') == None:
+        id_sol= request.form.get('id')
+    else:
+        id_sol=request.args.get('id')
+    s = db_session.query(SolicitudCambio).filter_by(id=id_sol).filter_by(id_proyecto=session['pry']).first()
     pro = db_session.query(Proyecto).filter_by(id=session['pry']).first()
     if pro.estado != 'P' :
         flash('No se pueden eliminar Solicitudes a un Proyecto que no se encuentre En Progreso','info')
@@ -166,8 +175,8 @@ def eliminarsolicitud():
         return render_template('solicitud/administrarsolicitud.html')
     try:
 #        init_db(db_session)
-        solicitud = db_session.query(SolicitudCambio).filter_by(id=id).filter_by(id_proyecto=session['pry']).first()  
-        itemssol=  db_session.query(Item).from_statement("select * from item where id in(select id_item from solicitud_item where id_solicitud="+solicitud.id+")")
+        solicitud = db_session.query(SolicitudCambio).filter_by(id=id_sol).filter_by(id_proyecto=session['pry']).first()  
+        itemssol=  db_session.query(Item).from_statement("select * from item where id in(select id_item from solicitud_item where id_solicitud='"+str(solicitud.id)+"')")
         #itemssol=  db_session.query(Item).join(SolicitudItem, Item.id== SolicitudItem.id_item).filter(SolicitudItem.id_solicitud== solicitud.id ).all()   
 #        list_aux=[]
 #        for it in itemssol :
