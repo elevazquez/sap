@@ -24,6 +24,7 @@ from des.tipoAtributo import *
 from ges.relacion import *
 from ges.lineaBase import *
 from ges.solicitud import *
+from ges.solicitudavotar import *
 
 #load the extension
 principal = Principal(app)
