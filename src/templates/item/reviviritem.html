@@ -18,6 +18,9 @@
 	
 			<label>Fase</label> <input type="text" name="fase" value="{{ form.fase.data }} " id="fase" readonly="true"/> 
     		<label>Tipo Item</label> <input type="text" name="tipo_item" value="{{ form.tipo_item.data }} " id="tipo_item" readonly="true"/> 
+    		<input type="text" name="id" value="{{ form.id.data }}" id="id" hidden="true"/>
+    		<input type="text" name="id_fase_f" value="{{ form.id_fase_f.data }}" id="id_fase_f" hidden="true"/>
+    		<input type="text" name="id_tipo_f" value="{{ form.id_tipo_f.data }}" id="id_tipo_f" hidden="true"/>
     		<label>Código</label> <input type="text" name="codigo" value="{{ form.codigo.data }}" id="codigo" readonly="true" />
     		<label>Nombre</label> <input type="text" name="nombre" value="{{ form.nombre.data }}" id="nombre" readonly="true" />
     		<label>Descripción</label> <input type="text" name="descripcion" value="{{ form.descripcion.data }}" id="descripcion" readonly="true" />
