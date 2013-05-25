@@ -9,8 +9,8 @@ db_session = scoped_session(sessionmaker(autocommit=False,
 
 class UserPermission(Permission):
     def __init__(self, action, idr):
-        need = ItemNeed(action, idr, 'manage')
-        super(UserPermission, self).__init__(need)
+        needPermiso = ItemNeed(action, idr, 'manage')
+        super(UserPermission, self).__init__(needPermiso)
         
 class UserRol(Permission):
     def __init__(self, rol):
