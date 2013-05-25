@@ -35,7 +35,7 @@ class   TipoATributoTestCase(unittest.TestCase):
         print "tipo att creado correctamente"
 
 
-    def test_crear_tipoatt_duplicado(self):
+    def test_crear_tipoatt_duplicado(self): 
         """prueba si se pueden crear tipo att duplicados    """
         #Ahora probamos vovler a crear
         print "Creacion de tipo att con nombre repetido"
