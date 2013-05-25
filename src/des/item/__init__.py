@@ -57,7 +57,7 @@ def flash_errors(form):
 @app.route('/item/listafase', methods=['GET', 'POST'])
 def listafase(): 
     """ Funcion que lista las fases en la cual se creara el item"""      
-    ##init_db(db_session)
+    ##init_db(db_session)    
     fases = db_session.query(Fase).from_statement(" select * from fase where id_proyecto = "+str(session['pry'])+" and estado != 'A' order by nro_orden " )
     return render_template('item/listafase.html', fases = fases)  
     
@@ -66,7 +66,12 @@ def listafase():
 @app.route('/item/listatipoitem', methods=['GET', 'POST'])
 def listatipoitem():   
     """ Funcion que lista los tipo de items posibles del item a crear""" 
-   # #init_db(db_session)
+    # #init_db(db_session)
+    var = "INSERTAR ITEM F" + str(request.args.get('id_fase'))
+    permission = UserPermission(var, int(request.args.get('id_fase')))
+    if permission.can() == False:
+            flash('No Posee los permisos suficientes para Agregar un Item','info')
+            return redirect('/item/administraritem') 
     tipo = db_session.query(TipoItem).from_statement(" select * from tipo_item where id_fase = "+request.args.get('id_fase')+" order by codigo " )
     global fase_global
     fase_global = request.args.get('id_fase')
@@ -77,6 +82,7 @@ def listatipoitem():
 def nuevoitem():
     """ Funcion para agregar registros a la tabla de Item"""
     today = datetime.date.today()
+  
     atributo = db_session.query(Atributo).join(TItemAtributo , TItemAtributo.id_atributo == Atributo.id).join(TipoItem, TipoItem.id == TItemAtributo.id_tipo_item).filter(TipoItem.id == request.args.get('id_tipo')).all()
     
     form = ItemFormulario(request.form)
@@ -204,15 +210,6 @@ def buscarItem():
     return render_template('item/administraritem.html', items = r)
 
 
-def tienePermiso(nombreper):
-     """funcion que verifica los permisos en item"""
-     per = db_session.query(Permiso).from_statement(" select p.* from usuario_rol ur , rol_permiso rp , permiso p "+
-                                                    " where ur.id_usuario = "+str(session['user_id'])+"and ur.id_rol = rp.id_rol and rp.id_permiso = p.id and p.codigo = '"+str(nombreper)+"' ").first()
-     if per != None :
-         return True
-     else :
-         return False 
-
 
 @app.route('/item/editaritem', methods=['GET', 'POST'])
 def editaritem():  
@@ -247,7 +244,7 @@ def editaritem():
     
     valoresatr = db_session.query(ItemAtributo).from_statement(" select ia.* from item_atributo ia where ia.id_item= " +str(id_itemg) )
     form.estado.choices = [('I', 'Abierto'), ('P', 'En Progreso'), ('R', 'Resuelto'), ('A', 'Aprobado'), 
-                                          ('Z', 'Rechazado'), ('V', 'Revision'),  ('B', 'Bloqueado')   ]     
+                                          ('Z', 'Rechazado'), ('V', 'Revision')  ]     
     #estado= request.args.get('es')    
    
     if request.method != 'POST':   
@@ -261,21 +258,25 @@ def editaritem():
          
     enlb= db_session.query(LbItem).filter_by(id_item=id_itemg).first()      
     #verifica si puede ser modificado:
-    if enlb != None or estado_global == 'E' :
+    if enlb != None or item.estado == 'E' :
         flash('El Item no puede ser modificado, ya que se encuebra en una Linea Base o esta Eliminado!','error')
-        return render_template('item/editaritem.html', form=form, att=atributo, vals=valoresatr)
+        return render_template('item/administraritem.html')
 
     if request.method == 'POST' and form.validate():
         # #init_db(db_session)
-        try:           
+        try:     
             # verifica permisos de modificacion
             if form.estado.data== 'P' or form.estado.data =='R' :
-                if tienePermiso("modificaItem") == False :
+                var = "MODIFICACION ITEM F" + str(id_faseg)
+                permission = UserPermission(var, int(id_faseg))
+                if permission.can() == False:
                         flash('No posee los Permisos suficientes para realizar el cambio de estado','error')
                         return render_template('item/editaritem.html', form=form, att=atributo, vals=valoresatr)
                  
             if form.estado.data=='A' or form.estado.data =='Z':
-                if tienePermiso("aprobacionItem") == False :
+                var = "APROBACION ITEM F" + str(id_faseg)
+                permission = UserPermission(var, int(id_faseg))
+                if permission.can() == False:
                         flash('No posee los Permisos suficientes para realizar el cambio de estado','error')
                         return render_template('item/editaritem.html', form=form, att=atributo, vals=valoresatr)
                  
@@ -332,7 +333,7 @@ def editaritem():
                         relacion= Relacion(rel_hijo.fecha_creacion, today, rel_hijo.id_tipo_relacion, item.id, item2.id, 'A')
                         db_session.add(relacion)
                         db_session.commit() 
-            print "ed9"     
+                
             # cambios en items padres
             if list_item_padres != None     :
                 for padre in list_item_padres :
@@ -557,6 +558,7 @@ def reversionaritem():
     """funcion que permite la reversion de items"""  
     today = datetime.date.today()
     ##init_db(db_session)      
+   
     i = db_session.query(Item).filter_by(codigo=request.args.get('cod')).filter_by(id=request.args.get('id')).first() 
     if  request.args.get('id') == None:
         id_itemg= request.form.get('id')
@@ -572,7 +574,13 @@ def reversionaritem():
         id_faseg= request.form.get('id_fase_f')
     else:
         id_faseg=request.args.get('fase')
-        
+     
+    var = "MODIFICACION ITEM F" + str(id_faseg)
+    permission = UserPermission(var, int(id_faseg))
+    if permission.can() == False:
+            flash('No posee los Permisos suficientes para realizar esta Operacion','error')
+            return redirect('/item/administraritem')   
+                    
     form = ItemEditarFormulario(request.form,i)             
     item = db_session.query(Item).filter_by(nombre=form.nombre.data).filter_by(id=id_itemg).first()  
     form.usuario.data = session['user_id']       
@@ -604,14 +612,15 @@ def reversionaritem():
     #atributo=  db_session.query(Atributo).join(TItemAtributo, Atributo.id== TItemAtributo.id_atributo).filter(TipoItem.id == id_tipog ).all() 
     atributo = db_session.query(Atributo).from_statement(" select at.* from tipo_item ti , titem_atributo ta, atributo at "+
                                                         " where ti.id = ta.id_tipo_item and at.id = ta.id_atributo and ti.id=  " +str(id_tipog) )
-    
+   
     valoresatr = db_session.query(ItemAtributo).from_statement(" select ia.* from item_atributo ia where ia.id_item= " +str(id_itemg) )
-        
+   
     enlb= db_session.query(LbItem).filter_by(id_item=id_itemg).first() 
                 
     if request.method == 'POST' and form.validate():
         # #init_db(db_session)
         try:            
+            
             maxversionitem = db_session.query(Item).from_statement("select *  from item where codigo = '"+form.codigo.data+"' and version = ( "+ 
                                                                     " select max(version) from item i where i.codigo = '"+form.codigo.data+"' )" ).first()
             
@@ -622,10 +631,12 @@ def reversionaritem():
             db_session.commit()
             if atributo != None:
                 for atr in atributo:
-                    valor =  request.form.get(atr.nombre)                  
-                    ia= ItemAtributo(valor, item_aux.id, atr.id)
-                    db_session.add(ia)
-                    db_session.commit()
+                    for val in valoresatr:
+                        if atr.id == val.id_atributo:
+                            #valor =  request.form.get(atr.nomre)               
+                            ia= ItemAtributo(val.valor, item_aux.id, atr.id)
+                            db_session.add(ia)
+                            db_session.commit()
                     
             
             # --------------------------------------------------------------------------------------------------
@@ -717,6 +728,7 @@ def reviviritem():
     """funcion que permite revivir un item"""
     today = datetime.date.today()
     ##init_db(db_session)      
+                     
     i = db_session.query(Item).filter_by(codigo=request.args.get('cod')).filter_by(id=request.args.get('id')).first() 
     if  request.args.get('id') == None:
         id_itemg= request.form.get('id')
@@ -732,6 +744,12 @@ def reviviritem():
         id_faseg= request.form.get('id_fase_f')
     else:
         id_faseg=request.args.get('fase')
+        
+    var = "MODIFICACION ITEM F" + str(id_faseg)
+    permission = UserPermission(var, int(id_faseg) )
+    if permission.can() == False:
+            flash('No posee los Permisos suficientes para realizar esta Operacion','error')
+            return redirect('/item/administraritem') 
     form = ItemEditarFormulario(request.form,i)   
               
     item = db_session.query(Item).filter_by(nombre=form.nombre.data).filter_by(id=id_itemg).first()  
@@ -787,11 +805,13 @@ def reviviritem():
             db_session.add(item2)
             db_session.commit()
             if atributo != None:
-                for atr in atributo:
-                    valor =  request.form.get(atr.nombre)                   
-                    ia= ItemAtributo(valor, item2.id, atr.id)
-                    db_session.add(ia)
-                    db_session.commit()
+                 for atr in atributo:
+                    for val in valoresatr:
+                        if atr.id == val.id_atributo:
+                            #valor =  request.form.get(atr.nombre)                   
+                            ia= ItemAtributo(val.valor, item2.id, atr.id)
+                            db_session.add(ia)
+                            db_session.commit()
             
             # --------------------------------------------------------------------------------------------------
             #  se verifica si el item poseia alguna relacion antes de eliminarse para recuperar la misma

@@ -39,34 +39,37 @@ def nuevasolicitud():
     form = SolicitudFormulario(request.form)
 #    init_db(db_session)
     pro = db_session.query(Proyecto).filter_by(id=session['pry']).first()
+    if pro.estado != 'P' :
+        flash('No se pueden agregar Solicitudes a un Proyecto que no se encuentre En Progreso','info')
+        return render_template('solicitud/administrarsolicitud.html')
     form.estado.data = 'Nueva'
     form.id_proyecto.data = pro.nombre
     form.id_usuario.data = current_user.usuario
     form.fecha.data = today
     form.cant_votos.data = 0
+    id_fase = request.args.get('id_fase')
+    if (id_fase!=None):
+        session['faseid'] = id_fase
     items = db_session.query(Item).from_statement("Select it.*  from item it, "+ 
                         " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id "+
-                        " and f.id_proyecto = "+str(session['pry'])+" and f.id=" +str(request.args.get('id_fase'))+ " group by codigo order by 1 ) s "+
+                        " and f.id_proyecto = "+str(session['pry'])+" and f.id=" +str(session['faseid'])+ " group by codigo order by 1 ) s "+
                         " where it.codigo = cod and it.version= vermax and it.estado = 'B' " + 
                         " and it.id not in(select id_item from solicitud_item where id_solicitud in (select id from solicitud_cambio " +
                         " where id_proyecto = "+str(session['pry'])+" and id_usuario = " + str(current_user.id) +" and (estado='N' or estado ='E'))) order by it.codigo ")
-    if pro.estado != 'P' :
-        flash('No se pueden agregar Solicitudes a un Proyecto que no se encuentre En Progreso','info')
-        return render_template('solicitud/administrarsolicitud.html')
     if request.method == 'POST' and form.validate():
  #       init_db(db_session)
         try:
             multiselect= request.form.getlist('selectitem')  
             list_aux=[]
             
-            if list_aux == None or list_aux == []:
-                flash('Debe seleccionar un item','info')
-                return render_template('solicitud/administrarsolicitud.html')         
-            
             for it in multiselect :
                 i = db_session.query(Item).filter_by(id=it).first()    
                 list_aux.append(i)
-                id_fase= i.id_fase            
+                #id_fase= i.id_fase            
+            
+            if list_aux == None or list_aux == []:
+                flash('Debe seleccionar un item','info')
+                return render_template('solicitud/administrarsolicitud.html')         
             
             solicitud = SolicitudCambio(form.descripcion.data, 'N', today, 0, current_user.id, pro.id )
             db_session.add(solicitud)
@@ -88,7 +91,7 @@ def nuevasolicitud():
             return render_template('solicitud/nuevasolicitud.html', items= items, form= form)
     else:
         flash_errors(form)  
-    return render_template('solicitud/nuevasolicitud.html',items= items, form= form )
+    return render_template('solicitud/nuevasolicitud.html', form= form ,items= items)
 
 @app.route('/solicitud/editarsolicitud', methods=['GET', 'POST'])
 def editarsolicitud():
@@ -96,11 +99,17 @@ def editarsolicitud():
 #    init_db(db_session)
     today = datetime.date.today()
     pro = db_session.query(Proyecto).filter_by(id=session['pry']).first()
-    s = db_session.query(SolicitudCambio).filter_by(id=request.args.get('id')).filter_by(id_proyecto=session['pry']).first()  
+    if  request.args.get('id') == None:
+        id_sol= request.form.get('id')
+    else:
+        id_sol=request.args.get('id')
+    s = db_session.query(SolicitudCambio).filter_by(id=id_sol).filter_by(id_proyecto=session['pry']).first()
+    itemssol=  db_session.query(Item).from_statement("select * from item where id in(select id_item from solicitud_item where id_solicitud="+str(id_sol)+")")  
     form = SolicitudFormulario(request.form,s)
-    solicitud = db_session.query(SolicitudCambio).filter_by(id=request.args.get('id')).filter_by(id_proyecto=session['pry']).first()  
+    solicitud = db_session.query(SolicitudCambio).filter_by(id=id_sol).filter_by(id_proyecto=session['pry']).first()  
     form.fecha.data = today
     form.id_proyecto.data = pro.nombre
+    form.id_usuario.data = current_user.usuario
     form.cant_votos.data = 0
     if pro.estado != 'P' :
         flash('No se pueden editar Solicitudes a un Proyecto que no se encuentre En Progreso','info')
@@ -116,15 +125,16 @@ def editarsolicitud():
             if form.estado.data=='Nueva':
                 solicitud.estado='N'
             solicitud.id_proyecto=pro.id
+            solicitud.id_usuario=current_user.id
             db_session.merge(solicitud)
             db_session.commit()
             return redirect('/solicitud/administrarsolicitud')
         except DatabaseError, e:
             flash('Error en la Base de Datos' + e.args[0],'error')
-            return render_template('solicitud/editarsolicitud.html', form=form)
+            return render_template('solicitud/editarsolicitud.html', form=form, items=itemssol)
     else:
         flash_errors(form) 
-    return render_template('solicitud/editarsolicitud.html', form=form)
+    return render_template('solicitud/editarsolicitud.html', form=form, items=itemssol)
 
 @app.route('/solicitud/enviarsolicitud', methods=['GET', 'POST'])
 def enviarsolicitud():
@@ -151,7 +161,11 @@ def enviarsolicitud():
 def eliminarsolicitud():
     """ Funcion para eliminar registros de la tabla Solicitud""" 
 #    init_db(db_session)
-    s = db_session.query(SolicitudCambio).filter_by(id=request.args.get('id')).filter_by(id_proyecto=session['pry']).first()
+    if  request.args.get('id') == None:
+        id_sol= request.form.get('id')
+    else:
+        id_sol=request.args.get('id')
+    s = db_session.query(SolicitudCambio).filter_by(id=id_sol).filter_by(id_proyecto=session['pry']).first()
     pro = db_session.query(Proyecto).filter_by(id=session['pry']).first()
     if pro.estado != 'P' :
         flash('No se pueden eliminar Solicitudes a un Proyecto que no se encuentre En Progreso','info')
@@ -161,15 +175,16 @@ def eliminarsolicitud():
         return render_template('solicitud/administrarsolicitud.html')
     try:
 #        init_db(db_session)
-        solicitud = db_session.query(SolicitudCambio).filter_by(id=id).filter_by(id_proyecto=session['pry']).first()  
-        itemssol=  db_session.query(SolicitudItem).from_statement("select * from item where id in(select id_item from solicitud_item where id_solicitud="+solicitud.id+")")
-        list_aux=[]
-        for it in itemssol :
-            i = db_session.query(Item).filter_by(id=it).first()    
-            list_aux.append(i)
-                
+        solicitud = db_session.query(SolicitudCambio).filter_by(id=id_sol).filter_by(id_proyecto=session['pry']).first()  
+        itemssol=  db_session.query(Item).from_statement("select * from item where id in(select id_item from solicitud_item where id_solicitud='"+str(solicitud.id)+"')")
+        #itemssol=  db_session.query(Item).join(SolicitudItem, Item.id== SolicitudItem.id_item).filter(SolicitudItem.id_solicitud== solicitud.id ).all()   
+#        list_aux=[]
+#        for it in itemssol :
+#            i = db_session.query(Item).filter_by(id=it).first()    
+#            list_aux.append(i)
+#                
         #se elimina el id de los item de la sol          
-        for it in list_aux:
+        for it in itemssol:
             s = db_session.query(SolicitudItem).filter_by(id_item=it.id).first()  
             db_session.delete(s)
             db_session.commit()
@@ -224,7 +239,7 @@ def buscarfase():
 def listarfase():
     """ Funcion para listar registros de la tabla Fase""" 
 #    init_db(db_session)
-    fases2 = db_session.query(Fase).filter_by(id_proyecto=session['pry']).filter_by(estado='P').order_by(Fase.nombre)
+    fases2 = db_session.query(Fase).filter_by(id_proyecto=session['pry']).order_by(Fase.nombre)
     return render_template('solicitud/listarfase.html', fases2 = fases2)
 
 @app.route('/solicitud/buscaritem', methods=['GET', 'POST'])
@@ -346,7 +361,7 @@ def quitaritemsol():
     #solicitud = db_session.query(SolicitudCambio).filter_by(id= sol.id).first() 
     #itemssol=  db_session.query(SolicitudItem).join(Item, SolicitudItem.id_item== Item.id).filter(SolicitudItem.id_solicitud== sol.id ).all()   
     #itemssol=  db_session.query(SolicitudItem).from_statement("select * from item where id in(select id_item from solicitud_item where id_solicitud='"+str(sol.id)+"')")
-    itemssol=  db_session.query(Item).join(SolicitudItem, SolicitudItem.id_item== Item.id).filter(SolicitudItem.id_solicitud== sol.id ).all()   
+    itemssol=  db_session.query(Item).join(SolicitudItem, Item.id== SolicitudItem.id_item).filter(SolicitudItem.id_solicitud== sol.id ).all()   
     if request.method == 'POST' and form.validate(): 
         items=request.form.getlist('selectitem')
         try:
