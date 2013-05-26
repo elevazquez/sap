@@ -3,21 +3,20 @@
 <div class="primary">
 <div >
 <h1>Solicitud de Cambios a votar</h1>
-<form id=buscar method=get action="/solicitud/buscarsolicitud">
+<form id=buscar method=get action="/solicitudavotar/buscarsolicitudavotar">
 			<input type="text" name="patron" /> 
 			<select name=parametro>
 				<option value="descripcion">Descripción</option>
 				<option value="fecha">Fecha</option>
 				<option value="estado">Estado</option>
 			</select> 
-			<input type=submit name="Buscar" value=Buscar /> 			
-		<a href="{{ url_for('listarfase') }}" ><img src="../static/images/a.png" alt="Nuevo" height="30" width="30" title="Nuevo" ></a>
+			<input type=submit name="Buscar" value=Buscar />
 </form>
 <p></p>
 {% with errors = get_flashed_messages(category_filter=["info"]) %}
 {% if errors %}
 <div class="block-message">
-  <a class="close" href="{{ url_for( 'administraravotar' ) }}" dir="rtl">×</a>
+  <a class="close" href="{{ url_for( 'administrarsolicitudavotar' ) }}" dir="rtl">×</a>
   <ul>
     {%- for msg in errors %}
     <li>{{ msg }}</li>

@@ -14,7 +14,7 @@
 			</div>
 		{% endif %} 
 	{% endwith %}
-	<form id=asignar method=post action="/solicitud/editarsolicitud">
+	<form id=asignar method=post action="/solicitudavotar/votar">
 	<label>Ítems en la Solicitud de Cambio:</label>
 	<div style="height:250px;width:500px;overflow:auto;">
 	<table id="tablaitems" border="1">
@@ -49,8 +49,9 @@
     		<label>Usuario</label> <input type="text" name="id_usuario" value="{{ form.id_usuario.data }}" id="id_usuario" readonly="true"/>
     		<label>Proyecto</label> <input type="text" name="id_proyecto" value="{{ form.id_proyecto.data }}" id="id_proyecto" readonly="true"/>
     		<label>Votos</label> <input type="text" name="cant_votos" value="{{ form.cant_votos.data }}" id="cant_votos" readonly="true"/>
+    		<label> Aprobar</label><input type="checkbox" name="voto" value="False"/>
   		<p><input type=submit value=Votar>
-  		<input type="button" value="Cancelar"  onClick="document.location.href='{{ url_for( 'administraravotar' ) }}';"> 
+  		<input type="button" value="Cancelar"  onClick="document.location.href='{{ url_for( 'administrarsolicitudavotar' ) }}';"> 
 	</form>
 </div>
 {% endblock %}

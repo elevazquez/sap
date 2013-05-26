@@ -29,9 +29,9 @@ def flash_errors(form):
                 error
             ),'error')
 
-@app.route('/solicitudavotar/administraravotar', methods=['GET', 'POST'])
-def administraravotar():
-    idusuario = session['user_id']
+@app.route('/solicitudavotar/administrarsolicitudavotar', methods=['GET', 'POST'])
+def administrarsolicitudavotar():
+    idusuario = current_user.id
     idproyecto= session['pry']
     solicitudes = db_session.query(SolicitudCambio).join(MiembrosComite, MiembrosComite.id_proyecto == SolicitudCambio.id_proyecto).filter(MiembrosComite.id_usuario == idusuario).filter(SolicitudCambio.id_proyecto == idproyecto).filter(SolicitudCambio.estado == 'E').all()
     return render_template('solicitudavotar/administrarsolicitudavotar.html', solicitudes = solicitudes)
@@ -58,10 +58,29 @@ def veritems():
         form.estado.data='Enviada'
     return render_template('solicitudavotar/itemssolicitud.html', form=form, items=itemssol)
 
-
-def aprobarSolicitud():
-    idproyecto=1
-    idsolicitud=1
+@app.route('/solicitudavotar/votar', methods=['GET', 'POST'])  
+def votar():
+    voto = request.form.get('voto')
+    idsolicitud = request.form.get('id')
+    iduser = current_user.id
+    resolucion=ResolucionMiembros(voto, idsolicitud, iduser)
+    db_session.add(resolucion)
+    db_session.commit()
+    aprobarSolicitud(session['pry'], idsolicitud)
+    return redirect('/solicitudavotar/administrarsolicitudavotar')
+        
+def aprobarSolicitud(idproyecto, idsolicitud):
+    print('proyecto ', idproyecto)
+    cantidadvotante = db_session.query(func.count(ResolucionMiembros)).filter(ResolucionMiembros.id_solicitud_cambio == idsolicitud);
     cantidadaprobado = db_session.query(func.count(ResolucionMiembros)).filter(ResolucionMiembros.id_solicitud_cambio == idsolicitud).filter(ResolucionMiembros.voto == True);
-    db_session.query(Proyecto).filter(Proyecto.id == idproyecto);
-    
+    proyecto = db_session.query(Proyecto).filter(Proyecto.id == idproyecto).first();
+    mayoria = (proyecto.cant_miembros // 2) + 1
+    print 'mayoria ', mayoria
+    if (cantidadvotante == proyecto.cant_miembros) and (cantidadaprobado >= (mayoria )):
+        solicitud = db_session.query(SolicitudCambio).filter_by(id= idsolicitud).first()
+        solicitud.estado= 'A'
+        db_session.merge(solicitud)
+        db_session.commit()
+        flash ('Solicitud aprobada','info')
+    else:
+        flash ('Solicitud no aprobada','info')
