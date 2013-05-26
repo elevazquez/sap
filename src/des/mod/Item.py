@@ -1,6 +1,6 @@
 """ Modelo de la tabla Item"""
-from sqlalchemy import *
-from sqlalchemy.orm import *
+from sqlalchemy import Column, Integer, Sequence, String, Date, Numeric, LargeBinary, ForeignKey
+from sqlalchemy.orm import relationship, backref
 from util.database import Base
 from adm.mod.Usuario import Usuario
 from des.mod.Fase import Fase

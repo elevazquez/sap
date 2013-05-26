@@ -1,5 +1,5 @@
 """ Modelo de la tabla Tipo Relacion"""
-from sqlalchemy import *
+from sqlalchemy import Integer, Column, String, Sequence
 from util.database import Base
 
 class TipoRelacion (Base):
