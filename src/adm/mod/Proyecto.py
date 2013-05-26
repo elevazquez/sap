@@ -30,7 +30,7 @@ class Proyecto (Base):
         self.id_usuario_lider = id_usuario_lider
     
     def __repr__(self):
-        return '<Proyecto %s %s %s %d %d %d %d %s>' % (self.nombre, self.descripcion, self.estado,
+        return '<Proyecto %s %s %s %d %s %s %s %d>' % (self.nombre, self.descripcion, self.estado,
         self.cant_miembros, self.fecha_inicio, self.fecha_fin, self.fecha_ultima_mod,
         self.id_usuario_lider)
     

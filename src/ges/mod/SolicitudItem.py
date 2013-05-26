@@ -19,4 +19,4 @@ class SolicitudItem (Base):
         self.id_item = id_item
         
     def __repr__(self):
-        return '<Solicitud Item %s %s>' % (self.id_solicitud, self.id_item)
+        return '<Solicitud Item %d %d>' % (self.id_solicitud, self.id_item)

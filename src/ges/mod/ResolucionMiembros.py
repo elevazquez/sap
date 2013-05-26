@@ -21,5 +21,5 @@ class ResolucionMiembros (Base):
         self.id_usuario = id_usuario
         
     def __repr__(self):
-        return '<ResolucionMiembros %s %s %s>' % (self.voto, self.id_solicitud_cambio, self.id_usuario)
+        return '<ResolucionMiembros %s %d %d>' % (self.voto, self.id_solicitud_cambio, self.id_usuario)
     

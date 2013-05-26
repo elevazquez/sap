@@ -31,6 +31,6 @@ class Relacion (Base):
         self.estado = estado
         
     def __repr__(self):
-        return '<Relacion %d %d %s %s %s>' % (self.fecha_creacion, self.fecha_modificacion,
+        return '<Relacion %s %s %d %d %d %s>' % (self.fecha_creacion, self.fecha_modificacion,
                  self.id_tipo_relacion, self.id_item, self.id_item_duenho, self.estado)
     

@@ -30,7 +30,7 @@ class Usuario (Base, UserMixin):
         self.fecha_nac = fecha_nac
     
     def __repr__(self):
-        return '<Usuario %s %s %s %s %s %s %s %d>' % (self.usuario, self.nombre, self.apellido,
+        return '<Usuario %s %s %s %s %s %s %s %s>' % (self.usuario, self.nombre, self.apellido,
         self.password, self.correo, self.domicilio, self.telefono, self.fecha_nac)
     
     def getUserName(self): 

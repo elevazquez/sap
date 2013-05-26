@@ -19,5 +19,5 @@ class LbItem (Base):
         self.id_item = id_item
         
     def __repr__(self):
-        return '<LbItem %s %s>' % (self.id_linea_base, self.id_item)
+        return '<LbItem %d %d>' % (self.id_linea_base, self.id_item)
     

@@ -14,5 +14,5 @@ class TipoAtributo (Base):
         self.descripcion = descripcion
         
     def __repr__(self):
-        return '<TipoAtributo %s %s %s>' % (self.nombre, self.descripcion)
+        return '<TipoAtributo %s %s>' % (self.nombre, self.descripcion)
     

@@ -19,5 +19,5 @@ class MiembrosComite (Base):
         self.id_usuario = id_usuario
         
     def __repr__(self):
-        return '<Miembros Comite %s %s>' % (self.id_proyecto, self.id_usuario)
+        return '<Miembros Comite %d %d>' % (self.id_proyecto, self.id_usuario)
     

@@ -27,6 +27,6 @@ class SolicitudCambio (Base):
         self.id_proyecto = id_proyecto
             
     def __repr__(self):
-        return '<Proyecto %s %s %d %i %s>' % (self.descripcion, self.estado,
+        return '<Proyecto %s %s %s %d %d %d>' % (self.descripcion, self.estado,
         self.fecha, self.cant_votos, self.id_usuario, self.id_proyecto)
     

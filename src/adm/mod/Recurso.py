@@ -21,5 +21,5 @@ class Recurso (Base):
         self.id_fase = id_fase
  
     def __repr__(self):
-        return '<Recurso %s %s %s>' % (self.nombre, self.id_proyecto, self.id_fase)
+        return '<Recurso %s %d %d>' % (self.nombre, self.id_proyecto, self.id_fase)
     

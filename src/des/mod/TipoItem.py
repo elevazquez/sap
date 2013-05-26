@@ -21,4 +21,4 @@ class TipoItem (Base):
         self.id_fase = id_fase
     
     def __repr__(self):
-        return '<Tipo Item %s %s %s %s>' % (self.codigo, self.nombre, self.descripcion, self.id_fase)
+        return '<Tipo Item %s %s %s %d>' % (self.codigo, self.nombre, self.descripcion, self.id_fase)

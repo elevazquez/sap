@@ -23,5 +23,5 @@ class UsuarioRol (Base):
         self.id_proyecto = id_proyecto
     
     def __repr__(self):
-        return '<Usuario Rol %s %s %s %s>' % (self.id_rol, self.id_usuario, self.id_proyecto)
+        return '<Usuario Rol %d %d %d>' % (self.id_rol, self.id_usuario, self.id_proyecto)
     

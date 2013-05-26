@@ -28,6 +28,6 @@ class Fase (Base):
         self.id_proyecto = id_proyecto
     
     def __repr__(self):
-        return '<Fase %d %s %s %s %d %d %s>' % (self.nro_orden, self.nombre, self.descripcion, self.estado,
+        return '<Fase %d %s %s %s %s %s %d>' % (self.nro_orden, self.nombre, self.descripcion, self.estado,
         self.fecha_inicio, self.fecha_fin, self.id_proyecto)
     

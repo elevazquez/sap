@@ -19,4 +19,4 @@ class RolPermiso (Base):
         self.id_permiso = id_permiso
         
     def __repr__(self):
-        return '<RolPermiso %s %s>' % (self.id_rol, self.id_permiso)
+        return '<RolPermiso %d %d>' % (self.id_rol, self.id_permiso)

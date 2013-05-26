@@ -19,5 +19,5 @@ class TItemAtributo (Base):
         self.id_atributo = id_atributo
         
     def __repr__(self):
-        return '<Tipo Tipo Item Atributo %s %s %s %s>' % (self.id_tipo_item, self.id_atributo)
+        return '<Tipo Tipo Item Atributo %d %d>' % (self.id_tipo_item, self.id_atributo)
     

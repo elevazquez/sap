@@ -19,5 +19,5 @@ class Permiso (Base):
         self.id_fase = id_fase
  
     def __repr__(self):
-        return '<Permiso %s %s %s>' % (self.codigo, self.descripcion, self.id_fase)
+        return '<Permiso %s %s %d>' % (self.codigo, self.descripcion, self.id_fase)
     

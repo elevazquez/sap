@@ -16,5 +16,5 @@ class TipoRelacion (Base):
         self.descripcion = descripcion
     
     def __repr__(self):
-        return '<Tipo Relacion %s %s %s %s>' % (self.codigo, self.nombre, self.descripcion)
+        return '<Tipo Relacion %s %s %s>' % (self.codigo, self.nombre, self.descripcion)
     
