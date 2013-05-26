@@ -7,7 +7,8 @@
 			<select name=parametro>
 				<option value="descripcion">Descripción</option>
 				<option value="fecha">Fecha</option>
-				<option value="estado">Estado</option>
+				<option value="nombre">Usuario creador</option>
+				<option value="cant_votos">Cantidad de votos</option>
 			</select> 
 			<input type=submit name="Buscar" value=Buscar />
 </form>
@@ -24,13 +25,15 @@
 </div>
 {% endif %}
 {% endwith %}
-<div style="height:500px;width:580px;overflow:auto;">
+<div style="height:500px;width:700px;overflow:auto;">
 <table border="1">
 	<TR>
 		<TH class="c1"></TH>
 		<TH class="c2">Descripción</TH>
 		<TH class="c3">Fecha</TH>
 		<TH class="c4">Estado</TH>
+		<TH class="c4">Creado por </TH>
+		<TH class="c4">Cantidad de votos </TH>
 	</TR>
 	{% for solicitud in solicitudes %}
 	<TR>
@@ -40,6 +43,8 @@
 		<TD class="c3"><SPAN>{{solicitud.fecha|e}}</SPAN></TD>
 		<TD class="c5"><SPAN>{{'Nueva' if solicitud.estado=='N' else 'Enviada' if solicitud.estado=='E' 
 		else 'Aprobada' if solicitud.estado=='A' else 'Rechazada' if solicitud.estado=='R'|e}}</SPAN></TD>
+		<TD class="c6"><SPAN>{{ solicitud.solcamusuario.nombre }} {{ solicitud.solcamusuario.apellido }}</SPAN></TD>
+		<TD class="c6"><SPAN>{{ solicitud.cant_votos }}</SPAN></TD>
 	</TR>
 	{% else %}
   	<TR>

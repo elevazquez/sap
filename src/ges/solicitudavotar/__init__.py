@@ -1,12 +1,14 @@
 from loginC import app
 from util.database import init_db, engine
 from sqlalchemy.orm import scoped_session, sessionmaker
-from sqlalchemy import func
+from sqlalchemy import func, or_
+from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 import flask, flask.views
 from ges.mod.SolicitudCambio import SolicitudCambio
 from adm.mod.MiembrosComite import MiembrosComite
 from ges.mod.ResolucionMiembros import ResolucionMiembros
+from adm.mod.Usuario import Usuario
 from adm.mod.Proyecto import Proyecto
 from flask_login import current_user
 from des.mod.Item import Item
@@ -34,6 +36,38 @@ def administrarsolicitudavotar():
     idproyecto= session['pry']
     solicitudes = db_session.query(SolicitudCambio).join(MiembrosComite, MiembrosComite.id_proyecto == SolicitudCambio.id_proyecto).filter(MiembrosComite.id_usuario == idusuario).filter(SolicitudCambio.id_proyecto == idproyecto).filter(SolicitudCambio.estado == 'E').all()
     return render_template('solicitudavotar/administrarsolicitudavotar.html', solicitudes = solicitudes)
+
+@app.route('/solicitudavotar/buscarsolicitudavotar', methods=['GET', 'POST'])
+def buscarsolicitudavotar():
+    idusuario = current_user.id
+    idproyecto= session['pry']
+    valor = request.args['patron']
+    parametro = request.args['parametro']
+    if valor=='' or valor == None:
+        return administrarsolicitudavotar()
+    else:
+        if parametro == 'fecha':
+            try:
+                fecha = datetime.strptime(valor, '%Y-%m-%d')
+                solicitudes = db_session.query(SolicitudCambio).join(MiembrosComite, MiembrosComite.id_proyecto == SolicitudCambio.id_proyecto).filter(MiembrosComite.id_usuario == idusuario).filter(SolicitudCambio.id_proyecto == idproyecto).filter(SolicitudCambio.estado == 'E').filter(SolicitudCambio.fecha == fecha).all()
+            except ValueError:
+                solicitudes =[]
+        elif parametro == 'nombre':
+            solicitudes = db_session.query(SolicitudCambio).join(MiembrosComite, MiembrosComite.id_proyecto == SolicitudCambio.id_proyecto).filter(MiembrosComite.id_usuario == idusuario).join(Usuario, SolicitudCambio.id_usuario == Usuario.id).filter(SolicitudCambio.id_proyecto == idproyecto).filter(SolicitudCambio.estado == 'E').filter(or_(Usuario.nombre.ilike('%'+valor+'%'),Usuario.apellido.ilike('%'+valor+'%'))).all()
+        elif parametro == 'cant_votos':
+            if valor.isdigit() :
+                solicitudes = db_session.query(SolicitudCambio).join(MiembrosComite, MiembrosComite.id_proyecto == SolicitudCambio.id_proyecto).filter(MiembrosComite.id_usuario == idusuario).filter(SolicitudCambio.id_proyecto == idproyecto).filter(SolicitudCambio.estado == 'E').filter(SolicitudCambio.cant_votos == valor).all()
+            else :
+                solicitudes = []
+        elif parametro == 'descripcion' :
+            solicitudes = db_session.query(SolicitudCambio).join(MiembrosComite, MiembrosComite.id_proyecto == SolicitudCambio.id_proyecto).filter(MiembrosComite.id_usuario == idusuario).filter(SolicitudCambio.id_proyecto == idproyecto).filter(SolicitudCambio.estado == 'E').filter(SolicitudCambio.descripcion.ilike('%'+valor+'%')).all()
+            #relaciones = db_session.query(Relacion).from_statement("SELECT * FROM relacion where to_char("+parametro+", '99999') ilike '%"+valor+"%'").all()
+            #p = db_session.query(Relacion).from_statement("SELECT * FROM relacion where "+parametro+" = CAST("+valor+" AS Int)").all()
+        else:
+            return administrarsolicitudavotar()()
+    #p = db_session.query(Relacion).filter(Relacion.codigo.like('%'+valor+ '%'))
+        return render_template('solicitudavotar/administrarsolicitudavotar.html', solicitudes = solicitudes)
+
 
 @app.route('/solicitudavotar/veritems', methods=['GET', 'POST'])  
 def veritems():
@@ -85,3 +119,13 @@ def aprobarSolicitud(idproyecto, idsolicitud):
         flash ('Solicitud aprobada','info')
     else:
         flash ('Solicitud no aprobada','info')
+        
+@app.errorhandler(404)
+def page_not_found(error):
+    return 'Esta Pagina no existe', 404
+
+"""Cierra la sesion de la conexion con la base de datos"""
+@app.after_request
+def shutdown_session(response):
+    db_session.remove()
+    return response
