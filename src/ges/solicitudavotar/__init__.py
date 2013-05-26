@@ -66,16 +66,18 @@ def votar():
     resolucion=ResolucionMiembros(voto, idsolicitud, iduser)
     db_session.add(resolucion)
     db_session.commit()
+    comiteCambio = db_session.query(SolicitudCambio).filter_by(id = idsolicitud).first()
+    comiteCambio.cant_votos = comiteCambio.cant_votos + 1
+    db_session.merge(comiteCambio)
+    db_session.commit()
     aprobarSolicitud(session['pry'], idsolicitud)
     return redirect('/solicitudavotar/administrarsolicitudavotar')
         
 def aprobarSolicitud(idproyecto, idsolicitud):
-    print('proyecto ', idproyecto)
     cantidadvotante = db_session.query(func.count(ResolucionMiembros)).filter(ResolucionMiembros.id_solicitud_cambio == idsolicitud);
     cantidadaprobado = db_session.query(func.count(ResolucionMiembros)).filter(ResolucionMiembros.id_solicitud_cambio == idsolicitud).filter(ResolucionMiembros.voto == True);
     proyecto = db_session.query(Proyecto).filter(Proyecto.id == idproyecto).first();
     mayoria = (proyecto.cant_miembros // 2) + 1
-    print 'mayoria ', mayoria
     if (cantidadvotante == proyecto.cant_miembros) and (cantidadaprobado >= (mayoria )):
         solicitud = db_session.query(SolicitudCambio).filter_by(id= idsolicitud).first()
         solicitud.estado= 'A'

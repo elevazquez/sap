@@ -43,6 +43,7 @@
 	<form id=asignarPermisos method=post action="/rol/asignarpermiso">
 		<input type="text" hidden="true" name="idrol" value="{{ idrol }}"/>
 	{% endif %}
+	<div style="height:400px;width:600px;overflow:auto;">
 	<table id="tablapermisos" border="1">
 		<TR>
 			<TH class="c3"></TH>
@@ -86,6 +87,7 @@
 			</TR>
 		{% endfor %}
 	</table>
+	</div>
 	{% if not isAdministrar %}
 	<input type=submit name="Asignar Permisos" value="Asignar Permisos" />
 	<input type="button" value="Cancelar"  onClick="document.location.href='{{ url_for( 'administrarrol' ) }}';"> 

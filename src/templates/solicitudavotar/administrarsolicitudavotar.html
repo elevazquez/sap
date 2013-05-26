@@ -1,7 +1,6 @@
 {% extends "principal.html" %} 
 {% block content %}
 <div class="primary">
-<div >
 <h1>Solicitud de Cambios a votar</h1>
 <form id=buscar method=get action="/solicitudavotar/buscarsolicitudavotar">
 			<input type="text" name="patron" /> 
@@ -25,7 +24,7 @@
 </div>
 {% endif %}
 {% endwith %}
-<div style="height:250px;width:380px;overflow:auto;">
+<div style="height:500px;width:580px;overflow:auto;">
 <table border="1">
 	<TR>
 		<TH class="c1"></TH>
@@ -48,7 +47,6 @@
 	</TR>
 	{% endfor %}
 </table>
-</div>
 </div>
 </div>
 {% endblock %}
