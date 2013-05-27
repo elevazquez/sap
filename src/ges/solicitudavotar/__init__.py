@@ -10,7 +10,6 @@ from adm.mod.MiembrosComite import MiembrosComite
 from ges.mod.ResolucionMiembros import ResolucionMiembros
 from adm.mod.Usuario import Usuario
 from adm.mod.Proyecto import Proyecto
-from ges.mod.ResolucionMiembros import ResolucionMiembros
 from flask_login import current_user
 from des.mod.Item import Item
 from ges.solicitud.SolicitudFormulario import SolicitudFormulario
