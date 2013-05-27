@@ -49,9 +49,18 @@
     		<label>Usuario</label> <input type="text" name="id_usuario" value="{{ form.id_usuario.data }}" id="id_usuario" readonly="true"/>
     		<label>Proyecto</label> <input type="text" name="id_proyecto" value="{{ form.id_proyecto.data }}" id="id_proyecto" readonly="true"/>
     		<label>Votos</label> <input type="text" name="cant_votos" value="{{ form.cant_votos.data }}" id="cant_votos" readonly="true"/>
-    		<label> Aprobar</label><input type="checkbox" name="voto" value="False"/>
-  		<p><input type=submit value=Votar>
-  		<input type="button" value="Cancelar"  onClick="document.location.href='{{ url_for( 'administrarsolicitudavotar' ) }}';"> 
+    		{% if voto != none %}
+    		{% if voto.voto == True %}
+    		<label> Aprobar solicitud</label><input type="checkbox" name="voto" checked="checked" disabled="disabled"/>
+    		{% else %}
+    		<label> Aprobar</label><input type="checkbox" name="voto" disabled="disabled"/>
+    		{% endif %}
+    		<p><input type="button" value="Cancelar"  onClick="document.location.href='{{ url_for( 'administrarsolicitudavotar' ) }}';"> 
+    		{% else %}
+    		<label> Aprobar</label><input type="checkbox" name="voto"/>
+    		<p><input type=submit value=Votar>
+    		<input type="button" value="Cancelar"  onClick="document.location.href='{{ url_for( 'administrarsolicitudavotar' ) }}';"> 
+    		{% endif %}
 	</form>
 </div>
 {% endblock %}

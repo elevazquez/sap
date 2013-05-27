@@ -10,6 +10,7 @@ from adm.mod.MiembrosComite import MiembrosComite
 from ges.mod.ResolucionMiembros import ResolucionMiembros
 from adm.mod.Usuario import Usuario
 from adm.mod.Proyecto import Proyecto
+from ges.mod.ResolucionMiembros import ResolucionMiembros
 from flask_login import current_user
 from des.mod.Item import Item
 from ges.solicitud.SolicitudFormulario import SolicitudFormulario
@@ -73,23 +74,22 @@ def buscarsolicitudavotar():
 def veritems():
     """ Funcion para editar registros de la tabla Solicitud""" 
 #    init_db(db_session)
-    #today = datetime.date.today()
     pro = db_session.query(Proyecto).filter_by(id=session['pry']).first()
+    idusuario= current_user.id
     if  request.args.get('id') == None:
         id_sol= request.form.get('id')
     else:
         id_sol=request.args.get('id')
-    s = db_session.query(SolicitudCambio).filter_by(id=id_sol).filter_by(id_proyecto=session['pry']).first()
+    solicitud = db_session.query(SolicitudCambio).filter_by(id=id_sol).filter_by(id_proyecto=session['pry']).first()
     itemssol=  db_session.query(Item).from_statement("select * from item where id in(select id_item from solicitud_item where id_solicitud="+str(id_sol)+")")  
-    form = SolicitudFormulario(request.form,s)
-    solicitud = db_session.query(SolicitudCambio).filter_by(id=id_sol).filter_by(id_proyecto=session['pry']).first()  
-    #form.fecha.data = today
+    form = SolicitudFormulario(request.form,solicitud)
+    usuario =db_session.query(Usuario).filter_by(id=solicitud.id_usuario).first()
+    voto = db_session.query(ResolucionMiembros).filter(ResolucionMiembros.id_solicitud_cambio == id_sol).filter(ResolucionMiembros.id_usuario == idusuario).first()
     form.id_proyecto.data = pro.nombre
-    form.id_usuario.data = current_user.usuario
-    #form.cant_votos.data = 0
+    form.id_usuario.data = usuario.usuario
     if solicitud.estado=='E':
         form.estado.data='Enviada'
-    return render_template('solicitudavotar/itemssolicitud.html', form=form, items=itemssol)
+    return render_template('solicitudavotar/itemssolicitud.html', form=form, items=itemssol, voto = voto)
 
 @app.route('/solicitudavotar/votar', methods=['GET', 'POST'])  
 def votar():
