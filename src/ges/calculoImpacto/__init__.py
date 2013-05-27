@@ -42,6 +42,7 @@ def calculoImpactoAll():
     
     print caminos, caminoImpacto
     print camino_general, impacto_general
+    return render_template('calculoImpacto/calculoimpacto.html', caminogeneral=camino_general, impactoTotal = impacto_general)
     return 'Impacto encontrado'
         
 def getAllCaminos(item):

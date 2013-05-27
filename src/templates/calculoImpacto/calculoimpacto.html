@@ -1,0 +1,44 @@
+{% extends "principal.html" %} 
+{% block content %}
+<div class="primary">
+<div >
+<h1>Calculo Impacto</h1>
+{% with errors = get_flashed_messages(category_filter=["info"]) %}
+{% if errors %}
+<div class="block-message">
+  <a class="close" href="{{ url_for( 'administrarrol' ) }}" dir="rtl">×</a>
+  <ul>
+    {%- for msg in errors %}
+    <li>{{ msg }}</li>
+    {% endfor -%}
+  </ul>
+</div>
+{% endif %}
+{% endwith %}
+<div style="height:350px;width:700px;overflow:auto;">
+<table border="1">
+	<TR>
+		<TH class="c4">Items involucrados</TH>
+		<TH class="c5">Impacto</TH>
+	</TR>
+	{% set fila = 0 %}
+	{% set can = caminogeneral|length %}
+	{% for camino in caminogeneral %}
+	<TR>
+		<TD class="c4">
+		<SPAN>
+			<em>{{ camino.codigo }}</em>
+			{% set fila = fila + 1 %}
+		</SPAN>
+		</TD>
+		{% if fila == 1 %}
+		<TD rowspan="{{ can }}" class="c4">{{ impactoTotal }}</TD>
+		{% endif %}
+	</TR>
+	
+	{% endfor %}
+</table>
+</div>
+</div>
+</div>
+{% endblock %}
