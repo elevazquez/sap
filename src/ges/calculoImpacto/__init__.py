@@ -23,17 +23,25 @@ def flash_errors(form):
 
 @app.route('/calculoimpacto', methods=['GET', 'POST'])
 def calculoImpactoAll():
+    global camino_general
+    camino_general = []
     idItem = request.args.get('id')
     item = db_session.query(Item).filter(Item.id == idItem).first()
     caminos = getAllCaminos(item)
+    camino_general.append(item)
     caminoImpacto = []
     for camino in caminos :
         impacto = 0
         for item in camino :
             impacto = impacto + item.complejidad
         caminoImpacto.append(impacto)
+        
+    impacto_general = 0
+    for item in camino_general :
+        impacto_general = impacto_general + item.complejidad
     
     print caminos, caminoImpacto
+    print camino_general, impacto_general
     return 'Impacto encontrado'
         
 def getAllCaminos(item):
@@ -46,6 +54,11 @@ def getAllCaminos(item):
     
 def getItemsPadres(idItem):
     itemsrelacionados = db_session.query(Item).join(Relacion, Relacion.id_item_duenho == Item.id).filter(Relacion.id_item == idItem).filter(Relacion.estado == 'A').all()
+    for i in itemsrelacionados :
+        try:
+            camino_general.index(i)
+        except ValueError:
+            camino_general.append(i)
     return itemsrelacionados
     
 def getListas(listaItem, ultimoItem, itemsAAnhadir):
