@@ -27,7 +27,8 @@
 		</TR>
 		{% for item in items %}
 			<TR>
-				<TD class="c2"><SPAN><a href="{{ url_for('calculoImpactoAll', id=item.id) }}" ><img src="../static/images/e.png" alt="Ver costo" height="20" width="20" title="Ver items" style="vertical-align: middle;"></a></SPAN></TD>
+				<TD class="c2"><a href="{{ url_for('calculoImpactoAll', id=item.id) }}" ><img src="../static/images/im.png" alt="Ver Impacto" height="20" width="20" title="Ver Impacto" style="vertical-align: middle;"></a>
+				<a href="{{ url_for('calculoCostoAll', id=item.id) }}" ><img src="../static/images/dol.png" alt="Ver costos" height="20" width="20" title="Ver Costos" style="vertical-align: middle;"></a></TD>
 				<TD class="c2"><SPAN>{{item.codigo|e}}</SPAN></TD>
 				<TD class="c3"><SPAN>{{item.nombre|e}}</SPAN></TD>
 				<TD class="c4"><SPAN>{{item.descripcion|e}}</SPAN></TD>
@@ -36,7 +37,7 @@
 			</TR>
 		{% else %}
 			<TR>
-				<em>La Fase no cuenta con Ítems que pueden ser agregados a la Solicitud de Cambios.</em>
+				<em>No se encontraron Items.</em>
 			</TR>
 		{% endfor %}
 	</table>

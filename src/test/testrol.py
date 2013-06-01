@@ -8,15 +8,15 @@ from flask import Flask, Response
 from flask_principal import Principal, Permission, Denial, RoleNeed, \
     PermissionDenied, identity_changed, Identity, identity_loaded
 
-anon_permission = Permission()
-admin_permission = Permission(RoleNeed('ADMINISTRADOR'))
-admin_or_editor = Permission(RoleNeed('ADMINISTRADOR'), RoleNeed('ADMINISTRADOR'))
-editor_permission = Permission(RoleNeed('ADMINISTRADOR'))
-admin_denied = Denial(RoleNeed('ADMINISTRADOR'))
+#anon_permission = Permission()
+#admin_permission = Permission(RoleNeed('ADMINISTRADOR'))
+#admin_or_editor = Permission(RoleNeed('ADMINISTRADOR'), RoleNeed('ADMINISTRADOR'))
+#editor_permission = Permission(RoleNeed('ADMINISTRADOR'))
+#admin_denied = Denial(RoleNeed('ADMINISTRADOR'))
 
 def _on_principal_init(sender, identity):
         if identity.id == 'admin':
-            identity.provides.add(RoleNeed('ADMINISTRADOR'))
+            #identity.provides.add(RoleNeed('ADMINISTRADOR'))
             identity.provides.add(UserRol('ADMINISTRADOR'))
 
 
