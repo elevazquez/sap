@@ -26,6 +26,7 @@ from ges.lineaBase import *
 from ges.solicitud import *
 from ges.solicitudavotar import *
 from ges.calculoImpacto import *
+from ges.calculoCosto import *
 
 #load the extension
 principal = Principal(app)

@@ -23,7 +23,6 @@ from sqlalchemy.exc import DatabaseError
 from UserPermission import UserPermission
 import os
 import datetime
-import psycopg2 
 
 
 UPLOAD_FOLDER = '/path/to/the/uploads'
@@ -32,10 +31,10 @@ ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-fase_global= None;
-tipo_global = None; 
+#fase_global= None;
+#tipo_global = None; 
 estado_global= None;
-id_item_global= None;
+#id_item_global= None;
 
 db_session = scoped_session(sessionmaker(autocommit=False,
                                          autoflush=False,
@@ -73,33 +72,41 @@ def listatipoitem():
             flash('No Posee los permisos suficientes para Agregar un Item','info')
             return redirect('/item/administraritem') 
     tipo = db_session.query(TipoItem).from_statement(" select * from tipo_item where id_fase = "+request.args.get('id_fase')+" order by codigo " )
-    global fase_global
-    fase_global = request.args.get('id_fase')
+    #global fase_global
+    #fase_global = request.args.get('id_fase')
     return render_template('item/listatipoitem.html', tipos = tipo)  
   
 
 @app.route('/item/nuevoitem', methods=['GET', 'POST'])
 def nuevoitem():
     """ Funcion para agregar registros a la tabla de Item"""
-    today = datetime.date.today()
-  
+    today = datetime.date.today()  
     atributo = db_session.query(Atributo).join(TItemAtributo , TItemAtributo.id_atributo == Atributo.id).join(TipoItem, TipoItem.id == TItemAtributo.id_tipo_item).filter(TipoItem.id == request.args.get('id_tipo')).all()
-    
     form = ItemFormulario(request.form)
     ##init_db(db_session)
     form.usuario.data = session['user_id']     
-    
+    if  request.args.get('id_tipo') == None:
+        id_tipog= request.form.get('id_tipo_f')
+    else:
+        id_tipog=request.args.get('id_tipo')
+        
+    if  request.args.get('fase') == None:
+        id_faseg= request.form.get('id_fase_f')
+    else:
+        id_faseg=request.args.get('fase')
+        
     form.version.data= 1    
-    form.fecha.data= today   
-    if request.method != 'POST':   
-        global tipo_global
-        tipo_global=  request.args.get('id_tipo') 
+    form.fecha.data= today 
+    form.id_tipo_f.data=id_tipog
+    form.id_fase_f.data=id_faseg
+    # if request.method != 'POST':   
+    #     global tipo_global
+    #    tipo_global=  request.args.get('id_tipo') 
         
     if request.method == 'POST' and form.validate():
         try:
-            atributo = db_session.query(Atributo).join(TItemAtributo , TItemAtributo.id_atributo == Atributo.id).join(TipoItem, TipoItem.id == TItemAtributo.id_tipo_item).filter(TipoItem.id == tipo_global).all()
-    
-            
+            atributo = db_session.query(Atributo).join(TItemAtributo , TItemAtributo.id_atributo == Atributo.id).join(TipoItem, TipoItem.id == TItemAtributo.id_tipo_item).filter(TipoItem.id == id_tipog).all()
+                
             #f=open(form.archivo.data ,'rb')
             #fb= f.read()
             #arch = request.FILES[form.archivo.name].read()
@@ -114,7 +121,7 @@ def nuevoitem():
             #archivo=file(form.archivo.data,'rb').read()  
             item = Item(form.codigo.data, form.nombre.data, form.descripcion.data, 
                     form.estado.data, form.complejidad.data, form.fecha.data, form.costo.data, 
-                    form.usuario.data , form.version.data, fase_global , tipo_global,  None )
+                    form.usuario.data , form.version.data, id_faseg , id_tipog,  None )
             db_session.add(item)
             db_session.commit() 
             #psycopg2.Binary(form.archivo.data)  (psycopg2.Binary(file),) 
@@ -137,7 +144,7 @@ def nuevoitem():
                 flash('Error en la Base de Datos' + e.args[0],'error')
                 return render_template('item/nuevoitem.html', form=form, att=atributo)                      
             
-            session.pop('tipo_global',None)
+            #session.pop('tipo_global',None)
             flash('El Item ha sido registrada con Exito','info')
             return redirect('/item/administraritem') 
         except DatabaseError, e:
@@ -237,7 +244,6 @@ def editaritem():
     item = db_session.query(Item).filter_by(nombre=form.nombre.data).filter_by(id=id_itemg).first()  
     form.usuario.data = session['user_id']  
     form.fecha.data= today    
-   
    # atributo=  db_session.query(Atributo).join(TItemAtributo, Atributo.id== TItemAtributo.id_atributo).filter(TipoItem.id == id_tipog ).all() 
     atributo = db_session.query(Atributo).from_statement(" select at.* from tipo_item ti , titem_atributo ta, atributo at "+
                                                         " where ti.id = ta.id_tipo_item and at.id = ta.id_atributo and ti.id=  " +str(id_tipog) )
@@ -637,7 +643,7 @@ def reversionaritem():
                             ia= ItemAtributo(val.valor, item_aux.id, atr.id)
                             db_session.add(ia)
                             db_session.commit()
-                    
+                     
             
             # --------------------------------------------------------------------------------------------------
             #  # si el item poseia alguna relacion,estas se recuperan y se cambia el estado de sus relaciones directas a Revision
@@ -805,14 +811,14 @@ def reviviritem():
             db_session.add(item2)
             db_session.commit()
             if atributo != None:
-                 for atr in atributo:
+                for atr in atributo:
                     for val in valoresatr:
                         if atr.id == val.id_atributo:
                             #valor =  request.form.get(atr.nombre)                   
                             ia= ItemAtributo(val.valor, item2.id, atr.id)
                             db_session.add(ia)
                             db_session.commit()
-            
+            session.pop('estado_global',None)
             # --------------------------------------------------------------------------------------------------
             #  se verifica si el item poseia alguna relacion antes de eliminarse para recuperar la misma
             #---------------------------------------------------------------------------------------------------
@@ -831,7 +837,7 @@ def reviviritem():
                                                                  " where i.id = r.id_item  and r.id_item= "+str(item_aux.id)+") ")
           
             posee_cliclo = False
-            if list_relac_padres != None and list_relac_hijos:
+            if list_relac_padres != None and list_relac_hijos !=None:
                 for rel_padre in list_relac_padres:
                     for rel_hijo in list_relac_hijos :
                         if rel_padre.id == rel_hijo.id :
@@ -886,6 +892,7 @@ def reviviritem():
                             relacion= Relacion(rel_padre.fecha_creacion, today, rel_padre.id_tipo_relacion, item3.id, item2.id,  'A')
                             db_session.add(relacion)
                             db_session.commit() 
+                
             else :          
                 flash('El Item ha sido Revivido con Exito, pero no se han recuperado sus relaciones','info')
                 return redirect('/item/administraritem')    
@@ -912,43 +919,6 @@ def administraritem():
     
     return render_template('item/administraritem.html', items = item)
 
-
-def obtenerCostoItem(id_item):
-        """funcion que relorna el costo de un item"""
-        item = db_session.query(Item).filter_by(id=id_item).first()  
-        return item.costo 
-     
-def obtenerCostoTotal(listitem):
-        """funcion que relorna el costo Total de un conjunto de  item"""
-        costoTotal= 0
-        if listitem != None:
-            for item in listitem :
-                costoTotal = costoTotal + item.costo
-        return costoTotal
-
-def obtenerCostoTotalRelaciones(id_item):
-        """funcion que retorna el costo Total de un item junto con el costo de sus relaciones directas"""
-        #items padres y sus relaciones
-        list_item_padres = db_session.query(Item).from_statement(" select * from item where id in ( select r.id_item  from item i, relacion r "+
-                                                            " where i.id = r.id_item_duenho and r.id_item_duenho= "+str(id_item)+" ) ")
-
-        list_item_hijos = db_session.query(Item).from_statement(" select * from item where id in ( select r.id_item_duenho   from item i, relacion r "+
-                                                            " where i.id = r.id_item and r.id_item = "+str(id_item)+" ) ")
-    
-        costoTotal= 0
-        #COSTO DEL ITEM
-        item = db_session.query(Item).filter_by(id=id_item).first()  
-        costoTotal = costoTotal + item.costo
-        #COSTO DE LAS RELACIONES
-        if list_item_padres != None:
-            for item1 in list_item_padres :
-                costoTotal = costoTotal + item1.costo
-        if list_item_hijos != None:
-            for item1 in list_item_hijos :
-                costoTotal = costoTotal + item1.costo       
-                
-        return costoTotal 
-     
 
 @app.errorhandler(404)
 def page_not_found(error):

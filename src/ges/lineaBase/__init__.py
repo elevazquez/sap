@@ -18,6 +18,9 @@ from sqlalchemy.exc import DatabaseError
 from UserPermission import *
 import os
 import datetime
+from ges.mod.Relacion  import Relacion
+from ges.mod.TipoRelacion import TipoRelacion
+from adm.mod.Permiso import Permiso
 
 fase_global= None;
 linea_global= None;
@@ -66,8 +69,7 @@ def agregaritems():
     items = db_session.query(Item).from_statement(" select * from item where id_fase = "+request.args.get('id_fase')+" and (estado = 'A' and estado != 'B') order by codigo " )
     return render_template('lineaBase/listaitem.html', items = items)  
    
-   
-
+ 
 
 
 @app.route('/lineaBase/nuevalineabase', methods=['GET', 'POST'])
@@ -127,6 +129,7 @@ def nuevalineabase():
             db_session.merge(fase)
             db_session.commit()   
             
+           
             flash('La Linea Base fue creada con exito','info')            
             return redirect('/lineaBase/administrarlineabase') 
         except DatabaseError, e:
@@ -195,7 +198,7 @@ def agregaritem():
                                     ia= ItemAtributo(val.valor, item.id, atr.id)
                                     db_session.add(ia)
                                     db_session.commit()   
-                
+            
             #se guarda la linea base junto con los item pertenecientes al mismo          
             for it in list_aux:
                 lbit= LbItem(linea.id, it.id)
