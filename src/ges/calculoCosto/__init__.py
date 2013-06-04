@@ -44,8 +44,9 @@ def calculoCostoAll():
     
     print caminos, caminoCosto
     print camino_general, costo_general
-    return render_template('calculoCosto/calculocosto.html', caminogeneral=camino_general, costoTotal = costo_general)
-    return 'Costo encontrado'
+    return render_template('calculoCosto/calculocosto.html', caminogeneral=camino_general, costoTotal = costo_general, caminos = caminos, caminoCosto = caminoCosto, item = item)
+
+
         
 def getAllCaminos(item):
     """ Funcion para calcular costo"""

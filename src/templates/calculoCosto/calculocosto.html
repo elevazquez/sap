@@ -15,20 +15,30 @@
 </div>
 {% endif %}
 {% endwith %}
-<div style="height:350px;width:700px;overflow:auto;">
+<div style="text-align: right;">
+<a href="javascript:history.go(-1)">Volver</a>
+</div>
+<h4>Calculo Costo: Camino general</h4>
+<div style="height:250px;width:700px;overflow:auto;">
 <table border="1">
 	<TR>
-		<TH class="c4">Items involucrados</TH>
+		<TH class="c4">Código item</TH>
+		<TH class="c4">Nombre item</TH>
 		<TH class="c5">Costo</TH>
 	</TR>
 	{% set fila = 0 %}
 	{% set can = caminogeneral|length %}
-	{% for camino in caminogeneral %}
+	{% for item in caminogeneral %}
 	<TR>
 		<TD class="c4">
 		<SPAN>
-			<em>{{ camino.codigo }}</em>
+			<em>{{ item.codigo }}</em>
 			{% set fila = fila + 1 %}
+		</SPAN>
+		</TD>
+		<TD class="c4">
+		<SPAN>
+			<em>{{ item.nombre }}</em>
 		</SPAN>
 		</TD>
 		{% if fila == 1 %}
@@ -38,6 +48,43 @@
 	
 	{% endfor %}
 </table>
+</div>
+<h4>Calculo Costo: Caminos individuales</h4>
+<div style="height:300px;width:700px;overflow:auto;">
+<table border="1">
+	<TR>
+		<TH class="c4">Código item</TH>
+		<TH class="c4">Nombre item</TH>
+		<TH class="c5">Impacto</TH>
+	</TR>
+	{% set posicion = 0 %}
+	{% for camino in caminos %}
+		{% set fila = 0 %}
+		{% set can = camino|length %}
+		{% for item in camino %}
+	<TR>
+		<TD class="c4">
+		<SPAN>
+			<em>{{ item.codigo }}</em>
+			{% set fila = fila + 1 %}
+		</SPAN>
+		</TD>
+		<TD class="c4">
+		<SPAN>
+			<em>{{ item.nombre }}</em>
+		</SPAN>
+		</TD>
+			{% if fila == 1 %}
+		<TD rowspan="{{ can }}" class="c4">{{ caminoCosto[posicion] }}</TD>
+			{% endif %}
+	</TR>
+		{% endfor %}
+		{% set posicion = posicion + 1 %}
+	{% endfor %}
+</table>
+</div>
+<div style="text-align: right;">
+<a href="javascript:history.go(-1)">Volver</a>
 </div>
 </div>
 </div>
