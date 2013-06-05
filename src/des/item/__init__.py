@@ -306,21 +306,8 @@ def editaritem():
                 if permission.can() == False:
                         flash('No posee los Permisos suficientes para realizar el cambio de estado','error')
                         return render_template('item/editaritem.html', form=form, att=atributo, vals=valoresatr)
-                 
-            item = Item(form.codigo.data, form.nombre.data, form.descripcion.data, 
-                    form.estado.data, form.complejidad.data, form.fecha.data, form.costo.data, 
-                    form.usuario.data , form.version.data, id_faseg , id_tipog , None)
             
-            db_session.add(item)
-            db_session.commit()
-          
-            if atributo != None :
-                for atr in atributo:
-                    valor =  request.form.get(atr.nombre)                  
-                    ia= ItemAtributo(valor, item.id, atr.id)
-                    db_session.add(ia)
-                    db_session.commit()
-            
+           
             # --------------------------------------------------------------------------------------------------
             #  # si el item posee alguna relacion, se cambia el estado de sus relaciones directas a Revision
             #---------------------------------------------------------------------------------------------------
@@ -337,6 +324,44 @@ def editaritem():
     
             list_relac_hijos = db_session.query(Relacion).from_statement("select * from relacion where id in  ( select r.id  from item i, relacion r "+
                                                                  " where i.id = r.id_item  and r.id_item= "+str(id_itemg)+") ")
+           
+            
+            #no puede ser aprobado si no tiene un acceso directo a su padre de la fase anterior
+            #el padre debe ser aprobado primero
+            if form.estado.data =='A': 
+                print "entro"   
+                for padre in list_item_padres :
+                    print"entro2"
+                    if padre.estado != 'A' or padre.estado !='B':
+                        flash('El padre/ansestro del Item no esta Aprobado..','info')
+                        return redirect('/item/administraritem')  
+                else:    
+                    print"entro3"            
+                    verfase= db_session.query(Fase).filter_by(id_proyecto= session['pry']).filter_by(id=id_faseg ).first()
+                    primerafase= db_session.query(Fase).from_statement("select * from fase where nro_orden = (select min(f.nro_orden) from fase f)")
+                    if verfase.nro_orden != primerafase :
+                        print"entro4"
+                        flash('El Item no posee un padre/ansestro..','info')
+                        return redirect('/item/administraritem')  
+                   
+                              
+            
+            item = Item(form.codigo.data, form.nombre.data, form.descripcion.data, 
+                    form.estado.data, form.complejidad.data, form.fecha.data, form.costo.data, 
+                    form.usuario.data , form.version.data, id_faseg , id_tipog , None)
+            
+            db_session.add(item)
+            db_session.commit()
+          
+            if atributo != None :
+                for atr in atributo:
+                    valor =  request.form.get(atr.nombre)                  
+                    ia= ItemAtributo(valor, item.id, atr.id)
+                    db_session.add(ia)
+                    db_session.commit()
+            
+           
+            
             # cambios en items hijos
             if list_item_hijos != None   :            
                 for hijo in list_item_hijos : 
@@ -386,12 +411,20 @@ def editaritem():
                         db_session.commit() 
             #se modifica en la lb            
             linea= db_session.query(LbItem).join(LineaBase, LineaBase.id==LbItem.id_linea_base).filter(LbItem.id_item==id_itemg).first() 
+            
             if linea != None:
+                lb= db_session.query(LineaBase).filterby(id= linea.id_linea_base)
                 db_session.delete(linea)
                 db_session.commit()
                 lin = LbItem(linea.id_linea_base, item.id)
                 db_session.add(lin)
                 db_session.commit() 
+                # si el item pasa a revision su lb pasa a un estado no valido
+                if item.estado=='V':
+                    lb.estado='N'
+                    db_session.merge(lb)
+                    db_session.commit() 
+                    
                 
             flash('El Item ha sido modificado con Exito','info')
             return redirect('/item/administraritem')     
