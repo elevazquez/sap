@@ -47,15 +47,15 @@ def nuevasolicitud():
     form.id_usuario.data = current_user.usuario
     form.fecha.data = today
     form.cant_votos.data = 0
-    id_fase = request.args.get('id_fase')
-    if (id_fase!=None):
-        session['faseid'] = id_fase
+    #id_fase = request.args.get('id_fase')
+    #if (id_fase!=None):
+     #   session['faseid'] = id_fase
     items = db_session.query(Item).from_statement("Select it.*  from item it, "+ 
                         " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id "+
-                        " and f.id_proyecto = "+str(session['pry'])+" and f.id=" +str(session['faseid'])+ " group by codigo order by 1 ) s "+
+                        " and f.id_proyecto = "+str(session['pry'])+ " group by codigo order by 1 ) s "+
                         " where it.codigo = cod and it.version= vermax and it.estado = 'B' " + 
                         " and it.id not in(select id_item from solicitud_item where id_solicitud in (select id from solicitud_cambio " +
-                        " where id_proyecto = "+str(session['pry'])+" and id_usuario = " + str(current_user.id) +" and (estado='N' or estado ='E'))) order by it.codigo ")
+                        " where id_proyecto = "+str(session['pry'])+" and (estado='N' or estado ='E'))) order by it.codigo ")
     if request.method == 'POST' and form.validate():
  #       init_db(db_session)
         try:
@@ -253,19 +253,19 @@ def buscaritem():
     else:
         i = db_session.query(Item).from_statement("Select it.*  from item it,  "+ 
                         " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id "+
-                        " and f.id_proyecto = "+str(session['pry'])+" and f.id=" +str(request.args.get('id_fase'))+ " group by codigo order by 1 ) s "+
+                        " and f.id_proyecto = "+str(session['pry'])+ " group by codigo order by 1 ) s "+
                         " where it.codigo = cod and it.version= vermax and it.estado = 'B' and lower( it."+parametro+" )  ilike lower( '%"+valor+"%' ) "+
                         " and it.id not in(select id_item from solicitud_item where id_solicitud in (select id from solicitud_cambio " +
-                        " where id_proyecto = "+str(session['pry'])+" and id_usuario = " + str(current_user.id) +" and (estado='N' or estado ='E'))) order by it.codigo ").all()
+                        " where id_proyecto = "+str(session['pry'])+" and (estado='N' or estado ='E'))) order by it.codigo ").all()
     return render_template('solicitud/listaritem.html', items = i)    
     valor = request.args['patron']
     #r = db_session.query(Item).filter_by(nombre=valor)
     r = db_session.query(Item).from_statement("Select it.*  from item it,  "+ 
                         " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id "+
-                        " and f.id_proyecto = "+str(session['pry'])+" and f.id=" +str(request.args.get('id_fase'))+ " group by codigo order by 1 ) s "+
+                        " and f.id_proyecto = "+str(session['pry'])+ " group by codigo order by 1 ) s "+
                         " where it.codigo = cod and it.version= vermax and it.estado = 'B' and lower( it.nombre )  ilike lower( '%"+valor+"%' ) "+
                         " and it.id not in(select id_item from solicitud_item where id_solicitud in (select id from solicitud_cambio " +
-                        " where id_proyecto = "+str(session['pry'])+" and id_usuario = " + str(current_user.id) +" and (estado='N' or estado ='E'))) order by it.codigo ").all()
+                        " where id_proyecto = "+str(session['pry'])+" and (estado='N' or estado ='E'))) order by it.codigo ").all()
     if r == None:
         return 'no existe concordancia'
     return render_template('solicitud/listaritem.html', items = r)
@@ -276,10 +276,10 @@ def listaritem():
     #init_db(db_session)
     item = db_session.query(Item).from_statement("Select it.*  from item it, "+ 
                         " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id "+
-                        " and f.id_proyecto = "+str(session['pry'])+" and f.id=" +str(request.args.get('id_fase'))+ " group by codigo order by 1 ) s "+
+                        " and f.id_proyecto = "+str(session['pry'])+ " group by codigo order by 1 ) s "+
                         " where it.codigo = cod and it.version= vermax and it.estado = 'B' " + 
                         " and it.id not in(select id_item from solicitud_item where id_solicitud in (select id from solicitud_cambio " +
-                        " where id_proyecto = "+str(session['pry'])+" and id_usuario = " + str(current_user.id) +" and (estado='N' or estado ='E'))) order by it.codigo ")
+                        " where id_proyecto = "+str(session['pry']) +" and (estado='N' or estado ='E'))) order by it.codigo ")
     return render_template('solicitud/listaritem.html', items = item)
 
 @app.route('/solicitud/agregaritemssol', methods=['GET', 'POST'])
@@ -289,10 +289,10 @@ def agregaritemssol():
     selecteditem=  request.args.get('id_item')    
     items = db_session.query(Item).from_statement("Select it.*  from item it, "+ 
                         " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id "+
-                        " and f.id_proyecto = "+str(session['pry'])+" and f.id=" +str(request.args.get('id_fase'))+ " group by codigo order by 1 ) s "+
+                        " and f.id_proyecto = "+str(session['pry'])+ " group by codigo order by 1 ) s "+
                         " where it.codigo = cod and it.version= vermax and it.estado = 'B' " + 
                         " and it.id not in(select id_item from solicitud_item where id_solicitud in (select id from solicitud_cambio " +
-                        " where id_proyecto = "+str(session['pry'])+" and id_usuario = " + str(current_user.id) +" and (estado='N' or estado ='E'))) order by it.codigo ")
+                        " where id_proyecto = "+str(session['pry'])+" and (estado='N' or estado ='E'))) order by it.codigo ")
     return render_template('solicitud/listaitem.html', items = items)  
 
 @app.route('/solicitud/agregaritemsol', methods=['GET', 'POST'])
@@ -316,8 +316,8 @@ def agregaritemsol():
     itemsdisp = db_session.query(Item).from_statement("Select it.*  from item it, "+ 
                         " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id "+
                         " and f.id_proyecto = "+str(session['pry'])+"  group by codigo order by 1 ) s "+
-                        " where it.codigo = cod and it.version= vermax and (it.estado = 'B') and it.id_fase= "+str(item_aux.id_fase)+" and it.id not in (select id_item from solicitud_item where id_solicitud in (select id from solicitud_cambio " +
-                        " where id_proyecto = "+str(session['pry'])+" and id_usuario = " + str(current_user.id) +" and (estado='N' or estado ='E')) ) order by it.codigo " )
+                        " where it.codigo = cod and it.version= vermax and (it.estado = 'B')  and it.id not in (select id_item from solicitud_item where id_solicitud in (select id from solicitud_cambio " +
+                        " where id_proyecto = "+str(session['pry'])+" and (estado='N' or estado ='E')) ) order by it.codigo " )
     if request.method == 'POST' and form.validate(): 
         items=request.form.getlist('selectitem')
         try:
@@ -391,6 +391,31 @@ def quitaritemsol():
     else:
         flash_errors(form)    
     return render_template('solicitud/quitaritemsol.html', form=form,  items=itemssol)  
+
+@app.route('/solicitud/versolicitud', methods=['GET', 'POST'])
+def versolicitud():
+    """ Funcion para consultar registros de la tabla Solicitud""" 
+#    init_db(db_session)
+    pro = db_session.query(Proyecto).filter_by(id=session['pry']).first()
+    if  request.args.get('id') == None:
+        id_sol= request.form.get('id')
+    else:
+        id_sol=request.args.get('id')
+    s = db_session.query(SolicitudCambio).filter_by(id=id_sol).filter_by(id_proyecto=session['pry']).first()
+    itemssol=  db_session.query(Item).from_statement("select * from item where id in(select id_item from solicitud_item where id_solicitud="+str(id_sol)+")")  
+    form = SolicitudFormulario(request.form,s)
+    solicitud = db_session.query(SolicitudCambio).filter_by(id=id_sol).filter_by(id_proyecto=session['pry']).first()  
+    form.id_proyecto.data = pro.nombre
+    form.id_usuario.data = current_user.usuario
+    if solicitud.estado=='N':
+        form.estado.data='Nueva'
+    elif solicitud.estado=='E':
+        form.estado.data='Enviada'
+    elif solicitud.estado=='A':
+        form.estado.data='Aprobada'
+    elif solicitud.estado=='R':
+        form.estado.data='Rechazada'
+    return render_template('solicitud/versolicitud.html', form=form, items=itemssol)
 
 @app.errorhandler(404)
 def page_not_found(error):
