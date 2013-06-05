@@ -43,12 +43,12 @@
 	</table>
 	</div>
 			<input type="text" name="id" value="{{ form.id.data }}" id="id" readonly="true" hidden="true"/>
-			<label>Descripción</label>{{ form.descripcion() }}
+			<label>Descripción</label><input type="text" name="descripcion" value="{{ form.descripcion.data }}" id="descripcion" readonly="true"/>
   			<label>Fecha</label><input type="date" name="fecha" value="{{ form.fecha.data }}" id="fecha" readonly="true"/>
-    		<label>Estado</label> <input type="text" name="estado" value="{{ form.estado.data }}" id="estado" readonly="true"/>
-    		<label>Usuario</label> <input type="text" name="id_usuario" value="{{ form.id_usuario.data }}" id="id_usuario" readonly="true"/>
-    		<label>Proyecto</label> <input type="text" name="id_proyecto" value="{{ form.id_proyecto.data }}" id="id_proyecto" readonly="true"/>
-    		<label>Votos</label> <input type="text" name="cant_votos" value="{{ form.cant_votos.data }}" id="cant_votos" readonly="true"/>
+    		<label>Estado</label><input type="text" name="estado" value="{{ form.estado.data }}" id="estado" readonly="true"/>
+    		<label>Usuario</label><input type="text" name="id_usuario" value="{{ form.id_usuario.data }}" id="id_usuario" readonly="true"/>
+    		<label>Proyecto</label><input type="text" name="id_proyecto" value="{{ form.id_proyecto.data }}" id="id_proyecto" readonly="true"/>
+    		<label>Votos</label><input type="text" name="cant_votos" value="{{ form.cant_votos.data }}" id="cant_votos" readonly="true"/>
   		<p><input type=submit value=Guardar>
   		<input type="button" value="Cancelar"  onClick="document.location.href='{{ url_for( 'administrarsolicitud' ) }}';"> 
 	</form>
