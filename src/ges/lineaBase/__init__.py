@@ -47,7 +47,7 @@ def flash_errors(form):
 @app.route('/lineaBase/listafaselb', methods=['GET', 'POST'])
 def listafaselb():   
     """ Funcion que lista las fases de la cual se escoge una para la creacion de la LB"""   
-    ##init_db(db_session)
+    ##init_db(db_session)    
     fases = db_session.query(Fase).from_statement(" select * from fase where id_proyecto = "+str(session['pry'])+" and estado !='I' order by nro_orden " )
     return render_template('lineaBase/listafaselb.html', fases = fases)  
 
@@ -57,6 +57,12 @@ def listafaselb():
 def listaitem():   
     """ Funcion que lista los items posibles a formar parte de una linea base"""     
     ##init_db(db_session)    
+    var = "CREAR LINEA BASE F" + str(request.args.get('id_fase'))
+    permission = UserPermission(var, int(request.args.get('id_fase')))
+    if permission.can() == False:
+            flash('No posee los Permisos suficientes para realizar esta Operacion','info')
+            return redirect('/lineaBase/administrarlineabase') 
+        
     items = db_session.query(Item).from_statement(" select * from item where id_fase = "+request.args.get('id_fase')+" and (estado = 'A' and estado != 'B') order by codigo " )
     return render_template('lineaBase/listaitem.html', items = items)  
 
@@ -86,6 +92,13 @@ def nuevalineabase():
                         " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id "+
                         " and f.id_proyecto = "+str(session['pry'])+"  group by codigo order by 1 ) s "+
                         " where it.codigo = cod and it.version= vermax and (it.estado = 'A' and it.estado != 'B') and it.id_fase= "+str(request.args.get('id_fase'))+" and it.id not in (select  id_item from lb_item ) order by it.codigo " )
+   
+    var = "CREAR LINEA BASE F" + str(request.args.get('id_fase'))
+    permission = UserPermission(var, int(request.args.get('id_fase')))
+    if permission.can() == False:
+            flash('No posee los Permisos suficientes para realizar esta Operacion','info')
+            return redirect('/lineaBase/administrarlineabase') 
+           
     if request.method != 'POST':
         verfase= db_session.query(Fase).filter_by(id_proyecto= session['pry']).filter_by(id=request.args.get('id_fase') ).first()
         primerafase= db_session.query(Fase).from_statement("select f2.* from fase f2 where f2.nro_orden = (select min(f.nro_orden) from fase f)").first()
@@ -242,7 +255,13 @@ def agregaritem():
                         " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id "+
                         " and f.id_proyecto = "+str(session['pry'])+"  group by codigo order by 1 ) s "+
                         " where it.codigo = cod and it.version= vermax and (it.estado = 'A' and it.estado != 'B') and it.id_fase= "+str(item_aux.id_fase)+" and it.id not in (select  id_item from lb_item ) order by it.codigo " )
-       
+    
+    var = "AGREGAR ITEM LINEA BASE F" + str(item_aux.id_fase)
+    permission = UserPermission(var, int(item_aux.id_fase))
+    if permission.can() == False:
+            flash('No posee los Permisos suficientes para realizar esta Operacion','info')
+            return redirect('/lineaBase/administrarlineabase') 
+           
     if request.method != 'POST':
         
         verfase= db_session.query(Fase).filter_by(id_proyecto= session['pry']).filter_by(id=item_aux.id_fase ).first()
@@ -374,6 +393,8 @@ def quitaritem():
     else :
         itemslb=  db_session.query(Item).join(LbItem, Item.id== LbItem.id_item).filter(LbItem.id_linea_base== id_linea ).filter(Item.estado=='B').all()   
     
+    item_aux= db_session.query(Item).join(LbItem, Item.id== LbItem.id_item).filter(LbItem.id_linea_base== id_linea).first()   
+     
    
     if estado == 'V':
         form.estado.data = 'Valido'
@@ -381,7 +402,13 @@ def quitaritem():
         estado.data = 'No Valido'
     elif estado == 'L':
         form.estado.data = 'Liberado'
-        
+    
+    var = "QUITAR ITEM LINEA BASE F" + str(item_aux.id_fase)
+    permission = UserPermission(var, int(item_aux.id_fase))
+    if permission.can() == False:
+            flash('No posee los Permisos suficientes para realizar esta Operacion','info')
+            return redirect('/lineaBase/administrarlineabase') 
+            
     form.fecha_creacion.data=  request.args.get('fecha_crea')        
     if request.method == 'POST' and form.validate(): 
         items=request.form.getlist('selectitem')
@@ -496,6 +523,12 @@ def editarlineabase():
        
     form.fecha_creacion.data=  request.args.get('fecha_crea')
     
+    var = "VER LINEA BASE F" + str(item_aux.id_fase)
+    permission = UserPermission(var, int(item_aux.id_fase))
+    if permission.can() == False:
+            flash('No posee los Permisos suficientes para realizar esta Operacion','info')
+            return redirect('/lineaBase/administrarlineabase') 
+        
     if request.method == 'POST' and form.validate():        
         try:  
             multiselect = request.form.getlist('selecitems')
@@ -606,7 +639,8 @@ def liberarlineabase():
     
     linea = db_session.query(LineaBase).filter_by(id= form.id.data).first() 
     itemslb=  db_session.query(Item).join(LbItem, Item.id== LbItem.id_item).filter(LbItem.id_linea_base== id_linea ).filter(Item.estado=='B').all()   
-   
+    item_aux= db_session.query(Item).join(LbItem, Item.id== LbItem.id_item).filter(LbItem.id_linea_base== id_linea).first()   
+     
     if estado == 'V':
         form.estado.data = 'Valido'
     elif estado == 'N':
@@ -614,7 +648,25 @@ def liberarlineabase():
     elif estado == 'L':
         form.estado.data = 'Liberado'
         
-    form.fecha_creacion.data=  request.args.get('fecha_crea')  
+    form.fecha_creacion.data=  request.args.get('fecha_crea') 
+     
+    var = "LIBERAR LINEA BASE F" + str(item_aux.id_fase)
+    permission = UserPermission(var, int(item_aux.id_fase))
+    if permission.can() == False:
+            flash('No posee los Permisos suficientes para realizar esta Operacion','info')
+            return redirect('/lineaBase/administrarlineabase') 
+   
+    versol=  db_session.query(SolicitudItem).join(SolicitudCambio , SolicitudCambio.id == SolicitudItem.id_solicitud).join(LbItem, LbItem.id_item == SolicitudItem.id_item).filter(LbItem.id_linea_base == id_linea).filter(SolicitudCambio.id_usuario ==session['user_id'] ).first()
+    if versol == None:
+            flash('Debe realizar una Solicitud de Cambio para Proceder','info')
+            return redirect('/lineaBase/administrarlineabase')    
+    else :
+        versol=   db_session.query(SolicitudItem).join(SolicitudCambio , SolicitudCambio.id == SolicitudItem.id_solicitud).join(LbItem, LbItem.id_item == SolicitudItem.id_item).filter(LbItem.id_linea_base == id_linea).filter(SolicitudCambio.id_usuario ==session['user_id'] ).filter(SolicitudCambio.estado=='A').first()
+        if versol == None:
+            flash('La Solicitud de Cambio no ha sido Aprobada','info')
+            return redirect('/lineaBase/administrarlineabase')       
+         
+         
     if request.method == 'POST' and form.validate():        
         try:   
             #se cambia el estado de los items a ser agregados
@@ -860,7 +912,8 @@ def componerlineabase():
     linea = db_session.query(LineaBase).filter_by(id= form.id.data).first()
      
     itemslb=  db_session.query(Item).join(LbItem, Item.id== LbItem.id_item).filter(LbItem.id_linea_base== id_linea ).filter(Item.estado=='A').all()
-    
+    item_aux= db_session.query(Item).join(LbItem, Item.id== LbItem.id_item).filter(LbItem.id_linea_base== id_linea).first()   
+     
     if itemslb != None:
         permitir =True
     else  :
@@ -874,6 +927,12 @@ def componerlineabase():
         form.estado.data = 'Liberado'
         
     form.fecha_creacion.data=  request.args.get('fecha_crea')  
+    var = "COMPONER LINEA BASE F" + str(item_aux.id_fase)
+    permission = UserPermission(var, int(item_aux.id_fase))
+    if permission.can() == False:
+            flash('No posee los Permisos suficientes para realizar esta Operacion','info')
+            return redirect('/lineaBase/administrarlineabase') 
+        
     if request.method == 'POST' and form.validate():        
         try:             
             list_aux=[]
