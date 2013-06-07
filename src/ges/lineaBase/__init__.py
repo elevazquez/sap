@@ -55,8 +55,9 @@ def listafaselb():
     
 @app.route('/lineaBase/listaitem', methods=['GET', 'POST'])
 def listaitem():   
-    """ Funcion que lista los items posibles a formar parte de una linea base""" 
-    ##init_db(db_session)
+    """ Funcion que lista los items posibles a formar parte de una linea base"""
+     
+    ##init_db(db_session)    
     items = db_session.query(Item).from_statement(" select * from item where id_fase = "+request.args.get('id_fase')+" and (estado = 'A' and estado != 'B') order by codigo " )
     return render_template('lineaBase/listaitem.html', items = items)  
 
@@ -80,12 +81,43 @@ def nuevalineabase():
     today = datetime.date.today()
     form =  LineaBaseFormulario(request.form)
     form.fechaCreacion.data= today
-    ##init_db(db_session)       
+    ##init_db(db_session)                 return redirect('/item/administraritem')  
+#    else:              
     items = db_session.query(Item).from_statement("Select it.*  from item it, "+ 
                         " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id "+
                         " and f.id_proyecto = "+str(session['pry'])+"  group by codigo order by 1 ) s "+
                         " where it.codigo = cod and it.version= vermax and (it.estado = 'A' and it.estado != 'B') and it.id_fase= "+str(request.args.get('id_fase'))+" and it.id not in (select  id_item from lb_item ) order by it.codigo " )
-       
+    
+    verfase= db_session.query(Fase).filter_by(id_proyecto= session['pry']).filter_by(id=request.args.get('id_fase') ).first()
+    primerafase= db_session.query(Fase).from_statement("select f2.* from fase f2 where f2.nro_orden = (select min(f.nro_orden) from fase f)").first()
+    print "fase "+str(verfase.nro_orden)
+    print "fase 1 "+str(primerafase.nro_orden)
+    if verfase.nro_orden != primerafase.nro_orden :             
+        print "entro" 
+        for it in items: 
+            relac_padre = db_session.query(Relacion).filter_by(id_item_duenho= it.id).filter_by(estado='A').first()
+            print "entro3 re"
+            if relac_padre != None:
+                linea= db_session.query(LbItem).join(LineaBase, LineaBase.id==LbItem.id_linea_base).filter(LbItem.id_item==relac_padre.id_item).filter(LineaBase.estado=='V').first()
+                if linea == None:
+                    print "entro 4" 
+                    items = db_session.query(Item).from_statement("Select it.*  from item it, "+ 
+                        " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id "+
+                        " and f.id_proyecto = "+str(session['pry'])+"  group by codigo order by 1 ) s "+
+                        " where it.codigo = cod and it.version= vermax and (it.estado = 'A' and it.estado != 'B') and it.id_fase= "+str(request.args.get('id_fase'))+" and it.id not in (select  id_item from lb_item )  and it.id = "+str(it.id)+"  order by it.codigo " )
+    
+            else:
+                print "no relac"
+                items = db_session.query(Item).from_statement("Select it.*  from item it, "+ 
+                        " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id "+
+                        " and f.id_proyecto = "+str(session['pry'])+"  group by codigo order by 1 ) s "+
+                        " where it.codigo = cod and it.version= vermax and (it.estado = 'A' and it.estado != 'B') and it.id_fase= "+str(request.args.get('id_fase'))+" and it.id not in (select  id_item from lb_item )  and it.id = "+str(it.id)+"  order by it.codigo " )
+    
+#                    item_lb=  db_session.query(Item).filter_by(id= linea.id_item).first()
+#                    fase_item_lb= db_session.query(Fase).filter_by(id=item_lb.id_fase ).first()
+#                    if fase_item_lb.nro_orden < fase_actual  :
+#                        se_puede= True
+                          
         
     if request.method == 'POST' and form.validate():                
         try:      
@@ -95,6 +127,7 @@ def nuevalineabase():
             db_session.commit()  
             multiselect= request.form.getlist('selectitem')  
             list_aux=[]
+            
             
             #se cambia el estado de los items involucrados
             for it in multiselect :
@@ -106,7 +139,10 @@ def nuevalineabase():
                             
                 item = Item(i.codigo, i.nombre, i.descripcion, 'B', i.complejidad, today, i.costo, 
                     session['user_id']  , i.version +1 , i.id_fase , i.id_tipo_item , i.archivo)            
-                db_session.add(item)
+                db_session.add(item)         
+                          
+    
+     
                 db_session.commit()
                 list_aux.append(item)
                 id_fase= i.id_fase  
@@ -206,7 +242,32 @@ def agregaritem():
                         " and f.id_proyecto = "+str(session['pry'])+"  group by codigo order by 1 ) s "+
                         " where it.codigo = cod and it.version= vermax and (it.estado = 'A' and it.estado != 'B') and it.id_fase= "+str(item_aux.id_fase)+" and it.id not in (select  id_item from lb_item ) order by it.codigo " )
        
+    verfase= db_session.query(Fase).filter_by(id_proyecto= session['pry']).filter_by(id=request.args.get('id_fase') ).first()
+    primerafase= db_session.query(Fase).from_statement("select f2.* from fase f2 where f2.nro_orden = (select min(f.nro_orden) from fase f)").first()
+    print "fase add"+str(verfase.nro_orden)
+    print "fase 1 add "+str(primerafase.nro_orden)
+    if verfase.nro_orden != primerafase.nro_orden :             
+        print "entro add" 
+        for it in itemsdisp: 
+            relac_padre = db_session.query(Relacion).filter_by(id_item_duenho= it.id).filter_by(estado='A').first()
+            print "entro3 re add"
+            if relac_padre != None:
+                linea= db_session.query(LbItem).join(LineaBase, LineaBase.id==LbItem.id_linea_base).filter(LbItem.id_item==relac_padre.id_item).filter(LineaBase.estado=='V').first()
+                if linea == None:
+                    print "entro 4 add"
+                    items = db_session.query(Item).from_statement("Select it.*  from item it, "+ 
+                        " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id "+
+                        " and f.id_proyecto = "+str(session['pry'])+"  group by codigo order by 1 ) s "+
+                        " where it.codigo = cod and it.version= vermax and (it.estado = 'A' and it.estado != 'B') and it.id_fase= "+str(request.args.get('id_fase'))+" and it.id not in (select  id_item from lb_item )  and it.id = "+str(it.id)+"  order by it.codigo " )
     
+            else:
+                print "no relac add "
+                items = db_session.query(Item).from_statement("Select it.*  from item it, "+ 
+                        " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id "+
+                        " and f.id_proyecto = "+str(session['pry'])+"  group by codigo order by 1 ) s "+
+                        " where it.codigo = cod and it.version= vermax and (it.estado = 'A' and it.estado != 'B') and it.id_fase= "+str(request.args.get('id_fase'))+" and it.id not in (select  id_item from lb_item )  and it.id = "+str(it.id)+"  order by it.codigo " )
+    
+                        
     if request.method == 'POST' and form.validate(): 
         items=request.form.getlist('selectitem')
         try:

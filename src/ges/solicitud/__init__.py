@@ -235,13 +235,6 @@ def buscarfase():
         p = db_session.query(Fase).from_statement("SELECT * FROM fase where "+parametro+" ilike '%"+valor+"%' and id_proyecto='"+session['pry']+"'").all()
     return render_template('solicitud/listarfase.html', fases2 = p)
 
-@app.route('/solicitud/listarfase')
-def listarfase():
-    """ Funcion para listar registros de la tabla Fase""" 
-#    init_db(db_session)
-    fases2 = db_session.query(Fase).filter_by(id_proyecto=session['pry']).order_by(Fase.nombre)
-    return render_template('solicitud/listarfase.html', fases2 = fases2)
-
 @app.route('/solicitud/buscaritem', methods=['GET', 'POST'])
 def buscaritem():
     """Funcion que permite realizar busqueda de items"""

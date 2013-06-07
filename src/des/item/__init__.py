@@ -247,7 +247,7 @@ def editaritem():
     item = db_session.query(Item).filter_by(nombre=form.nombre.data).filter_by(id=id_itemg).first()  
     form.usuario.data = session['user_id']  
     form.fecha.data= today    
-   # atributo=  db_session.query(Atributo).join(TItemAtributo, Atributo.id== TItemAtributo.id_atributo).filter(TipoItem.id == id_tipog ).all() 
+    # atributo=  db_session.query(Atributo).join(TItemAtributo, Atributo.id== TItemAtributo.id_atributo).filter(TipoItem.id == id_tipog ).all() 
     atributo = db_session.query(Atributo).from_statement(" select at.* from tipo_item ti , titem_atributo ta, atributo at "+
                                                         " where ti.id = ta.id_tipo_item and at.id = ta.id_atributo and ti.id=  " +str(id_tipog) )
     
@@ -314,33 +314,32 @@ def editaritem():
            
             #items padres y sus relaciones
             list_item_padres = db_session.query(Item).from_statement(" select * from item where id in ( select r.id_item  from item i, relacion r "+
-                                                            " where i.id = r.id_item_duenho and r.id_item_duenho= "+str(id_itemg)+" ) ")
+                                                            " where i.id = r.id_item_duenho and r.id_item_duenho= "+str(id_itemg)+" and  r.estado= 'A' ) ")
 
             list_relac_padres = db_session.query(Relacion).from_statement("select * from relacion where id in  ( select r.id  from item i, relacion r "+ 
-                                                               " where i.id = r.id_item_duenho and r.id_item_duenho=  "+str(id_itemg)+") ")
+                                                               " where i.id = r.id_item_duenho and r.id_item_duenho=  "+str(id_itemg)+" and  r.estado= 'A' ) ")
             #item hijos y sus relaciones
             list_item_hijos = db_session.query(Item).from_statement(" select * from item where id in ( select r.id_item_duenho   from item i, relacion r "+
-                                                            " where i.id = r.id_item and r.id_item = "+str(id_itemg)+" ) ")
+                                                            " where i.id = r.id_item and r.id_item = "+str(id_itemg)+"  and  r.estado= 'A' )")
     
             list_relac_hijos = db_session.query(Relacion).from_statement("select * from relacion where id in  ( select r.id  from item i, relacion r "+
-                                                                 " where i.id = r.id_item  and r.id_item= "+str(id_itemg)+") ")
+                                                                 " where i.id = r.id_item  and r.id_item= "+str(id_itemg)+" and  r.estado= 'A' )")
            
             
             #no puede ser aprobado si no tiene un acceso directo a su padre de la fase anterior
             #el padre debe ser aprobado primero
             if form.estado.data =='A': 
-                print "entro"   
                 for padre in list_item_padres :
-                    print"entro2"
-                    if padre.estado != 'A' or padre.estado !='B':
+                    print "padre "+str(padre)+ "  " 
+                    if padre.estado != 'A' and padre.estado != 'B':
                         flash('El padre/ansestro del Item no esta Aprobado..','info')
                         return redirect('/item/administraritem')  
-                else:    
-                    print"entro3"            
+                if  list_item_padres == None : 
+                    print "noo"
                     verfase= db_session.query(Fase).filter_by(id_proyecto= session['pry']).filter_by(id=id_faseg ).first()
-                    primerafase= db_session.query(Fase).from_statement("select * from fase where nro_orden = (select min(f.nro_orden) from fase f)")
-                    if verfase.nro_orden != primerafase :
-                        print"entro4"
+                    primerafase= db_session.query(Fase).from_statement("select f2.* from fase f2 where f2.nro_orden = (select min(f.nro_orden) from fase f)").first()
+                    
+                    if verfase.nro_orden != primerafase.nro_orden : 
                         flash('El Item no posee un padre/ansestro..','info')
                         return redirect('/item/administraritem')  
                    
@@ -382,6 +381,9 @@ def editaritem():
                                     db_session.add(ia)
                                     db_session.commit()   
                     for rel_hijo in list_relac_hijos :
+                        rel_hijo.estado= 'E'
+                        db_session.merge(rel_hijo)
+                        db_session.commit() 
                         relacion= Relacion(rel_hijo.fecha_creacion, today, rel_hijo.id_tipo_relacion, item.id, item2.id, 'A')
                         db_session.add(relacion)
                         db_session.commit() 
@@ -389,24 +391,27 @@ def editaritem():
             # cambios en items padres
             if list_item_padres != None     :
                 for padre in list_item_padres :
-                    atri2 = db_session.query(Atributo).from_statement(" select at.* from tipo_item ti , titem_atributo ta, atributo at "+
-                                                        " where ti.id = ta.id_tipo_item and at.id = ta.id_atributo and ti.id=  " +str(padre.id_tipo_item) )
-    
-                    valores_atr2 = db_session.query(ItemAtributo).from_statement(" select ia.* from item_atributo ia where ia.id_item= " +str(padre.id) )
-                    item3 = Item(padre.codigo, padre.nombre, padre.descripcion, 'V', padre.complejidad, today, padre.costo, 
-                    session['user_id']  , padre.version +1 , padre.id_fase , padre.id_tipo_item , padre.archivo)            
-                    db_session.add(item3)
-                    db_session.commit()  
-                    # se actualizan los atributos del item si es que tienen
-                    if atri2 != None :
-                        for atr in atri2 :
-                            for val in valores_atr2 :   
-                                if val.id_atributo == atr.id :                  
-                                    ia= ItemAtributo(val.valor, item3.id, atr.id)
-                                    db_session.add(ia)
-                                    db_session.commit()   
+#                    atri2 = db_session.query(Atributo).from_statement(" select at.* from tipo_item ti , titem_atributo ta, atributo at "+
+#                                                        " where ti.id = ta.id_tipo_item and at.id = ta.id_atributo and ti.id=  " +str(padre.id_tipo_item) )
+#    
+#                    valores_atr2 = db_session.query(ItemAtributo).from_statement(" select ia.* from item_atributo ia where ia.id_item= " +str(padre.id) )
+#                    item3 = Item(padre.codigo, padre.nombre, padre.descripcion, 'V', padre.complejidad, today, padre.costo, 
+#                    session['user_id']  , padre.version +1 , padre.id_fase , padre.id_tipo_item , padre.archivo)            
+#                    db_session.add(item3)
+#                    db_session.commit()  
+#                    # se actualizan los atributos del item si es que tienen
+#                    if atri2 != None :
+#                        for atr in atri2 :
+#                            for val in valores_atr2 :   
+#                                if val.id_atributo == atr.id :                  
+#                                    ia= ItemAtributo(val.valor, item3.id, atr.id)
+#                                    db_session.add(ia)
+#                                    db_session.commit()   
                     for rel_padre in list_relac_padres:
-                        relacion= Relacion(rel_padre.fecha_creacion, today, rel_padre.id_tipo_relacion, item3.id, item.id,  'A')
+                        rel_padre.estado= 'E'
+                        db_session.merge(rel_padre)
+                        db_session.commit() 
+                        relacion= Relacion(rel_padre.fecha_creacion, today, rel_padre.id_tipo_relacion, padre.id, item.id,  'A')
                         db_session.add(relacion)
                         db_session.commit() 
             #se modifica en la lb            
@@ -480,16 +485,16 @@ def eliminaritem():
             
         #items padres y sus relaciones
         list_item_padres = db_session.query(Item).from_statement(" select * from item where id in ( select r.id_item  from item i, relacion r "+
-                                                           " where i.id = r.id_item_duenho and r.id_item_duenho= "+str(id_item)+" ) ")
+                                                           " where i.id = r.id_item_duenho and r.id_item_duenho= "+str(id_item)+" and  r.estado= 'A' )  ")
 
         list_relac_padres = db_session.query(Relacion).from_statement("select * from relacion where id in  ( select r.id  from item i, relacion r "+ 
-                                                               " where i.id = r.id_item_duenho and r.id_item_duenho=  "+str(id_item)+") ")
+                                                               " where i.id = r.id_item_duenho and r.id_item_duenho=  "+str(id_item)+" and  r.estado= 'A' ) ")
         #item hijos y sus relaciones
         list_item_hijos = db_session.query(Item).from_statement(" select * from item where id in ( select r.id_item_duenho   from item i, relacion r "+
-                                                            " where i.id = r.id_item and r.id_item = "+str(id_item)+" ) ")
+                                                            " where i.id = r.id_item and r.id_item = "+str(id_item)+" and  r.estado= 'A' ) ")
     
         list_relac_hijos = db_session.query(Relacion).from_statement("select * from relacion where id in  ( select r.id  from item i, relacion r "+
-                                                                 " where i.id = r.id_item  and r.id_item= "+str(id_item)+") ")
+                                                                 " where i.id = r.id_item  and r.id_item= "+str(id_item)+" and  r.estado= 'A' ) ")
            
         
         if item.estado == 'A' :
@@ -527,6 +532,9 @@ def eliminaritem():
                                     db_session.add(ia)
                                     db_session.commit()   
                     for rel_hijo in list_relac_hijos :
+                        rel_hijo.estado= 'E'
+                        db_session.merge(rel_hijo)
+                        db_session.commit() 
                         relacion= Relacion(rel_hijo.fecha_creacion, today, rel_hijo.id_tipo_relacion, item.id, item2.id, 'A')
                         db_session.add(relacion)
                         db_session.commit() 
@@ -534,24 +542,27 @@ def eliminaritem():
             # cambios en items padres
             if list_item_padres != None     :
                 for padre in list_item_padres :
-                    atri2 = db_session.query(Atributo).from_statement(" select at.* from tipo_item ti , titem_atributo ta, atributo at "+
-                                                        " where ti.id = ta.id_tipo_item and at.id = ta.id_atributo and ti.id=  " +str(padre.id_tipo_item) )
-    
-                    valores_atr2 = db_session.query(ItemAtributo).from_statement(" select ia.* from item_atributo ia where ia.id_item= " +str(padre.id) )
-                    item3 = Item(padre.codigo, padre.nombre, padre.descripcion, 'V', padre.complejidad, today, padre.costo, 
-                    session['user_id']  , padre.version +1 , padre.id_fase , padre.id_tipo_item , padre.archivo)            
-                    db_session.add(item3)
-                    db_session.commit()  
-                    # se actualizan los atributos del item si es que tienen
-                    if atri2 != None :
-                        for atr in atri2 :
-                            for val in valores_atr2 :   
-                                if val.id_atributo == atr.id :                  
-                                    ia= ItemAtributo(val.valor, item3.id, atr.id)
-                                    db_session.add(ia)
-                                    db_session.commit()   
+#                    atri2 = db_session.query(Atributo).from_statement(" select at.* from tipo_item ti , titem_atributo ta, atributo at "+
+#                                                        " where ti.id = ta.id_tipo_item and at.id = ta.id_atributo and ti.id=  " +str(padre.id_tipo_item) )
+#    
+#                    valores_atr2 = db_session.query(ItemAtributo).from_statement(" select ia.* from item_atributo ia where ia.id_item= " +str(padre.id) )
+#                    item3 = Item(padre.codigo, padre.nombre, padre.descripcion, 'V', padre.complejidad, today, padre.costo, 
+#                    session['user_id']  , padre.version +1 , padre.id_fase , padre.id_tipo_item , padre.archivo)            
+#                    db_session.add(item3)
+#                    db_session.commit()  
+#                    # se actualizan los atributos del item si es que tienen
+#                    if atri2 != None :
+#                        for atr in atri2 :
+#                            for val in valores_atr2 :   
+#                                if val.id_atributo == atr.id :                  
+#                                    ia= ItemAtributo(val.valor, item3.id, atr.id)
+#                                    db_session.add(ia)
+#                                    db_session.commit()   
                     for rel_padre in list_relac_padres:
-                        relacion= Relacion(rel_padre.fecha_creacion, today, rel_padre.id_tipo_relacion, item3.id, item.id,  'A')
+                        rel_padre.estado= 'E'
+                        db_session.merge(rel_padre)
+                        db_session.commit() 
+                        relacion= Relacion(rel_padre.fecha_creacion, today, rel_padre.id_tipo_relacion, padre.id, item.id,  'A')
                         db_session.add(relacion)
                         db_session.commit()    
             flash('El Item ha sufrido el cambio de estado Aprobado a En Progreso. Puede proceder con la Eliminacion','info')
@@ -600,23 +611,23 @@ def eliminaritem():
                  
         # cambios en items padres
         if list_item_padres != None     :
-                for padre in list_item_padres :
-                    atri2 = db_session.query(Atributo).from_statement(" select at.* from tipo_item ti , titem_atributo ta, atributo at "+
-                                                        " where ti.id = ta.id_tipo_item and at.id = ta.id_atributo and ti.id=  " +str(padre.id_tipo_item) )
-    
-                    valores_atr2 = db_session.query(ItemAtributo).from_statement(" select ia.* from item_atributo ia where ia.id_item= " +str(padre.id) )
-                    item3 = Item(padre.codigo, padre.nombre, padre.descripcion, 'V', padre.complejidad, today, padre.costo, 
-                    session['user_id']  , padre.version +1 , padre.id_fase , padre.id_tipo_item , padre.archivo)            
-                    db_session.add(item3)
-                    db_session.commit()  
-                    # se actualizan los atributos del item si es que tienen
-                    if atri2 != None :
-                        for atr in atri2 :
-                            for val in valores_atr2 :   
-                                if val.id_atributo == atr.id :                  
-                                    ia= ItemAtributo(val.valor, item3.id, atr.id)
-                                    db_session.add(ia)
-                                    db_session.commit()   
+#                for padre in list_item_padres :
+#                    atri2 = db_session.query(Atributo).from_statement(" select at.* from tipo_item ti , titem_atributo ta, atributo at "+
+#                                                        " where ti.id = ta.id_tipo_item and at.id = ta.id_atributo and ti.id=  " +str(padre.id_tipo_item) )
+#    
+#                    valores_atr2 = db_session.query(ItemAtributo).from_statement(" select ia.* from item_atributo ia where ia.id_item= " +str(padre.id) )
+#                    item3 = Item(padre.codigo, padre.nombre, padre.descripcion, 'V', padre.complejidad, today, padre.costo, 
+#                    session['user_id']  , padre.version +1 , padre.id_fase , padre.id_tipo_item , padre.archivo)            
+#                    db_session.add(item3)
+#                    db_session.commit()  
+#                    # se actualizan los atributos del item si es que tienen
+#                    if atri2 != None :
+#                        for atr in atri2 :
+#                            for val in valores_atr2 :   
+#                                if val.id_atributo == atr.id :                  
+#                                    ia= ItemAtributo(val.valor, item3.id, atr.id)
+#                                    db_session.add(ia)
+#                                    db_session.commit()   
                     for rel_padre in list_relac_padres:
                             relacion = db_session.query(Relacion).filter_by(id=rel_padre.id).first()
                             relacion.estado='E'
@@ -754,10 +765,10 @@ def reversionaritem():
             
             #items padres y sus relaciones
             list_item_padres = db_session.query(Item).from_statement(" select * from item where id in ( select r.id_item  from item i, relacion r "+
-                                                            " where i.id = r.id_item_duenho and r.id_item_duenho= "+str(id_itemg)+" ) ")
+                                                            " where i.id = r.id_item_duenho and r.id_item_duenho= "+str(maxversionitem.id)+" ) ")
 
             list_relac_padres = db_session.query(Relacion).from_statement("select * from relacion where id in  ( select r.id  from item i, relacion r "+ 
-                                                               " where i.id = r.id_item_duenho and r.id_item_duenho=  "+str(id_itemg)+") ")
+                                                               " where i.id = r.id_item_duenho and r.id_item_duenho=  "+str(maxversionitem.id)+") ")
             #item hijos y sus relaciones
             list_item_hijos = db_session.query(Item).from_statement(" select * from item where id in ( select r.id_item_duenho   from item i, relacion r "+
                                                             " where i.id = r.id_item and r.id_item = "+str(id_itemg)+" ) ")
@@ -784,6 +795,9 @@ def reversionaritem():
                                     db_session.add(ia)
                                     db_session.commit()   
                     for rel_hijo in list_relac_hijos :
+                        rel_hijo.estado= 'E'
+                        db_session.merge(rel_hijo)
+                        db_session.commit() 
                         relacion= Relacion(rel_hijo.fecha_creacion, today, rel_hijo.id_tipo_relacion, item_aux.id, item2.id, 'A')
                         db_session.add(relacion)
                         db_session.commit() 
@@ -791,24 +805,27 @@ def reversionaritem():
             # cambios en items padres
             if list_item_padres != None     :
                 for padre in list_item_padres :
-                    atri2 = db_session.query(Atributo).from_statement(" select at.* from tipo_item ti , titem_atributo ta, atributo at "+
-                                                        " where ti.id = ta.id_tipo_item and at.id = ta.id_atributo and ti.id=  " +str(padre.id_tipo_item) )
-    
-                    valores_atr2 = db_session.query(ItemAtributo).from_statement(" select ia.* from item_atributo ia where ia.id_item= " +str(padre.id) )
-                    item3 = Item(padre.codigo, padre.nombre, padre.descripcion, 'V', padre.complejidad, today, padre.costo, 
-                    session['user_id']  , padre.version +1 , padre.id_fase , padre.id_tipo_item , padre.archivo)            
-                    db_session.add(item3)
-                    db_session.commit()  
-                    # se actualizan los atributos del item si es que tienen
-                    if atri2 != None :
-                        for atr in atri2 :
-                            for val in valores_atr2 :   
-                                if val.id_atributo == atr.id :                  
-                                    ia= ItemAtributo(val.valor, item3.id, atr.id)
-                                    db_session.add(ia)
-                                    db_session.commit()   
+#                    atri2 = db_session.query(Atributo).from_statement(" select at.* from tipo_item ti , titem_atributo ta, atributo at "+
+#                                                        " where ti.id = ta.id_tipo_item and at.id = ta.id_atributo and ti.id=  " +str(padre.id_tipo_item) )
+#    
+#                    valores_atr2 = db_session.query(ItemAtributo).from_statement(" select ia.* from item_atributo ia where ia.id_item= " +str(padre.id) )
+#                    item3 = Item(padre.codigo, padre.nombre, padre.descripcion, 'V', padre.complejidad, today, padre.costo, 
+#                    session['user_id']  , padre.version +1 , padre.id_fase , padre.id_tipo_item , padre.archivo)            
+#                    db_session.add(item3)
+#                    db_session.commit()  
+#                    # se actualizan los atributos del item si es que tienen
+#                    if atri2 != None :
+#                        for atr in atri2 :
+#                            for val in valores_atr2 :   
+#                                if val.id_atributo == atr.id :                  
+#                                    ia= ItemAtributo(val.valor, item3.id, atr.id)
+#                                    db_session.add(ia)
+#                                    db_session.commit()   
                     for rel_padre in list_relac_padres:
-                        relacion= Relacion(rel_padre.fecha_creacion, today, rel_padre.id_tipo_relacion, item3.id, item_aux.id,  'A')
+                        rel_padre.estado= 'E'
+                        db_session.merge(rel_padre)
+                        db_session.commit() 
+                        relacion= Relacion(rel_padre.fecha_creacion, today, rel_padre.id_tipo_relacion, padre.id, item_aux.id,  'A')
                         db_session.add(relacion)
                         db_session.commit() 
            
@@ -936,16 +953,16 @@ def reviviritem():
             
             #items padres y sus relaciones
             list_item_padres = db_session.query(Item).from_statement(" select * from item where id in ( select r.id_item  from item i, relacion r "+
-                                                            " where i.id = r.id_item_duenho and r.id_item_duenho= "+str(item_aux.id)+" ) ")
+                                                            " where i.id = r.id_item_duenho and r.id_item_duenho= "+str(maxversionitem.id)+" and r.estado = 'E' ) ")
 
             list_relac_padres = db_session.query(Relacion).from_statement("select * from relacion where id in  ( select r.id  from item i, relacion r "+ 
-                                                               " where i.id = r.id_item_duenho and r.id_item_duenho=  "+str(item_aux.id)+") ")
+                                                               " where i.id = r.id_item_duenho and r.id_item_duenho=  "+str(maxversionitem.id)+" and r.estado = 'E' ) ")
             #item hijos y sus relaciones
             list_item_hijos = db_session.query(Item).from_statement(" select * from item where id in ( select r.id_item_duenho   from item i, relacion r "+
-                                                            " where i.id = r.id_item and r.id_item = "+str(item_aux.id)+" ) ")
+                                                            " where i.id = r.id_item and r.id_item = "+str(item_aux.id)+" and r.estado = 'E' ) ")
     
             list_relac_hijos = db_session.query(Relacion).from_statement("select * from relacion where id in  ( select r.id  from item i, relacion r "+
-                                                                 " where i.id = r.id_item  and r.id_item= "+str(item_aux.id)+") ")
+                                                                 " where i.id = r.id_item  and r.id_item= "+str(item_aux.id)+" and r.estado = 'E') ")
           
             posee_cliclo = False
             if list_relac_padres != None and list_relac_hijos !=None:
@@ -976,6 +993,9 @@ def reviviritem():
                                         db_session.add(ia)
                                         db_session.commit()   
                         for rel_hijo in list_relac_hijos :
+                            rel_hijo.estado= 'E'
+                            db_session.merge(rel_hijo)
+                            db_session.commit() 
                             relacion= Relacion(rel_hijo.fecha_creacion, today, rel_hijo.id_tipo_relacion, item2.id, item1.id, 'A')
                             db_session.add(relacion)
                             db_session.commit() 
@@ -983,24 +1003,27 @@ def reviviritem():
                 # cambios en items padres
                 if list_item_padres != None     :
                     for padre in list_item_padres :
-                        atri2 = db_session.query(Atributo).from_statement(" select at.* from tipo_item ti , titem_atributo ta, atributo at "+
-                                                        " where ti.id = ta.id_tipo_item and at.id = ta.id_atributo and ti.id=  " +str(padre.id_tipo_item) )
-    
-                        valores_atr2 = db_session.query(ItemAtributo).from_statement(" select ia.* from item_atributo ia where ia.id_item= " +str(padre.id) )
-                        item3 = Item(padre.codigo, padre.nombre, padre.descripcion, 'V', padre.complejidad, today, padre.costo, 
-                                     session['user_id']  , padre.version +1 , padre.id_fase , padre.id_tipo_item , padre.archivo)            
-                        db_session.add(item3)
-                        db_session.commit()  
-                        # se actualizan los atributos del item si es que tienen
-                        if atri2 != None :
-                            for atr in atri2 :
-                                for val in valores_atr2 :   
-                                    if val.id_atributo == atr.id :                  
-                                        ia= ItemAtributo(val.valor, item3.id, atr.id)
-                                        db_session.add(ia)
-                                        db_session.commit()   
+#                        atri2 = db_session.query(Atributo).from_statement(" select at.* from tipo_item ti , titem_atributo ta, atributo at "+
+#                                                        " where ti.id = ta.id_tipo_item and at.id = ta.id_atributo and ti.id=  " +str(padre.id_tipo_item) )
+#    
+#                        valores_atr2 = db_session.query(ItemAtributo).from_statement(" select ia.* from item_atributo ia where ia.id_item= " +str(padre.id) )
+#                        item3 = Item(padre.codigo, padre.nombre, padre.descripcion, 'V', padre.complejidad, today, padre.costo, 
+#                                     session['user_id']  , padre.version +1 , padre.id_fase , padre.id_tipo_item , padre.archivo)            
+#                        db_session.add(item3)
+#                        db_session.commit()  
+#                        # se actualizan los atributos del item si es que tienen
+#                        if atri2 != None :
+#                            for atr in atri2 :
+#                                for val in valores_atr2 :   
+#                                    if val.id_atributo == atr.id :                  
+#                                        ia= ItemAtributo(val.valor, item3.id, atr.id)
+#                                        db_session.add(ia)
+#                                        db_session.commit()   
                         for rel_padre in list_relac_padres:
-                            relacion= Relacion(rel_padre.fecha_creacion, today, rel_padre.id_tipo_relacion, item3.id, item2.id,  'A')
+                            rel_padre.estado= 'E'
+                            db_session.merge(rel_padre)
+                            db_session.commit() 
+                            relacion= Relacion(rel_padre.fecha_creacion, today, rel_padre.id_tipo_relacion, maxversionitem.id, item2.id,  'A')
                             db_session.add(relacion)
                             db_session.commit() 
                 
