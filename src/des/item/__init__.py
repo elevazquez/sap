@@ -330,12 +330,10 @@ def editaritem():
             #el padre debe ser aprobado primero
             if form.estado.data =='A': 
                 for padre in list_item_padres :
-                    print "padre "+str(padre)+ "  " 
                     if padre.estado != 'A' and padre.estado != 'B':
                         flash('El padre/ansestro del Item no esta Aprobado..','info')
                         return redirect('/item/administraritem')  
                 if  list_item_padres == None : 
-                    print "noo"
                     verfase= db_session.query(Fase).filter_by(id_proyecto= session['pry']).filter_by(id=id_faseg ).first()
                     primerafase= db_session.query(Fase).from_statement("select f2.* from fase f2 where f2.nro_orden = (select min(f.nro_orden) from fase f)").first()
                     
@@ -418,7 +416,7 @@ def editaritem():
             linea= db_session.query(LbItem).join(LineaBase, LineaBase.id==LbItem.id_linea_base).filter(LbItem.id_item==id_itemg).first() 
             
             if linea != None:
-                lb= db_session.query(LineaBase).filterby(id= linea.id_linea_base)
+                lb= db_session.query(LineaBase).filter_by(id= linea.id_linea_base)
                 db_session.delete(linea)
                 db_session.commit()
                 lin = LbItem(linea.id_linea_base, item.id)
