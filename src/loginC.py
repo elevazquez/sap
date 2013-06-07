@@ -158,6 +158,9 @@ def logout():
     session.pop('is_administrador', None)
     session.pop('pry', None)
     session.pop('itemduenho', None)
+    session.pop('permission_admin', None)
+    session.pop('permiso_lider', None)
+    session.pop('proyecto_nombre', None)
     return redirect(url_for('index'))
 
 def is_administrador(userid):

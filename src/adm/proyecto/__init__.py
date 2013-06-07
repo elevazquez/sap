@@ -149,23 +149,24 @@ def editarproyecto():
                 db_session.merge(proyecto)
                 db_session.commit()
             
-                miembrosComite = db_session.query(MiembrosComite).filter_by(id_usuario=mc).filter_by(id_proyecto=proyecto.id).first()  
-                #init_db(db_session)
-                db_session.delete(miembrosComite)
-                db_session.commit()
+                if mc != proyecto.id_usuario_lider:
+                    miembrosComite = db_session.query(MiembrosComite).filter_by(id_usuario=mc).filter_by(id_proyecto=proyecto.id).first()  
+                    #init_db(db_session)
+                    db_session.delete(miembrosComite)
+                    db_session.commit()
 
-                lr = db_session.query(UsuarioRol).filter_by(id_rol=r2.id).filter_by(id_usuario=mc).filter_by(id_proyecto=proyecto.id).first()  
-                #init_db(db_session)
-                db_session.delete(lr)
-                db_session.commit()
+                    lr = db_session.query(UsuarioRol).filter_by(id_rol=r2.id).filter_by(id_usuario=mc).filter_by(id_proyecto=proyecto.id).first()  
+                    #init_db(db_session)
+                    db_session.delete(lr)
+                    db_session.commit()
                     
-                miembro = MiembrosComite(proyecto.id, proyecto.id_usuario_lider)
-                db_session.add(miembro)
-                db_session.commit()
+                    miembro = MiembrosComite(proyecto.id, proyecto.id_usuario_lider)
+                    db_session.add(miembro)
+                    db_session.commit()
             
-                li = UsuarioRol(r2.id, proyecto.id_usuario_lider, proyecto.id)
-                db_session.add(li)
-                db_session.commit()
+                    li = UsuarioRol(r2.id, proyecto.id_usuario_lider, proyecto.id)
+                    db_session.add(li)
+                    db_session.commit()
             
                 return redirect('/proyecto/administrarproyecto')
             except DatabaseError, e:

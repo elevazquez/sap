@@ -10,6 +10,7 @@ from des.mod.Fase import Fase
 from ges.mod.SolicitudCambio import SolicitudCambio
 from ges.mod.SolicitudItem import SolicitudItem
 from des.mod.Item import Item
+from ges.mod.ResolucionMiembros import ResolucionMiembros
 from ges.solicitud.SolicitudFormulario import SolicitudFormulario
 from flask_login import current_user
 import flask, flask.views
@@ -396,6 +397,7 @@ def versolicitud():
         id_sol=request.args.get('id')
     s = db_session.query(SolicitudCambio).filter_by(id=id_sol).filter_by(id_proyecto=session['pry']).first()
     itemssol=  db_session.query(Item).from_statement("select * from item where id in(select id_item from solicitud_item where id_solicitud="+str(id_sol)+")")  
+    res = db_session.query(ResolucionMiembros).filter_by(id_solicitud_cambio=s.id).all()
     form = SolicitudFormulario(request.form,s)
     solicitud = db_session.query(SolicitudCambio).filter_by(id=id_sol).filter_by(id_proyecto=session['pry']).first()  
     form.id_proyecto.data = pro.nombre
@@ -408,7 +410,7 @@ def versolicitud():
         form.estado.data='Aprobada'
     elif solicitud.estado=='R':
         form.estado.data='Rechazada'
-    return render_template('solicitud/versolicitud.html', form=form, items=itemssol)
+    return render_template('solicitud/versolicitud.html', form=form, items=itemssol, res=res)
 
 @app.errorhandler(404)
 def page_not_found(error):
