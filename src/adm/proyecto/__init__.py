@@ -263,18 +263,17 @@ def buscarproyecto():
 @app.route('/proyecto/administrarproyecto')
 def administrarproyecto():
     """ Funcion para listar registros de la tabla Proyecto""" 
-    idproy = session['pry']
+    idproy = None
+    if 'pry' in session:
+        idproy = session['pry']
     permission = UserRol('ADMINISTRADOR')
     if permission.can():
         #init_db(db_session)
-        if idproy != None :
+        if idproy != None :  
             proyectos = db_session.query(Proyecto).filter(Proyecto.id == idproy).all()
         else :
             proyectos = db_session.query(Proyecto).order_by(Proyecto.nombre)
     else:
-        rol = "LIDER PROYECTO"
-        habilitacion = UserPermission(rol, int(idproy))
-        session['permiso_lider'] = habilitacion
         proyectos = db_session.query(Proyecto).filter(Proyecto.id == idproy).all()
     return render_template('proyecto/administrarproyecto.html', proyectos = proyectos)
 
@@ -309,6 +308,9 @@ def proyectoActual():
     session['pry'] = proyecto
     p = db_session.query(Proyecto).filter_by(id = proyecto).first()
     session['proyecto_nombre'] = p.nombre
+    rol = "LIDER PROYECTO"
+    habilitacion = UserPermission(rol, int(proyecto))
+    session['permiso_lider'] = habilitacion
     return redirect(url_for('index'))
     #===========================================================================
     # else:

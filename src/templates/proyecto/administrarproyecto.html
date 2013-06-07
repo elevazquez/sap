@@ -26,8 +26,10 @@
 				<option value="fecha_ultima_mod">Fecha Ult Mod</option>
 				<option value="id_usuario_lider">Líder Proyecto</option>
 			</select> 
-			<input type=submit name="Buscar" value=Buscar /> 			
+			<input type=submit name="Buscar" value=Buscar /> 
+	{% if( session['is_administrador'] ) %}			
 		<a href="{{ url_for('nuevoproyecto') }}" ><img src="../static/images/a.png" alt="Agregar" height="30" width="30" title="Agregar" ></a>
+	{% endif %}
 </form>
 <p></p>
 {% with errors = get_flashed_messages(category_filter=["info"]) %}
@@ -57,10 +59,18 @@
 	</TR>
 	{% for proyecto in proyectos %}
 	<TR>
-		<TD class="c1" width="100"><a href="{{ url_for('editarproyecto', nom=proyecto.nombre) }}" ><img src="../static/images/e.png" alt="Editar" height="20" width="20" title="Editar" style="vertical-align: middle;"></a>
-		<a href="{{ url_for('eliminarproyecto', nom=proyecto.nombre) }}" onclick="javascript:return confirmar()"><img src="../static/images/b.png" alt="Eliminar" height="20" width="20" title="Eliminar" style="vertical-align: middle;"> </a>
-		<a href="{{ url_for('iniciarproyecto', nom=proyecto.nombre) }}">Iniciar</a>
-		<a href="{{ url_for('finalizarproyecto', nom=proyecto.nombre) }}">Finalizar</a></TD>
+		<TD class="c1" width="100">
+		{% if( session['is_administrador'] ) %}
+			<a href="{{ url_for('editarproyecto', nom=proyecto.nombre) }}" ><img src="../static/images/e.png" alt="Editar" height="20" width="20" title="Editar" style="vertical-align: middle;"></a>
+			<a href="{{ url_for('eliminarproyecto', nom=proyecto.nombre) }}" onclick="javascript:return confirmar()"><img src="../static/images/b.png" alt="Eliminar" height="20" width="20" title="Eliminar" style="vertical-align: middle;"> </a>
+		{% endif %}
+		{% if 'permiso_lider' in session %}
+			{% if( session['permiso_lider'].can() ) %}
+			<a href="{{ url_for('iniciarproyecto', nom=proyecto.nombre) }}">Iniciar</a>
+			<a href="{{ url_for('finalizarproyecto', nom=proyecto.nombre) }}">Finalizar</a>
+			{% endif %}
+		{% endif %}
+		</TD>
 		<TD class="c3"><SPAN>{{proyecto.nombre|e}}</SPAN></TD>
 		<TD class="c4"><SPAN>{{proyecto.descripcion|e}}</SPAN></TD>
 		<TD class="c5"><SPAN>{{'Nuevo' if proyecto.estado=='N' else 'En Progreso' if proyecto.estado=='P' 
