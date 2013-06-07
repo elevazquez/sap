@@ -14,6 +14,7 @@ from des.fase.FaseFormulario import FaseFormulario
 import flask, flask.views
 import os
 import datetime
+from UserPermission import UserPermission, UserRol
 
 db_session = scoped_session(sessionmaker(autocommit=False,
                                          autoflush=False,
@@ -33,7 +34,11 @@ def flash_errors(form):
 
 @app.route('/fase/nuevafase', methods=['GET', 'POST'])
 def nuevafase():
-    """ Funcion para agregar registros a la tabla Fase""" 
+    """ Funcion para agregar registros a la tabla Fase"""
+    permission =UserPermission('LIDER PROYECTO', int(session['pry']))
+    if permission.can()==False:
+        flash('No posee los permisos suficientes para realizar la operacion', 'info')
+        return render_template('fase/administrarfase.html') 
     form = FaseFormulario(request.form)
     ##init_db(db_session)
     n = db_session.query(func.max(Fase.nro_orden, type_=Integer)).filter_by(id_proyecto=session['pry']).scalar()
@@ -74,6 +79,10 @@ def nuevafase():
 def editarfase():
     """ Funcion para editar registros de la tabla Fase""" 
     #init_db(db_session)
+    permission =UserPermission('LIDER PROYECTO', int(session['pry']))
+    if permission.can()==False:
+        flash('No posee los permisos suficientes para realizar la operacion', 'info')
+        return render_template('fase/administrarfase.html') 
     pro = db_session.query(Proyecto).filter_by(id=session['pry']).first()
     f = db_session.query(Fase).filter_by(nro_orden=request.args.get('nro')).filter_by(id_proyecto=pro.id).first()  
     form = FaseFormulario(request.form,f)
@@ -122,6 +131,10 @@ def editarfase():
 def eliminarfase():
     """ Funcion para eliminar registros de la tabla Fase""" 
     #init_db(db_session)
+    permission =UserPermission('LIDER PROYECTO', int(session['pry']))
+    if permission.can()==False:
+        flash('No posee los permisos suficientes para realizar la operacion', 'info')
+        return render_template('fase/administrarfase.html') 
     pro = db_session.query(Proyecto).filter_by(id=session['pry']).first()
     if pro.estado != 'N' :
         flash('No se pueden eliminar Fases del Proyecto','info')
@@ -200,13 +213,20 @@ def listarfase():
 def importarfase():
     """ Funcion para importar registros a la tabla Fase""" 
     #init_db(db_session)
+    permission =UserPermission('LIDER PROYECTO', int(session['pry']))
+    if permission.can()==False:
+        flash('No posee los permisos suficientes para realizar la operacion', 'info')
+        return render_template('fase/administrarfase.html') 
     pro = db_session.query(Proyecto).filter_by(id=session['pry']).first()
     f = db_session.query(Fase).filter_by(nro_orden=request.args.get('nro')).filter_by(id_proyecto=request.args.get('py')).first()  
     form = FaseFormulario(request.form,f)
     fase = db_session.query(Fase).filter_by(nro_orden=form.nro_orden.data).filter_by(id_proyecto=request.args.get('py')).first()  
     form.id_proyecto.data = pro.nombre
     n = db_session.query(func.max(Fase.nro_orden, type_=Integer)).filter_by(id_proyecto=session['pry']).scalar()
-    form.nro_orden.default = n + 1
+    if n != None :
+        form.nro_orden.default = n + 1
+    else :
+        form.nro_orden.default = 1
     form.estado.data = 'Inicial'
     if pro.estado != 'N' :
         flash('No se pueden importar Fases al Proyecto','info')
@@ -238,6 +258,10 @@ def importarfase():
 def finalizarfase():
     """ Funcion para finalizar registros de la tabla Fase""" 
     #init_db(db_session)
+    permission =UserPermission('LIDER PROYECTO', int(session['pry']))
+    if permission.can()==False:
+        flash('No posee los permisos suficientes para realizar la operacion', 'info')
+        return render_template('fase/administrarfase.html') 
     nro = request.args.get('nro')
     fase = db_session.query(Fase).filter_by(nro_orden=nro).filter_by(id_proyecto=session['pry']).first()
     items = db_session.query(Item).from_statement("Select it.*  from item it, "+ 
