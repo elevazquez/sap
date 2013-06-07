@@ -11,10 +11,10 @@ from adm.mod.Usuario import *
 app = Flask(__name__)
 app.secret_key="sap"
 
+from adm.usuario import *
 from adm.rol import *
 from adm.permiso import *
 from adm.proyecto import *
-from adm.usuario import *
 from adm.miembrosComite import *
 from des.fase import *
 from des.atributo import *
@@ -135,6 +135,7 @@ class Main(views.MethodView):
                 if not session['is_administrador']:
                     return redirect(url_for('getProyectoByUsuario', id_usuario = current_user.id))
                 else:
+                    return redirect(url_for('getProyectoByUsuario', id_usuario = current_user.id))
                     permission = UserRol('ADMINISTRADOR')
                     session['permission_admin'] = permission
         return redirect(url_for('index'))
