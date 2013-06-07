@@ -112,9 +112,6 @@ def aprobarSolicitud(idproyecto, idsolicitud):
     cantidadaprobado = db_session.query(ResolucionMiembros).filter(ResolucionMiembros.id_solicitud_cambio == idsolicitud).filter(ResolucionMiembros.voto == True).count();
     proyecto = db_session.query(Proyecto).filter(Proyecto.id == idproyecto).first();
     mayoria = (proyecto.cant_miembros // 2) + 1
-    print cantidadvotante
-    print mayoria
-    print cantidadaprobado 
     if (cantidadvotante == proyecto.cant_miembros) and (cantidadaprobado >= (mayoria)):
         solicitud = db_session.query(SolicitudCambio).filter_by(id= idsolicitud).first()
         solicitud.estado= 'A'
