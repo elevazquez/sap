@@ -67,7 +67,10 @@ def on_identity_loaded(sender, identity):
         # identity with the roles that the user provides
         roles = db_session.query(UsuarioRol).filter_by(id_usuario=current_user.id).all()
         for role in roles:
-            identity.provides.add(RoleNeed(role.usuariorolrol.codigo))
+            if role.id_proyecto == None :
+                identity.provides.add(RoleNeed(role.usuariorolrol.codigo))
+            else :
+                identity.provides.add(ItemNeed(role.usuariorolrol.codigo, int(role.id_proyecto) , 'manage'))
             permisos = db_session.query(Permiso).join(RolPermiso, RolPermiso.id_permiso == Permiso.id).filter(RolPermiso.id_rol == role.id_rol).all()
             for p in permisos:
                 if p.id_fase == None and role.id_proyecto != None:
@@ -94,9 +97,7 @@ class Main(views.MethodView):
         return render_template('index.html')
     
     def post(self):
-        print 'datos en el post'
         #init_db(db_session)
-        print 'luego del init del db_session'
         if 'logout' in request.form :
             session.pop('username', None)
             return redirect(url_for('index'))
@@ -120,7 +121,6 @@ class Main(views.MethodView):
         if user == None :
             flash("Usuario o Password Incorrecto", "success")
         else:
-            print 'existe usuario'
             #Keep the user info in the session using Flask-Login
             login_user(user)
             #Tell Flask-Principal the identity changed

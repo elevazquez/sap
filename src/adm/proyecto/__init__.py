@@ -263,13 +263,19 @@ def buscarproyecto():
 @app.route('/proyecto/administrarproyecto')
 def administrarproyecto():
     """ Funcion para listar registros de la tabla Proyecto""" 
+    idproy = None
+    if 'pry' in session:
+        idproy = session['pry']
     permission = UserRol('ADMINISTRADOR')
     if permission.can():
         #init_db(db_session)
-        proyectos = db_session.query(Proyecto).order_by(Proyecto.nombre)
-        return render_template('proyecto/administrarproyecto.html', proyectos = proyectos)
+        if idproy != None :  
+            proyectos = db_session.query(Proyecto).filter(Proyecto.id == idproy).all()
+        else :
+            proyectos = db_session.query(Proyecto).order_by(Proyecto.nombre)
     else:
-        return 'sin permisos'
+        proyectos = db_session.query(Proyecto).filter(Proyecto.id == idproy).all()
+    return render_template('proyecto/administrarproyecto.html', proyectos = proyectos)
 
 @app.errorhandler(404)
 def page_not_found(error):
@@ -287,6 +293,8 @@ def getProyectoByUsuario():
     """Funcion que obtiene la lista de los proyectos de un usuario"""
     usuario = request.args['id_usuario']
     p = db_session.query(Proyecto).join(UsuarioRol, Proyecto.id == UsuarioRol.id_proyecto).filter(UsuarioRol.id_usuario == usuario).group_by(Proyecto.id).all()
+    if(len(p) == 0):
+        return redirect(url_for('index'))
     return render_template('proyecto/principal_proyecto.html', proyectos = p)
 
 @app.route('/proyectoActual')
@@ -300,6 +308,9 @@ def proyectoActual():
     session['pry'] = proyecto
     p = db_session.query(Proyecto).filter_by(id = proyecto).first()
     session['proyecto_nombre'] = p.nombre
+    rol = "LIDER PROYECTO"
+    habilitacion = UserPermission(rol, int(proyecto))
+    session['permiso_lider'] = habilitacion
     return redirect(url_for('index'))
     #===========================================================================
     # else:

@@ -52,6 +52,13 @@
 							<li><a href="{{ url_for('administrarproyecto') }}">Administrar Proyecto   </a></li>
 							{% endif %}
 						{% endif %}
+						{% if not session['is_administrador'] %}
+								{% if 'permiso_lider' in session %}
+									{% if( session['permiso_lider'].can() ) %}
+							<li><a href="{{ url_for('administrarproyecto') }}">Administrar Proyecto   </a></li>
+									{% endif %}
+								{% endif %}
+						{% endif %}
 							<li><a href="{{ url_for('administrarmiembrosComite') }}">Comité de Cambio   </a></li>
 							<li><a href="{{ url_for('administrarfase') }}">Administrar Fases   </a></li>
 							<li><a href="{{ url_for('administrarlineabase') }}">Administrar Línea Base   </a></li>
