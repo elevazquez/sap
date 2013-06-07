@@ -7,7 +7,7 @@
 {% with errors = get_flashed_messages(category_filter=["error"]) %} 
 		{% if errors %}
 			<div class="block-message">
-				<a class="close" href="{{ url_for( 'liberarlineabase' ) }}"
+				<a class="close" href="{{ url_for( 'componerlineabase' ) }}"
 					dir="rtl">×</a>
 					<ul>
 						{%- for msg in errors %}
@@ -18,7 +18,7 @@
 {% endwith %}
 
 
-<form id=liberarlineabase method=post action="/lineaBase/liberarlineabase">
+<form id=liberarlineabase method=post action="/lineaBase/componerlineabase">
 	 <label>Items en Linea Base</label> 
   <div style="height:200px;width:400px;overflow:auto;">
 	<table id="tablaitems" border="1">
@@ -57,9 +57,9 @@
     <label>Descripción</label> <input type="text" name="descripcion" value="{{ form.descripcion.data }}" id="descripcion" readonly="true"/>
  	<label>Estado</label><input type="text" name="estado" value="{{'Valido' if form.estado.data=='V' else 'No Valido' if form.estado.data=='N' 
 		else 'Liberado' if form.estado.data=='L' }}" id="estado" readonly="true"/> 
-	<label>Fecha Creacion </label> <input type="date" name="fecha" value="{{form.fecha_creacion.data}}"  id="fecha" readonly="true"/>
+ 	<label>Fecha Creacion </label> <input type="date" name="fecha" value="{{form.fecha_creacion.data}}"  id="fecha" readonly="true"/>
 
-    	<p><input type=submit value=Liberar>
+    	<p><input type=submit value=Componer>
   		<input type="button" value="Cancelar"  onClick="document.location.href='{{ url_for( 'administrarlineabase' ) }}';">
 </form>
 
