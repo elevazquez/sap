@@ -19,6 +19,7 @@
 	<table id="tablaitems" border="1">
 		<TR>
 			<TH class="c1"></TH>
+			<TH class="c2">Fase</TH>
 			<TH class="c2">Codigo</TH>
 			<TH class="c3">Nombre</TH>	
 			<TH class="c4">Descripción</TH>
@@ -27,6 +28,7 @@
 		{% for item in items %}
 			<TR>
 				<TD class="c1"> <input type="checkbox" name="selectitem" value="{{ item.id }}"/> </TD>					
+				<TD class="c2"><SPAN>{{item.itemfase.descripcion|e}}</SPAN></TD>
 				<TD class="c2"><SPAN>{{item.codigo|e}}</SPAN></TD>
 				<TD class="c3"><SPAN>{{item.nombre|e}}</SPAN></TD>
 				<TD class="c4"><SPAN>{{item.descripcion|e}}</SPAN></TD>

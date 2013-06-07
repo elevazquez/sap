@@ -18,6 +18,8 @@ from des.mod.TItemAtributo import TItemAtributo
 from ges.mod.Relacion  import Relacion
 from ges.mod.TipoRelacion import TipoRelacion
 from adm.mod.Permiso import Permiso
+from ges.mod.SolicitudItem import SolicitudItem
+from ges.mod.SolicitudCambio import SolicitudCambio
 import flask, flask.views
 from sqlalchemy.exc import DatabaseError
 from UserPermission import UserPermission
@@ -116,12 +118,13 @@ def nuevoitem():
             #binary = f.read()
             #############file = request.files['file']
             #mypic = open(form.archivo.data, 'rb').read()
-            #curs.execute("insert into blobs (file) values (%s)",
-    
+            #curs.execute("insert into blobs (file) values (%s)",    
             #archivo=file(form.archivo.data,'rb').read()  
+            #---------------------------------
+            file = request.form.get('archivo')
             item = Item(form.codigo.data, form.nombre.data, form.descripcion.data, 
                     form.estado.data, form.complejidad.data, form.fecha.data, form.costo.data, 
-                    form.usuario.data , form.version.data, id_faseg , id_tipog,  None )
+                    form.usuario.data , form.version.data, id_faseg , id_tipog,  file )
             db_session.add(item)
             db_session.commit() 
             #psycopg2.Binary(form.archivo.data)  (psycopg2.Binary(file),) 
@@ -262,11 +265,29 @@ def editaritem():
         form.id_tipo_f.data = id_tipog
         form.version.data= form.version.data + 1 #modifica la version        
          
-    enlb= db_session.query(LbItem).filter_by(id_item=id_itemg).first()      
-    #verifica si puede ser modificado:
-    if enlb != None or item.estado == 'E' :
-        flash('El Item no puede ser modificado, ya que se encuebra en una Linea Base o esta Eliminado!','error')
-        return render_template('item/administraritem.html')
+    #verificaciones
+      
+    verlb= db_session.query(LbItem).join(LineaBase, LineaBase.id==LbItem.id_linea_base).filter(LbItem.id_item==id_itemg).filter(LineaBase.estado =='V').first() 
+    if verlb != None :
+        flash('El Item se encuentra en una Linea Base debe Liberarla para continuar','info')
+        return redirect('/item/administraritem')     
+    
+    verlb= db_session.query(LbItem).join(LineaBase, LineaBase.id==LbItem.id_linea_base).filter(LbItem.id_item==id_itemg).filter(LineaBase.estado =='L').first() 
+    if verlb != None:
+        versol=  db_session.query(SolicitudItem).join(SolicitudCambio , SolicitudCambio.id == SolicitudItem.id_solicitud).filter(SolicitudItem.id_item == id_itemg).first()
+        if versol == None:
+            flash('Debe realizar una Solicitud de Cambio para Proceder','info')
+            return redirect('/item/administraritem')      
+        else :
+            versol=  db_session.query(SolicitudItem).join(SolicitudCambio , SolicitudCambio.id == SolicitudItem.id_solicitud).filter(SolicitudItem.id_item == id_itemg).filter(SolicitudCambio.estado=='A').first()
+            if versol == None:
+                flash('La Solicitud de Cambio no ha sido Aprobada','info')
+                return redirect('/item/administraritem')     
+         
+    
+    if item.estado == 'E' :
+        flash('El Item no puede ser modificado, ya que esta Eliminado!','info')
+        return redirect('/item/administraritem')     
 
     if request.method == 'POST' and form.validate():
         # #init_db(db_session)
@@ -285,21 +306,8 @@ def editaritem():
                 if permission.can() == False:
                         flash('No posee los Permisos suficientes para realizar el cambio de estado','error')
                         return render_template('item/editaritem.html', form=form, att=atributo, vals=valoresatr)
-                 
-            item = Item(form.codigo.data, form.nombre.data, form.descripcion.data, 
-                    form.estado.data, form.complejidad.data, form.fecha.data, form.costo.data, 
-                    form.usuario.data , form.version.data, id_faseg , id_tipog , None)
             
-            db_session.add(item)
-            db_session.commit()
-          
-            if atributo != None :
-                for atr in atributo:
-                    valor =  request.form.get(atr.nombre)                  
-                    ia= ItemAtributo(valor, item.id, atr.id)
-                    db_session.add(ia)
-                    db_session.commit()
-            
+           
             # --------------------------------------------------------------------------------------------------
             #  # si el item posee alguna relacion, se cambia el estado de sus relaciones directas a Revision
             #---------------------------------------------------------------------------------------------------
@@ -316,6 +324,44 @@ def editaritem():
     
             list_relac_hijos = db_session.query(Relacion).from_statement("select * from relacion where id in  ( select r.id  from item i, relacion r "+
                                                                  " where i.id = r.id_item  and r.id_item= "+str(id_itemg)+") ")
+           
+            
+            #no puede ser aprobado si no tiene un acceso directo a su padre de la fase anterior
+            #el padre debe ser aprobado primero
+            if form.estado.data =='A': 
+                print "entro"   
+                for padre in list_item_padres :
+                    print"entro2"
+                    if padre.estado != 'A' or padre.estado !='B':
+                        flash('El padre/ansestro del Item no esta Aprobado..','info')
+                        return redirect('/item/administraritem')  
+                else:    
+                    print"entro3"            
+                    verfase= db_session.query(Fase).filter_by(id_proyecto= session['pry']).filter_by(id=id_faseg ).first()
+                    primerafase= db_session.query(Fase).from_statement("select * from fase where nro_orden = (select min(f.nro_orden) from fase f)")
+                    if verfase.nro_orden != primerafase :
+                        print"entro4"
+                        flash('El Item no posee un padre/ansestro..','info')
+                        return redirect('/item/administraritem')  
+                   
+                              
+            
+            item = Item(form.codigo.data, form.nombre.data, form.descripcion.data, 
+                    form.estado.data, form.complejidad.data, form.fecha.data, form.costo.data, 
+                    form.usuario.data , form.version.data, id_faseg , id_tipog , None)
+            
+            db_session.add(item)
+            db_session.commit()
+          
+            if atributo != None :
+                for atr in atributo:
+                    valor =  request.form.get(atr.nombre)                  
+                    ia= ItemAtributo(valor, item.id, atr.id)
+                    db_session.add(ia)
+                    db_session.commit()
+            
+           
+            
             # cambios en items hijos
             if list_item_hijos != None   :            
                 for hijo in list_item_hijos : 
@@ -363,7 +409,23 @@ def editaritem():
                         relacion= Relacion(rel_padre.fecha_creacion, today, rel_padre.id_tipo_relacion, item3.id, item.id,  'A')
                         db_session.add(relacion)
                         db_session.commit() 
-         
+            #se modifica en la lb            
+            linea= db_session.query(LbItem).join(LineaBase, LineaBase.id==LbItem.id_linea_base).filter(LbItem.id_item==id_itemg).first() 
+            
+            if linea != None:
+                lb= db_session.query(LineaBase).filterby(id= linea.id_linea_base)
+                db_session.delete(linea)
+                db_session.commit()
+                lin = LbItem(linea.id_linea_base, item.id)
+                db_session.add(lin)
+                db_session.commit() 
+                # si el item pasa a revision su lb pasa a un estado no valido
+                if item.estado=='V':
+                    lb.estado='N'
+                    db_session.merge(lb)
+                    db_session.commit() 
+                    
+                
             flash('El Item ha sido modificado con Exito','info')
             return redirect('/item/administraritem')     
         except DatabaseError, e:
@@ -379,7 +441,7 @@ def editaritem():
 def eliminaritem():
     """funcion que permite eliminar items"""
     today = datetime.date.today()
-    
+ 
     try:
         var = "ELIMINAR ITEM F" + str(request.args.get('fase'))
         permission = UserPermission(var, int(request.args.get('fase')))
@@ -387,6 +449,24 @@ def eliminaritem():
             flash('No posee los permisos suficientes para realizar la Operacion','info')
             return render_template('item/administraritem.html')
     
+        #verificaciones      
+        verlb= db_session.query(LbItem).join(LineaBase, LineaBase.id==LbItem.id_linea_base).filter(LbItem.id_item==request.args.get('id')).filter(LineaBase.estado =='V').first() 
+        if verlb != None :
+            flash('El Item se encuentra en una Linea Base debe Liberarla para continuar','info')
+            return redirect('/item/administraritem')     
+    
+        verlb= db_session.query(LbItem).join(LineaBase, LineaBase.id==LbItem.id_linea_base).filter(LbItem.id_item==request.args.get('id')).filter(LineaBase.estado =='L').first() 
+        if verlb != None:
+            versol=  db_session.query(SolicitudItem).join(SolicitudCambio , SolicitudCambio.id == SolicitudItem.id_solicitud).filter(SolicitudItem.id_item == request.args.get('id')).first()
+            if versol == None:
+                flash('Debe realizar una Solicitud de Cambio para Proceder','info')
+                return redirect('/item/administraritem')      
+            else :
+                versol=  db_session.query(SolicitudItem).join(SolicitudCambio , SolicitudCambio.id == SolicitudItem.id_solicitud).filter(SolicitudItem.id_item == request.args.get('id')).filter(SolicitudCambio.estado=='A').first()
+                if versol == None:
+                    flash('La Solicitud de Cambio no ha sido Aprobada','info')
+                    return redirect('/item/administraritem')    
+                
         id_item = request.args.get('id')
     #    #init_db(db_session)
         item = db_session.query(Item).filter_by(id= id_item).first()
@@ -542,6 +622,11 @@ def eliminaritem():
                             relacion.estado='E'
                             db_session.merge(relacion)
                             db_session.commit()
+        #se elimina el item de la lb
+        linea= db_session.query(LbItem).join(LineaBase, LineaBase.id==LbItem.id_linea_base).filter(LbItem.id_item==id_item).first() 
+        if linea != None:
+            db_session.delete(linea)
+            db_session.commit()
         flash('El Item se ha Eliminado con Exito','info')
         return redirect('/item/administraritem')   
     except DatabaseError, e:
@@ -586,7 +671,26 @@ def reversionaritem():
     if permission.can() == False:
             flash('No posee los Permisos suficientes para realizar esta Operacion','error')
             return redirect('/item/administraritem')   
-                    
+    
+    #verificaciones      
+    verlb= db_session.query(LbItem).join(LineaBase, LineaBase.id==LbItem.id_linea_base).filter(LbItem.id_item==id_itemg).filter(LineaBase.estado =='V').first() 
+    if verlb != None :
+        flash('El Item se encuentra en una Linea Base debe Liberarla para continuar','info')
+        return redirect('/item/administraritem')     
+    
+    verlb= db_session.query(LbItem).join(LineaBase, LineaBase.id==LbItem.id_linea_base).filter(LbItem.id_item==id_itemg).filter(LineaBase.estado =='L').first() 
+    if verlb != None:
+        versol=  db_session.query(SolicitudItem).join(SolicitudCambio , SolicitudCambio.id == SolicitudItem.id_solicitud).filter(SolicitudItem.id_item == id_itemg).first()
+        if versol == None:
+            flash('Debe realizar una Solicitud de Cambio para Proceder','info')
+            return redirect('/item/administraritem')      
+        else :
+            versol=  db_session.query(SolicitudItem).join(SolicitudCambio , SolicitudCambio.id == SolicitudItem.id_solicitud).filter(SolicitudItem.id_item == id_itemg).filter(SolicitudCambio.estado=='A').first()
+            if versol == None:
+                flash('La Solicitud de Cambio no ha sido Aprobada','info')
+                return redirect('/item/administraritem')     
+         
+                   
     form = ItemEditarFormulario(request.form,i)             
     item = db_session.query(Item).filter_by(nombre=form.nombre.data).filter_by(id=id_itemg).first()  
     form.usuario.data = session['user_id']       
@@ -621,8 +725,7 @@ def reversionaritem():
    
     valoresatr = db_session.query(ItemAtributo).from_statement(" select ia.* from item_atributo ia where ia.id_item= " +str(id_itemg) )
    
-    enlb= db_session.query(LbItem).filter_by(id_item=id_itemg).first() 
-                
+                    
     if request.method == 'POST' and form.validate():
         # #init_db(db_session)
         try:            
@@ -709,6 +812,14 @@ def reversionaritem():
                         db_session.add(relacion)
                         db_session.commit() 
            
+            #se modifica en la lb            
+            linea= db_session.query(LbItem).join(LineaBase, LineaBase.id==LbItem.id_linea_base).filter(LbItem.id_item==id_itemg).first() 
+            if linea != None:
+                db_session.delete(linea)
+                db_session.commit()
+                lin = LbItem(linea.id_linea_base, item.id)
+                db_session.add(lin)
+                db_session.commit() 
             
             flash('El Item ha sido Reversionado con Exito','info')
             return redirect('/item/administraritem')     
