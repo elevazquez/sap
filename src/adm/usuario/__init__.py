@@ -12,6 +12,7 @@ from UserPermission import UserRol
 import os
 import datetime
 import md5
+from adm.mod.UsuarioRol import UsuarioRol
     
 db_session = scoped_session(sessionmaker(autocommit=False,
                                          autoflush=False,
@@ -169,37 +170,27 @@ def administrarusuario():
     else:
         return 'sin permisos'
     
-#===============================================================================
-# def asignarrolesusuario():
-#    permission = UserRol('ADMINISTRADOR')
-#    if permission.can():
-#        idusuario = request.args.get('idusuario')
-#        if request.method == 'POST':
-#            idusuario = request.form.get('idusuario')
-#            rolesmarcados=request.form.getlist('permisos')
-#            rolesactuales= getRolesByUsuario(idusuario)
-#          for rol in rolesactuales:
-#               #================================================================
-#               # Elimina los roles del usuario que ya no se encuentran seleccionados
-#               #================================================================
-#               if not (permisos.count(rol.id) > 0) :
-#                  rp= db_session.query(RolPermiso).filter_by(id_rol=rol, id_permiso=per.id).first()
-#                  db_session.delete(rp)
-#                  db_session.commit()
-#            #===================================================================
-#            # Inserta los roles permisos seleccionados, si no existe realiza el merge y confirma los cambios
-#            #===================================================================
-#            for p in rolesmarcados :
-#              rolper = RolPermiso(rol, p)
-#              exits = db_session.query(RolPermiso).filter_by(id_rol=rol, id_permiso=p).first()
-#              if not exits:
-#                  db_session.merge(rolper)
-#                  db_session.commit()
-#            return redirect('/administrarrol')
-#        return redirect(url_for('administrarpermiso', isAdministrar = False, idrol = idrol))
-#    else:
-#       return 'sin permisos'
-#===============================================================================
+def asignarrolesusuario():
+    permission = UserRol('ADMINISTRADOR')
+    if permission.can():
+        idusuario = request.args.get('idusuario')
+        if request.method == 'POST':
+            idusuario = request.form.get('idusuario')
+            
+            rolesmarcados=request.form.getlist('roles')
+            #===================================================================
+            # Inserta los roles permisos seleccionados, si no existe realiza el merge y confirma los cambios
+            #===================================================================
+            for r in rolesmarcados :
+                rolusu = UsuarioRol(idusuario, r,1)
+                exits = db_session.query(UsuarioRol).filter_by(id_usuario=idusuario, id_rol=r).first()
+                if not exits:
+                    db_session.merge(rolusu)
+                    db_session.commit()
+            return redirect('/administrarusuario')
+        return redirect(url_for('administrarrol', idusuario = idusuario))
+    else:
+        return 'sin permisos'
     
 
 @app.errorhandler(404)
