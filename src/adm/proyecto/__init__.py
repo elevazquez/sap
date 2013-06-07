@@ -312,6 +312,9 @@ def proyectoActual():
     rol = "LIDER PROYECTO"
     habilitacion = UserPermission(rol, int(proyecto))
     session['permiso_lider'] = habilitacion
+    rol2 = "COMITE CAMBIOS"
+    habilitacion2 = UserPermission(rol2, int(proyecto))
+    session['permiso_miembro'] = habilitacion2
     return redirect(url_for('index'))
     #===========================================================================
     # else:
