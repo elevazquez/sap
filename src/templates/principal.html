@@ -59,7 +59,9 @@
 									{% endif %}
 								{% endif %}
 						{% endif %}
+						{% if not session['is_administrador'] %}
 							<li><a href="{{ url_for('administrarmiembrosComite') }}">Comité de Cambio   </a></li>
+						{% endif %}
 							<li><a href="{{ url_for('administrarfase') }}">Administrar Fases   </a></li>
 							<li><a href="{{ url_for('administrarlineabase') }}">Administrar Línea Base   </a></li>
 							<li><a href="{{ url_for('administrartipoAtributo') }}">Administrar Tipo Atributo  </a></li>
