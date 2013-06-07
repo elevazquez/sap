@@ -1,0 +1,46 @@
+{% extends "principal.html" %} 
+{% block content %}
+<div class="primary">
+	<h1>Reversion de Item</h1>
+	{% with errors = get_flashed_messages(category_filter=["error"]) %} 
+			{% if errors %}
+			<div class="block-message">
+				<a class="close" href="{{ url_for( 'historialitem' ) }}"
+					dir="rtl">×</a>
+					<ul>
+						{%- for msg in errors %}
+							<li>{{ msg }}</li> {% endfor -%}
+					</ul>
+			</div>
+		{% endif %} 
+	{% endwith %}
+	<form id=historialitem method=post action="/item/historialitem">
+	
+			<label>Fase</label> <input type="text" name="fase" value="{{ form.fase.data }} " id="fase" readonly="true"/> 
+    		<label>Tipo Item</label> <input type="text" name="tipo_item" value="{{ form.tipo_item.data }} " id="tipo_item" readonly="true"/> 
+    		<input type="text" name="id" value="{{ form.id.data }}" id="id" hidden="true"/>
+    		<input type="text" name="id_fase_f" value="{{ form.id_fase_f.data }}" id="id_fase_f" hidden="true"/>
+    		<input type="text" name="id_tipo_f" value="{{ form.id_tipo_f.data }}" id="id_tipo_f" hidden="true"/>
+    		<label>Código</label> <input type="text" name="codigo" value="{{ form.codigo.data }}" id="codigo" readonly="true" />
+    		<label>Nombre</label> <input type="text" name="nombre" value="{{ form.nombre.data }}" id="nombre" readonly="true" />
+    		<label>Descripción</label> <input type="text" name="descripcion" value="{{ form.descripcion.data }}" id="descripcion" readonly="true" />
+    		<label>Estado</label> <input type="text" name="estado" value="{{ form.estado.data }}" id="estado" readonly="true"/> 
+    		<label>Fecha </label> <input type="date" name="fecha" value="{{ form.fecha.data }}"  id="fecha"/>
+    		<label>Complejidad</label> <input type="text" name="complejidad" value="{{ form.complejidad.data }}" id="complejidad" readonly="true"/> 
+    		<label>Costo</label> <input type="text" name="costo" value="{{ form.costo.data }}" id="costo" readonly="true"/> 
+    		<label>Versión</label><input type="number" name="version" value="{{ form.version.data }}" id="version" readonly="true" /> 
+    		<p><label>Atributos del Item</label>
+    	{% for atr in att %}
+    	   {% for val in vals %}
+    			{% if val.id_atributo == atr.id %}
+    		<label>{{atr.nombre|e}}</label>  <input name={{atr.nombre|e}} value={{val.valor|e}} type="text" readonly="true" />
+    			{% endif %} 
+    		{% endfor %}
+    	{% else %}
+			<em>El item no posee atributos</em>
+    	{% endfor %}	
+  		<input type="button" value="Salir"  onClick="document.location.href='{{ url_for( 'administraritem' ) }}';"> 
+	</form>
+</div>
+{% endblock %}
+
