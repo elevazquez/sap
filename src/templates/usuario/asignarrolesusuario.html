@@ -44,7 +44,7 @@
 		{% if (asignados|length) > 0 %}
 			{% set exists = [] %}
 			{% for asig in asignados %}
-				{% if rol.id == asig.id %}
+				{% if rol.id == asig.id_rol %}
 					{% do exists.append(1) %}
 						<TD class="c4"> <input type="checkbox" name="roles" value="{{ rol.id }}" checked="checked" disabled="disabled"/> </TD>
 				{% endif %}
