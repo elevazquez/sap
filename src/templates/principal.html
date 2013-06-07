@@ -61,7 +61,6 @@
 						{% endif %}
 						{% if not session['is_administrador'] %}
 							<li><a href="{{ url_for('administrarmiembrosComite') }}">Comité de Cambio   </a></li>
-						{% endif %}
 							<li><a href="{{ url_for('administrarfase') }}">Administrar Fases   </a></li>
 							<li><a href="{{ url_for('administrarlineabase') }}">Administrar Línea Base   </a></li>
 							<li><a href="{{ url_for('administrartipoAtributo') }}">Administrar Tipo Atributo  </a></li>
@@ -71,6 +70,7 @@
 							<li><a href="{{ url_for('administrarrelacion') }}">Administrar Relación   </a></li>
 							<li><a href="{{ url_for('administrarsolicitud') }}">Solicitud de Cambio   </a></li>
 							<li><a href="{{ url_for('administrarsolicitudavotar') }}">Solicitud a votar   </a></li>
+						{% endif %}
 						</ul>			
 					</div>
 				 {% endif %}	
