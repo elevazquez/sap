@@ -292,15 +292,19 @@ def getProyectoByUsuario():
 @app.route('/proyectoActual')
 def proyectoActual():
     """Funcion que obtiene el Proyecto Actual"""
-    permission = UserRol('ADMINISTRADOR')
-    if not permission.can():
-        proyecto = request.args['pyo']
-        session['pry'] = proyecto
-        p = db_session.query(Proyecto).filter_by(id = proyecto).first()
-        session['proyecto_nombre'] = p.nombre
-        return redirect(url_for('index'))
-    else:
-        return 'sin permisos'
+    #===========================================================================
+    # permission = UserRol('ADMINISTRADOR')
+    # if not permission.can():
+    #===========================================================================
+    proyecto = request.args['pyo']
+    session['pry'] = proyecto
+    p = db_session.query(Proyecto).filter_by(id = proyecto).first()
+    session['proyecto_nombre'] = p.nombre
+    return redirect(url_for('index'))
+    #===========================================================================
+    # else:
+    #    return 'sin permisos'
+    #===========================================================================
 
 @app.route('/proyecto/iniciarproyecto')
 def iniciarproyecto():
