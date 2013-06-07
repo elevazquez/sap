@@ -9,6 +9,7 @@ from adm.mod.Proyecto import Proyecto
 from des.mod.Fase import Fase
 from des.mod.TipoItem import TipoItem
 from des.mod.Item import Item
+from ges.mod.Relacion import Relacion
 from des.fase.FaseFormulario import FaseFormulario
 import flask, flask.views
 import os
@@ -239,17 +240,25 @@ def finalizarfase():
     #init_db(db_session)
     nro = request.args.get('nro')
     fase = db_session.query(Fase).filter_by(nro_orden=nro).filter_by(id_proyecto=session['pry']).first()
-    fase2 = db_session.query(Fase).filter_by(nro_orden=str(fase.nro_orden+1)).filter_by(id_proyecto=session['pry']).first()
-    items = db_session.query(Item).from_statement("SELECT * FROM item WHERE id_fase='"+str(fase.id)+"'").all()
-    i = db_session.query(Item).from_statement("SELECT * FROM item WHERE id_fase='"+str(fase.id)+"'").first()
+    items = db_session.query(Item).from_statement("Select it.*  from item it, "+ 
+                        " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id "+
+                        " and f.id_proyecto = "+str(session['pry'])+ " and f.id ='"+str(fase.id)+"' group by codigo order by 1 ) s "+
+                        " where it.codigo = cod and it.version= vermax order by it.codigo ")
+    i = db_session.query(Item).from_statement("Select it.*  from item it, "+ 
+                        " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id "+
+                        " and f.id_proyecto = "+str(session['pry'])+ " and f.id ='"+str(fase.id)+"' group by codigo order by 1 ) s "+
+                        " where it.codigo = cod and it.version= vermax order by it.codigo ").first()
+    rel = db_session.query(Relacion).from_statement("select * from relacion " +
+                        " where id_item_duenho in (Select it.id  from item it, " +
+                        " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id " + 
+                        " and f.id_proyecto = "+str(session['pry'])+" and f.id ="+str(fase.id)+" group by codigo order by 1 ) s " +
+                        " where it.codigo = cod and it.version= vermax order by it.codigo )")
     f='S'
-    for it in items:
-        print it.id
     if fase.estado!='P':
         flash('La fase no puede ser finalizada, debe estar en estado En Progreso','info')
         return redirect('/fase/administrarfase')
     if i==None:
-        flash('La fase no posee items relacionados','info')
+        flash('La fase no puede ser finalizada, no posee items relacionados','info')
         return redirect('/fase/administrarfase')
     else :
         for it in items:
@@ -259,15 +268,22 @@ def finalizarfase():
             flash('La fase no puede ser finalizada algun item no se encuentra en Linea Base','info')
             return redirect('/fase/administrarfase')
         else :
+            if rel != None:
+                for r in rel:
+                    itt = db_session.query(Item).filter_by(id=r.id_item).first()
+                    if itt.id_fase != fase.id :
+                        fas = db_session.query(Fase).filter_by(id=itt.id_fase).first()
+                        if fas.nro_orden<fase.nro_orden :
+                            if fas.estado!='A' :
+                                f='N'
+            if f=='N':
+                flash('La fase no puede ser finalizada algun item tiene una Relacion con una fase anterior que no ha sido Finalizada','info')
+                return redirect('/fase/administrarfase')
             try:
                 fase.estado = 'A'
                 db_session.merge(fase)
                 db_session.commit()
             
-                if fase2!=None:
-                    fase2.estado = 'P'
-                    db_session.merge(fase2)
-                    db_session.commit()
                 flash('La fase ha sido finalizada con exito','info')
                 return redirect('/fase/administrarfase')
             except DatabaseError, e:

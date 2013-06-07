@@ -11,10 +11,10 @@ from adm.mod.Usuario import *
 app = Flask(__name__)
 app.secret_key="sap"
 
+from adm.usuario import *
 from adm.rol import *
 from adm.permiso import *
 from adm.proyecto import *
-from adm.usuario import *
 from adm.miembrosComite import *
 from des.fase import *
 from des.atributo import *
@@ -137,6 +137,7 @@ class Main(views.MethodView):
                 else:
                     permission = UserRol('ADMINISTRADOR')
                     session['permission_admin'] = permission
+                    return redirect(url_for('getProyectoByUsuario', id_usuario = current_user.id))
         return redirect(url_for('index'))
 
 # el decorator indica que la vista requiere que los usuarios esten logueados

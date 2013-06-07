@@ -292,15 +292,19 @@ def getProyectoByUsuario():
 @app.route('/proyectoActual')
 def proyectoActual():
     """Funcion que obtiene el Proyecto Actual"""
-    permission = UserRol('ADMINISTRADOR')
-    if not permission.can():
-        proyecto = request.args['pyo']
-        session['pry'] = proyecto
-        p = db_session.query(Proyecto).filter_by(id = proyecto).first()
-        session['proyecto_nombre'] = p.nombre
-        return redirect(url_for('index'))
-    else:
-        return 'sin permisos'
+    #===========================================================================
+    # permission = UserRol('ADMINISTRADOR')
+    # if not permission.can():
+    #===========================================================================
+    proyecto = request.args['pyo']
+    session['pry'] = proyecto
+    p = db_session.query(Proyecto).filter_by(id = proyecto).first()
+    session['proyecto_nombre'] = p.nombre
+    return redirect(url_for('index'))
+    #===========================================================================
+    # else:
+    #    return 'sin permisos'
+    #===========================================================================
 
 @app.route('/proyecto/iniciarproyecto')
 def iniciarproyecto():
@@ -333,3 +337,33 @@ def iniciarproyecto():
     else:
             flash('El Proyecto no puede ser iniciado','info')
             return redirect('/proyecto/administrarproyecto')
+        
+@app.route('/proyecto/finalizarproyecto')
+def finalizarproyecto():
+    """ Funcion para finalizar registros de la tabla Proyecto""" 
+    #init_db(db_session)
+    nom = request.args.get('nom')
+    pry = db_session.query(Proyecto).filter_by(nombre=nom).first()
+    fases = db_session.query(Fase).filter_by(id_proyecto=pry.id).all()
+    f='S'
+    if pry.estado!='P':
+        flash('El Proyecto no puede ser finalizado, debe estar en estado En Progreso','info')
+        return redirect('/proyecto/administrarproyecto')
+    else :
+        for fa in fases:
+            if fa.estado != 'A' :
+                f='N'
+        if f=='N':
+            flash('El Proyecto no puede ser finalizado alguna fase no ha sido Finalizada','info')
+            return redirect('/proyecto/administrarproyecto')
+        else :
+            try:
+                pry.estado = 'F'
+                db_session.merge(pry)
+                db_session.commit()
+            
+                flash('El Proyecto ha sido finalizado con exito','info')
+                return redirect('/proyecto/administrarproyecto')
+            except DatabaseError, e:
+                flash('Error en la Base de Datos' + e.args[0],'info')
+                return redirect('/proyecto/administrarproyecto')

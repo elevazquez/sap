@@ -23,7 +23,6 @@
     		<label>Fecha Fin</label><input type="date" name="fecha_fin" value="{{ form.fecha_fin.data }}" id="fecha_fin"/>
     		<label>Líder de Proyecto</label> {{ form.id_usuario_lider() }}
   		<p><input type=submit value=Guardar>
-  		<input type="button" value="Iniciar"  onClick="document.location.href='{{ url_for( 'iniciarproyecto', nom=form.nombre.data ) }}';">
   		<input type="button" value="Cancelar"  onClick="document.location.href='{{ url_for( 'administrarproyecto' ) }}';"> 
 	</form>
 </div>

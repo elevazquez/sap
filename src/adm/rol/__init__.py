@@ -1,15 +1,16 @@
 from loginC import app
-from util.database import init_db, engine
-from sqlalchemy.orm import scoped_session, sessionmaker
-from sqlalchemy.exc import DatabaseError
-from flask import Flask, render_template, request, redirect, url_for, flash 
+from UserPermission import UserRol
 from adm.mod.Rol import Rol
-from adm.permiso import administrarpermiso
-from adm.rol.RolFormulario import RolFormulario
 from adm.mod.RolPermiso import RolPermiso
-from adm.permiso import getPermisosByRol
-from UserPermission import UserPermission, UserRol
-import flask, flask.views
+from adm.mod.UsuarioRol import UsuarioRol
+from adm.permiso import administrarpermiso, getPermisosByRol
+from adm.rol.RolFormulario import RolFormulario
+from flask import Flask, render_template, request, redirect, url_for, flash
+from sqlalchemy.exc import DatabaseError
+from sqlalchemy.orm import scoped_session, sessionmaker
+from util.database import init_db, engine
+import flask
+import flask.views
 import os
 
 db_session = scoped_session(sessionmaker(autocommit=False,
@@ -171,3 +172,7 @@ def shutdown_session(response):
     """Cierra la sesion de la conexion con la base de datos"""
     db_session.remove()
     return response
+
+def getRolesByUsuario(idusuario):
+    yourRoles = db_session.query(Rol).join(UsuarioRol, UsuarioRol.id_rol == Rol.id).filter(UsuarioRol.id_usuario == idusuario).all()
+    return yourRoles
