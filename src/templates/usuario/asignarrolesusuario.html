@@ -46,14 +46,14 @@
 			{% for asig in asignados %}
 				{% if rol.id == asig.id %}
 					{% do exists.append(1) %}
-						<TD class="c4"> <input type="checkbox" name="roles" value="{{ rol.id }}" checked="checked" onchange="{{  }}"/> </TD>
+						<TD class="c4"> <input type="checkbox" name="roles" value="{{ rol.id }}" checked="checked" disabled="disabled"/> </TD>
 				{% endif %}
 			{% endfor %}
 			{% if not exists %}
-				<TD class="c4"> <input type="checkbox" name="roles" value="{{ rol.id }}" onchange="{{  }}"/> </TD>
+				<TD class="c4"> <input type="checkbox" name="roles" value="{{ rol.id }}"/> </TD>
 			{% endif %}
 		{% else %}
-			<TD class="c4"> <input type="checkbox" name="roles" value="{{ rol.id }}" onchange="{{  }}"/> </TD>
+			<TD class="c4"> <input type="checkbox" name="roles" value="{{ rol.id }}"/> </TD>
 		{% endif %}
 		<TD class="c4"><SPAN>{{rol.codigo|e}}</SPAN></TD>
 		<TD class="c4"><SPAN>{{rol.descripcion|e}}</SPAN></TD>
