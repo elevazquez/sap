@@ -14,6 +14,7 @@ from des.mod.Fase import Fase
 import flask, flask.views
 from wtforms import widgets
 import os
+from UserPermission import UserPermission, UserRol
 
 db_session = scoped_session(sessionmaker(autocommit=False,
                                          autoflush=False,
@@ -34,6 +35,10 @@ def flash_errors(form):
 @app.route('/tipoItem/nuevotipoItem', methods=['GET', 'POST'])
 def nuevotipoItem():
     """ Funcion para agregar registros a la tabla de Tipo de Item""" 
+    permission =UserPermission('LIDER PROYECTO', int(session['pry']))
+    if permission.can()==False:
+        flash('No posee los permisos suficientes para realizar la operacion', 'info')
+        return render_template('tipoItem/administrartipoItem.html') 
     form = TipoItemFormulario(request.form) 
     #init_db(db_session)
     #form.id_fase.choices= [(f.id, f.nombre) for f in db_session.query(Fase).filter_by(id_proyecto=session['pry']).filter_by(estado='I').order_by(Fase.nombre).all()]
@@ -74,6 +79,10 @@ def nuevotipoItem():
 @app.route('/tipoItem/editartipoItem', methods=['GET', 'POST'])
 def editartipoItem():
     """ Funcion para editar registros de la tabla de Tipo de Item""" 
+    permission =UserPermission('LIDER PROYECTO', int(session['pry']))
+    if permission.can()==False:
+        flash('No posee los permisos suficientes para realizar la operacion', 'info')
+        return render_template('tipoItem/administrartipoItem.html') 
     #init_db(db_session)   
     ti = db_session.query(TipoItem).filter_by(codigo=request.args.get('codigo')).first() 
     form = TipoItemFormulario(request.form,ti)  
@@ -113,7 +122,11 @@ def editartipoItem():
     
 @app.route('/tipoItem/eliminartipoItem', methods=['GET', 'POST'])
 def eliminartipoItem():
-    """ Funcion para eliminar registros de la tabla de Tipo de Item""" 
+    """ Funcion para eliminar registros de la tabla de Tipo de Item"""
+    permission =UserPermission('LIDER PROYECTO', int(session['pry']))
+    if permission.can()==False:
+        flash('No posee los permisos suficientes para realizar la operacion', 'info')
+        return render_template('tipoItem/administrartipoItem.html')  
     try:
         cod = request.args.get('cod')
         #init_db(db_session)
@@ -203,6 +216,10 @@ def listaatt():
 @app.route('/lineaBase/agregaritems', methods=['GET', 'POST'])
 def agregaritems():   
     """ Funcion que agrega Atributos a un Tipo Item"""     
+    permission =UserPermission('LIDER PROYECTO', int(session['pry']))
+    if permission.can()==False:
+        flash('No posee los permisos suficientes para realizar la operacion', 'info')
+        return render_template('tipoItem/administrartipoItem.html') 
     #init_db(db_session)
     selectedatt=  request.args.get('ti')    
     atts = db_session.query(Atributo).from_statement(" select * from atributo  " )
@@ -210,7 +227,11 @@ def agregaritems():
 
 @app.route('/tipoItem/importartipoItem', methods=['GET', 'POST'])
 def importartipoItem():
-    """ Funcion para importar registros a la tabla de Tipo de Item""" 
+    """ Funcion para importar registros a la tabla de Tipo de Item"""
+    permission =UserPermission('LIDER PROYECTO', int(session['pry']))
+    if permission.can()==False:
+        flash('No posee los permisos suficientes para realizar la operacion', 'info')
+        return render_template('tipoItem/administrartipoItem.html')  
     #init_db(db_session)   
     ti = db_session.query(TipoItem).filter_by(codigo=request.args.get('codigo')).first() 
     form = TipoItemFormulario(request.form,ti)  

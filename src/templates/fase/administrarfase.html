@@ -25,9 +25,13 @@
 				<option value="fecha_fin">Fecha Fin</option>
 				<option value="id_proyecto">Proyecto</option>
 			</select> 
-			<input type=submit name="Buscar" value=Buscar /> 			
+			<input type=submit name="Buscar" value=Buscar />
+	{% if 'permiso_lider' in session %}
+		{% if( session['permiso_lider'].can() ) %}		
 		<a href="{{ url_for('nuevafase') }}" ><img src="../static/images/a.png" alt="Agregar" height="30" width="30" title="Agregar" ></a>
 		<a href="{{ url_for('listarfase') }}" ><img src="../static/images/i.png" alt="Importar" height="30" width="30" title="Importar" ></a>
+		{% endif %}
+	{% endif %}
 </form>
 <p></p>
 {% with errors = get_flashed_messages(category_filter=["info"]) %}
@@ -45,7 +49,11 @@
 <div style="height:250px;width:800px;overflow:auto;">
 <table border="1">
 	<TR>
+	{% if 'permiso_lider' in session %}
+		{% if( session['permiso_lider'].can() ) %}		
 		<TH class="c1"></TH>
+		{% endif %}
+	{% endif %}
 		<TH class="c2">Número</TH>
 		<TH class="c3">Nombre</TH>
 		<TH class="c4">Descripción</TH>
@@ -56,9 +64,13 @@
 	</TR>
 	{% for fase in fases %}
 	<TR>
+	{% if 'permiso_lider' in session %}
+		{% if( session['permiso_lider'].can() ) %}
 		<TD class="c1"><a href="{{ url_for('editarfase', nro=fase.nro_orden) }}" ><img src="../static/images/e.png" alt="Editar" height="20" width="20" title="Editar" style="vertical-align: middle;"></a>
 		<a href="{{ url_for('eliminarfase', nro=fase.nro_orden) }}" onclick="javascript:return confirmar()"><img src="../static/images/b.png" alt="Eliminar" height="20" width="20" title="Eliminar" style="vertical-align: middle;"> </a>
 		<a href="{{ url_for('finalizarfase', nro=fase.nro_orden) }}">Finalizar</a></TD>
+		{% endif %}
+	{% endif %}
 		<TD class="c2"><SPAN>{{fase.nro_orden|e}}</SPAN></TD>
 		<TD class="c3"><SPAN>{{fase.nombre|e}}</SPAN></TD>
 		<TD class="c4"><SPAN>{{fase.descripcion|e}}</SPAN></TD>

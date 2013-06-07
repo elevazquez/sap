@@ -38,7 +38,7 @@
 	{% for lin in lineas %}
 	<TR>
 		<TD class="c1"><a href="{{ url_for('editarlineabase', id_linea= lin.id, estado_linea=lin.estado, fecha_crea= lin.fecha_creacion) }}" > <img src="../static/images/ver.png" alt="Ver" height="20" width="20" title="Visualizar" style="vertical-align: middle;"></a>
-		{% if lin.estado != 'L' %}
+		{% if lin.estado == 'V' %}
 		<a href="{{ url_for('liberarlineabase', id_linea= lin.id , fecha_crea= lin.fecha_creacion ) }}" onclick="javascript:return confirmar()" ><img src="../static/images/lib.png" alt="Liberar Linea Base" height="20" width="20" title="Liberar Linea Base" style="vertical-align: middle;"> </a> 
 		{% else %}
 		<a href="{{ url_for('componerlineabase', id_linea= lin.id , fecha_crea= lin.fecha_creacion ) }}" onclick="javascript:return confirmar()" ><img src="../static/images/comp.png" alt="Componer Linea Base" height="20" width="20" title="Componer Linea Base" style="vertical-align: middle;"> </a> 
