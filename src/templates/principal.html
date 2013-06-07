@@ -69,7 +69,11 @@
 							<li><a href="{{ url_for('administraritem') }}">Administrar Ítem   </a></li>
 							<li><a href="{{ url_for('administrarrelacion') }}">Administrar Relación   </a></li>
 							<li><a href="{{ url_for('administrarsolicitud') }}">Solicitud de Cambio   </a></li>
-							<li><a href="{{ url_for('administrarsolicitudavotar') }}">Solicitud a votar   </a></li>
+						{% if 'permiso_miembro' in session %}
+							{% if( session['permiso_miembro'].can() ) %}
+							<li><a href="{{ url_for('administrarsolicitudavotar') }}">Solicitud a Votar   </a></li>
+								{% endif %}
+						{% endif %}
 						{% endif %}
 						</ul>			
 					</div>
