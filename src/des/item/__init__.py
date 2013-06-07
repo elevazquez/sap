@@ -848,6 +848,83 @@ def reversionaritem():
     return render_template('item/reversionaritem.html', form=form, att=atributo, vals=valoresatr)
     
 
+@app.route('/item/historialitem', methods=['GET', 'POST'])
+def historialitem():  
+    """funcion que permite la historial de items"""  
+    today = datetime.date.today()
+    ##init_db(db_session)      
+   
+    i = db_session.query(Item).filter_by(codigo=request.args.get('cod')).filter_by(id=request.args.get('id')).first() 
+    if  request.args.get('id') == None:
+        id_itemg= request.form.get('id')
+    else:
+        id_itemg=request.args.get('id')
+        
+    if  request.args.get('tipo') == None:
+        id_tipog= request.form.get('id_tipo_f')
+    else:
+        id_tipog=request.args.get('tipo')
+    
+    if  request.args.get('fase') == None:
+        id_faseg= request.form.get('id_fase_f')
+    else:
+        id_faseg=request.args.get('fase')
+     
+    var = "MODIFICAR ITEM F" + str(id_faseg)
+    permission = UserPermission(var, int(id_faseg))
+    if permission.can() == False:
+            flash('No posee los Permisos suficientes para realizar esta Operacion','error')
+            return redirect('/item/administraritem')   
+    
+   
+                   
+    form = ItemEditarFormulario(request.form,i)             
+    item = db_session.query(Item).filter_by(nombre=form.nombre.data).filter_by(id=id_itemg).first()  
+    form.usuario.data = session['user_id']       
+    estado= request.args.get('es')  
+    if request.method != 'POST':        
+        fase_selected= db_session.query(Fase).filter_by(id=id_faseg).first()      
+        tipo_selected= db_session.query(TipoItem).filter_by(id= id_tipog ).first()
+        form.fase.data= fase_selected.nombre  
+        form.tipo_item.data= tipo_selected.nombre
+        form.id_fase_f.data= id_faseg
+        form.id_tipo_f.data = id_tipog
+        if estado == 'I':
+            form.estado.data= 'Abierto'
+        elif estado == 'P':
+            form.estado.data = 'En Progreso'
+        elif estado == 'R':
+            form.estado.data = 'Resuelto'
+        elif estado == 'A':
+            form.estado.data = 'Aprobado'
+        elif estado == 'E':
+            form.estado.data = 'Eliminado'
+        elif estado == 'Z':
+            form.estado.data = 'Rechazado'
+        elif estado == 'V':
+            form.estado.data = 'Revision'
+        elif estado == 'B':
+            form.estado.data = 'Bloqueado'
+        
+    #atributo=  db_session.query(Atributo).join(TItemAtributo, Atributo.id== TItemAtributo.id_atributo).filter(TipoItem.id == id_tipog ).all() 
+    atributo = db_session.query(Atributo).from_statement(" select at.* from tipo_item ti , titem_atributo ta, atributo at "+
+                                                        " where ti.id = ta.id_tipo_item and at.id = ta.id_atributo and ti.id=  " +str(id_tipog) )
+   
+    valoresatr = db_session.query(ItemAtributo).from_statement(" select ia.* from item_atributo ia where ia.id_item= " +str(id_itemg) )
+                      
+        
+    
+    return render_template('item/historialitem.html', form=form, att=atributo, vals=valoresatr)
+    
+
+
+@app.route('/item/listahistorialitem', methods=['GET', 'POST'])
+def listahistorialitem():   
+    """funcion que lista el historial del Item"""
+    ##init_db(db_session)
+    item2 = db_session.query(Item).from_statement(" select * from item where codigo = '"+str(request.args.get('cod'))+"' and id != "+str(request.args.get('id'))+" order by version " )
+    return render_template('item/listahistorialitem.html', items2 = item2)  
+    
 
 @app.route('/item/listarreviviritem', methods=['GET', 'POST'])
 def listarreviviritem():   

@@ -30,7 +30,8 @@
 		<TD class="c1"><a href="{{ url_for('nuevalineabase', id_fase=fas.id, nro_fase= fas.nro_orden ) }}" onclick="javascript:return confirmar()" ><img src="../static/images/s.png" alt="Agregar" height="20" width="20" title="Agregar" style="vertical-align: middle;"> </a></TD>
 		<TD class="c2"><SPAN>{{fas.nro_orden|e}}</SPAN></TD>
 		<TD class="c3"><SPAN>{{fas.nombre|e}}</SPAN></TD>
-		<TD class="c4"><SPAN>{{fas.estado|e}}</SPAN></TD>
+		<TD class="c4"><SPAN>{{'Inicial' if fas.estado=='I' else 'En Progreso' if fas.estado=='P' 
+		else 'En Linea Base' if fas.estado=='L' else 'Aprobado' if fas.estado=='A'|e}}</SPAN></TD>
 	</TR>
 	{% else %}
   	<TR>

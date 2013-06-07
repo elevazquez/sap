@@ -93,6 +93,8 @@ def veritems():
 @app.route('/solicitudavotar/votar', methods=['GET', 'POST'])  
 def votar():
     voto = request.form.get('voto')
+    if voto == None :
+        voto = False
     idsolicitud = request.form.get('id')
     iduser = current_user.id
     resolucion=ResolucionMiembros(voto, idsolicitud, iduser)
