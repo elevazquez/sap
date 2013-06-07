@@ -274,12 +274,12 @@ def editaritem():
     
     verlb= db_session.query(LbItem).join(LineaBase, LineaBase.id==LbItem.id_linea_base).filter(LbItem.id_item==id_itemg).filter(LineaBase.estado =='L').first() 
     if verlb != None:
-        versol=  db_session.query(SolicitudItem).join(SolicitudCambio , SolicitudCambio.id == SolicitudItem.id_solicitud).filter(SolicitudItem.id_item == id_itemg).first()
+        versol=  db_session.query(SolicitudItem).join(SolicitudCambio , SolicitudCambio.id == SolicitudItem.id_solicitud).filter(SolicitudItem.id_item == id_itemg).filter(SolicitudCambio.id_usuario ==session['user_id'] ).first()
         if versol == None:
             flash('Debe realizar una Solicitud de Cambio para Proceder','info')
             return redirect('/item/administraritem')      
         else :
-            versol=  db_session.query(SolicitudItem).join(SolicitudCambio , SolicitudCambio.id == SolicitudItem.id_solicitud).filter(SolicitudItem.id_item == id_itemg).filter(SolicitudCambio.estado=='A').first()
+            versol=  db_session.query(SolicitudItem).join(SolicitudCambio , SolicitudCambio.id == SolicitudItem.id_solicitud).filter(SolicitudItem.id_item == id_itemg).filter(SolicitudCambio.estado=='A').filter(SolicitudCambio.id_usuario ==session['user_id'] ).first()
             if versol == None:
                 flash('La Solicitud de Cambio no ha sido Aprobada','info')
                 return redirect('/item/administraritem')     
