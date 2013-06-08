@@ -270,9 +270,7 @@ def getPermisosByProyecto(idproyecto):
     return yourPermisos
 
 def listadoPermisosNoAsignados(idproyecto, idrol):
-    var = str(idproyecto)
-    var = '%P'+ var
-    permisos = db_session.query(Permiso).join(Recurso, or_(Recurso.id == Permiso.id_recurso, Permiso.codigo.like(var))).join(Proyecto, Proyecto.id == Recurso.id_proyecto).filter(Proyecto.id == idproyecto).filter(~Permiso.id.in_(db_session.query(Permiso.id).join(RolPermiso, RolPermiso.id_permiso == Permiso.id).filter(RolPermiso.id_rol == idrol))).all()
+    permisos = db_session.query(Permiso).join(Recurso, Recurso.id == Permiso.id_recurso).join(Proyecto, Proyecto.id == Recurso.id_proyecto).filter(Proyecto.id == idproyecto).filter(~Permiso.id.in_(db_session.query(Permiso.id).join(RolPermiso, RolPermiso.id_permiso == Permiso.id).filter(RolPermiso.id_rol == idrol))).all()
     return permisos
 
 def getProyectoByPermiso(permisos):
