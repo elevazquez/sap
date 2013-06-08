@@ -1,0 +1,56 @@
+{% extends "principal.html" %} 
+{% block content %}
+<div class="primary">
+	<h1>Agregar Rol a Usuario</h1>
+	{% with errors = get_flashed_messages(category_filter=["error"]) %} 
+			{% if errors %}
+			<div class="block-message">
+				<a class="close" href="{{ url_for( 'agregarrolusu' ) }}"
+					dir="rtl">×</a>
+					<ul>
+						{%- for msg in errors %}
+							<li>{{ msg }}</li> {% endfor -%}
+					</ul>
+			</div>
+		{% endif %} 
+	{% endwith %}
+<form id=agregarrolusu method=post action="/usuario/agregarrolusu">
+	<div style="height:250px;width:500px;overflow:auto;">
+	<table id="tablarol" border="1">
+		<TR>
+			<TH class="c1"></TH>
+			<TH class="c2">Código</TH>
+			<TH class="c4">Descripción</TH>
+			<TH class="c4">Proyecto</TH>
+		</TR>
+		{% set posicion = 0 %}
+		{% for rol in roles %}
+			<TR>
+				<TD class="c1"> <input type="checkbox" name="selectrol" value="{{ rol.id }}"/> </TD>		
+				<TD class="c2"><SPAN>{{rol.codigo|e}}</SPAN></TD>
+				<TD class="c4"><SPAN>{{rol.descripcion|e}}</SPAN></TD>
+				<TD class="c4"><SPAN>{{ pro[posicion].nombre }}</SPAN></TD>
+			</TR>
+		{% else %}
+			<TR>
+				<em>No cuenta con Roles que pueden ser asignados al Usuario.</em>
+			</TR>
+		{% endfor %}
+		{% set posicion = posicion + 1 %}
+	</table>
+	</div>
+	<input type="text" name="id" value="{{ form.id.data }}" id="id" readonly="true" hidden="true"/>
+	<input type="text" name="usuario" value="{{ form.usuario.data }}" id="usuario" readonly="true" hidden="true"/>
+	<input type="text" name="password" value="{{ form.password.data }}" id="password" readonly="true" hidden="true"/>
+	<input type="text" name="nombre" value="{{ form.nombre.data }}" id="nombre" readonly="true" hidden="true"/>
+	<input type="text" name="apellido" value="{{ form.apellido.data }}" id="apellido" readonly="true" hidden="true"/>
+	<input type="text" name="correo" value="{{ form.correo.data }}" id="correo" readonly="true" hidden="true"/>
+	<input type="text" name="domicilio" value="{{ form.domicilio.data }}" id="domicilio" readonly="true" hidden="true"/>
+	<input type="text" name="telefono" value="{{ form.telefono.data }}" id="telefono" readonly="true" hidden="true"/>
+    <input type="date" name="fecha_nac" value="{{ form.fecha_nac.data }}" id="fecha_nac" readonly="true" hidden="true"/>
+    <input type=submit name="Agregar" value="Agregar" />
+	<input type="button" value="Cancelar"  onClick="document.location.href='{{ url_for( 'administrarusuario' ) }}';"> 
+</form>
+</div>
+{% endblock %}
+

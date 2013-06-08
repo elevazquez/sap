@@ -115,7 +115,7 @@ class Main(views.MethodView):
         con = md5.new()    
         con.update(request.form['passwd'])
         passwd = con.hexdigest()
-        #=======================================================================
+#        #=======================================================================
         
         user = db_session.query(Usuario).filter_by(usuario=username,password= passwd ).first() 
         if user == None :

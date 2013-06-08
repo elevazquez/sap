@@ -5,6 +5,7 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from flask import Flask, render_template, request, redirect, url_for, flash 
 from adm.mod.Permiso import Permiso
 from adm.mod.RolPermiso import RolPermiso
+from des.mod.Fase import Fase
 from adm.permiso.PermisoFormulario import PermisoFormulario
 import flask, flask.views
 from UserPermission import UserPermission, UserRol
@@ -31,8 +32,13 @@ def nuevopermiso():
     permission = UserRol('ADMINISTRADOR')
     if permission.can():
         form = PermisoFormulario(request.form)
+        if form.id_fase.choices.count((0, '')) == 0 :
+            form.id_fase.choices.insert(0, (0, ''))
         if request.method == 'POST' and form.validate():
-            #init_db(db_session)
+            if(form.id_fase.data == 0):
+                form.id_fase.data = None
+            else :
+                form.codigo.data = form.codigo.data + ' F' +  str(form.id_fase.data)
             permiso = Permiso(form.codigo.data, form.descripcion.data, form.id_fase.data)
             db_session.add(permiso)
             db_session.commit()
@@ -49,14 +55,31 @@ def editarpermiso():
     if permission.can():
         p = db_session.query(Permiso).filter_by(codigo=request.args.get('codigo')).first()
         form = PermisoFormulario(request.form,p)
+        if form.id_fase.choices.count((0, '')) == 0 :
+            form.id_fase.choices.insert(0, (0, ''))
         permiso = db_session.query(Permiso).filter_by(codigo=form.codigo.data).first()
-        if request.method == 'POST' and form.validate():
-            form.populate_obj(permiso)
-            db_session.merge(permiso)
-            db_session.commit()
-            return redirect('/permiso/administrarpermiso')
+        if request.method == 'POST':
+            fase = db_session.query(Fase).filter_by(nombre= form.codigo.data).first();
+            if fase != None:
+                form.id_fase.data = fase.id
+            else:
+                form.id_fase.data = 0
+            if form.validate():
+                if(int(form.id_fase.data) == 0):
+                    form.id_fase.data = None
+                form.populate_obj(permiso)
+                db_session.merge(permiso)
+                db_session.commit()
+                return redirect('/permiso/administrarpermiso')
+            else:
+                flash_errors(form)
         else:
             flash_errors(form)
+        fase = db_session.query(Fase).filter_by(id = int(form.id_fase.data)).first();
+        if fase == None:
+            form.id_fase.data = ''
+        else:
+            form.id_fase.data = fase.nombre
         return render_template('permiso/editarpermiso.html', form=form)
     else:
         return 'sin permisos'
@@ -85,7 +108,7 @@ def buscarpermiso():
         if valor=='' or valor == None:
             return administrarpermiso()
         else:
-            if parametro == 'id_recurso':
+            if parametro == 'id_fase':
                 p = db_session.query(Permiso).from_statement("SELECT * FROM permiso where to_char("+parametro+", '99999') ilike '%"+valor+"%'").all()
                 #p = db_session.query(Permiso).from_statement("SELECT * FROM permiso where "+parametro+" = CAST("+valor+" AS Int)").all()
             else:
