@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from loginC import app
 
 from util.database import init_db, engine
@@ -105,3 +106,5 @@ def shutdown_session(response):
     """Cierra la sesion de la conexion con la base de datos"""
     db_session.remove()
     return response
+=======
+>>>>>>> refs/remotes/origin/master
