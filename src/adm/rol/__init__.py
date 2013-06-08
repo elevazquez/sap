@@ -264,9 +264,7 @@ def getRolesByUsuario(idusuario):
 
 def getPermisosByProyecto(idproyecto):
     """Obtiene todos los permisos pertenecientes a un proyecto, mediante el id de la fase"""
-    var = str(idproyecto)
-    var = '%P'+ var
-    yourPermisos = db_session.query(Permiso).join(Recurso, or_(Recurso.id == Permiso.id_recurso, Permiso.codigo.like(var))).join(Proyecto, Proyecto.id == Recurso.id_proyecto).filter(Proyecto.id == idproyecto).all()
+    yourPermisos = db_session.query(Permiso).join(Recurso, Recurso.id == Permiso.id_recurso).join(Proyecto, Proyecto.id == Recurso.id_proyecto).join(Fase, Fase.id == Recurso.id).filter(or_(Proyecto.id == idproyecto, Permiso.id.in_(db_session.query(Permiso.id).join(Recurso, Recurso.id == Permiso.id_recurso).join(Fase, Fase.id == Recurso.id_fase).join(Proyecto, Proyecto.id == Fase.id_proyecto).filter(Proyecto.id == idproyecto)))).all()
     return yourPermisos
 
 def listadoPermisosNoAsignados(idproyecto, idrol):
