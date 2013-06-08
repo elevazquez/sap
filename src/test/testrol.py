@@ -2,11 +2,11 @@ import unittest
 from loginC import app
 
 from test_helper import login
-from UserPermission import UserRol
-from flask import Flask, Response
-
-from flask_principal import Principal, Permission, Denial, RoleNeed, \
-    PermissionDenied, identity_changed, Identity, identity_loaded
+#from UserPermission import UserRol
+#from flask import Flask, Response
+#
+#from flask_principal import Principal, Permission, Denial, RoleNeed, \
+#    PermissionDenied, identity_changed, Identity, identity_loaded
 
 #anon_permission = Permission()
 #admin_permission = Permission(RoleNeed('ADMINISTRADOR'))
@@ -14,10 +14,10 @@ from flask_principal import Principal, Permission, Denial, RoleNeed, \
 #editor_permission = Permission(RoleNeed('ADMINISTRADOR'))
 #admin_denied = Denial(RoleNeed('ADMINISTRADOR'))
 
-def _on_principal_init(sender, identity):
-        if identity.id == 'admin':
-            #identity.provides.add(RoleNeed('ADMINISTRADOR'))
-            identity.provides.add(UserRol('ADMINISTRADOR'))
+#def _on_principal_init(sender, identity):
+#        if identity.id == 'desarrollador':
+#            #identity.provides.add(RoleNeed('ADMINISTRADOR'))
+#            identity.provides.add(UserRol('ADMINISTRADOR'))
 
 
 class RolTestCase(unittest.TestCase):
@@ -29,7 +29,6 @@ class RolTestCase(unittest.TestCase):
         print "Iniciando test"
         self.app = app.test_client()
         self.acceso = login(self.app)
-        identity_loaded.connect(_on_principal_init)
 
     def tearDown(self):
         """ se llama al metodo al terminar el test"""
@@ -53,9 +52,9 @@ class RolTestCase(unittest.TestCase):
    
    
     def test_crear_rol(self):
-        """  crea el rol y verifica si el rol fue creado     """        
-        print "Probando crear un rol"
-        request = self._crear_rol('rolprueba', 'este es un rol de prueba')     
+        """  crea el rol y verifica si el rol fue creado     """  
+        request = self._crear_rol('rolprueba', 'este es un rol de prueba')    
+        
         print "Respuesta satisfactoria, verificando si creo el rol"
         request_all = self.app.get('/administrarrol', follow_redirects=True)
         assert 'rolprueba' in request_all.data

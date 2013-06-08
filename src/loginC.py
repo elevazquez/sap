@@ -138,6 +138,7 @@ class Main(views.MethodView):
                     permission = UserRol('ADMINISTRADOR')
                     session['permission_admin'] = permission
                     return redirect(url_for('getProyectoByUsuario', id_usuario = current_user.id))
+            
         return redirect(url_for('index'))
 
 # el decorator indica que la vista requiere que los usuarios esten logueados
