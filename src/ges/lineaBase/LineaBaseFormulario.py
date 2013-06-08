@@ -14,5 +14,6 @@ class LineaBaseFormulario(Form):
                                     #        , ('N', 'No Valido'), ('L', 'Liberado')  ])
      
     fechaCreacion = DateField('Fecha', format='%Y-%m-%d' )
+    
    
     

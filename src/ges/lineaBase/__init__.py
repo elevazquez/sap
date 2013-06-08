@@ -87,6 +87,9 @@ def agregaritems():
 def nuevalineabase():
     """ Funcion para agregar registros a tabla de linea base""" 
     today = datetime.date.today()
+    idfase = request.args.get('id_fase')
+    recurso = db_session.query(Recurso).filter_by(id_fase = idfase).first()
+    
     form =  LineaBaseFormulario(request.form)
     form.fechaCreacion.data= today
     ##init_db(db_session)                 
@@ -96,16 +99,35 @@ def nuevalineabase():
                         " and f.id_proyecto = "+str(session['pry'])+"  group by codigo order by 1 ) s "+
                         " where it.codigo = cod and it.version= vermax and (it.estado = 'A' and it.estado != 'B') and it.id_fase= "+str(request.args.get('id_fase'))+" and it.id not in (select  id_item from lb_item ) order by it.codigo " )
    
-    idfase = request.args.get('id_fase')
-    recurso = db_session.query(Recurso).filter_by(id_fase = idfase).first()
-    var = "CREAR LINEA BASE"
-    permission = UserPermission(var, int(recurso.id))
-    if permission.can() == False:
+    
+#    var = "CREAR LINEA BASE"
+#    permission = UserPermission(var, int(recurso.id))
+#    if permission.can() == False:
+#            flash('No posee los Permisos suficientes para realizar esta Operacion','info')
+#            return redirect('/lineaBase/administrarlineabase') 
+#           
+           
+    if request.method != 'POST' :
+        items = db_session.query(Item).from_statement("Select it.*  from item it, "+ 
+                        " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id "+
+                        " and f.id_proyecto = "+str(session['pry'])+"  group by codigo order by 1 ) s "+
+                        " where it.codigo = cod and it.version= vermax and (it.estado = 'A' and it.estado != 'B') and it.id_fase= "+str(request.args.get('id_fase'))+" and it.id not in (select  id_item from lb_item ) order by it.codigo " )
+   
+        idfase = request.args.get('id_fase')
+        for it in items :
+            if it.id != None:
+                idfase= it.id_fase
+    
+    
+        recurso = db_session.query(Recurso).filter_by(id_fase = idfase).first()
+        var = "CREAR LINEA BASE"
+        permission = UserPermission(var, int(recurso.id))
+        
+        if permission.can() == False:
             flash('No posee los Permisos suficientes para realizar esta Operacion','info')
             return redirect('/lineaBase/administrarlineabase') 
-           
-    if request.method != 'POST':
-        verfase= db_session.query(Fase).filter_by(id_proyecto= session['pry']).filter_by(id=request.args.get('id_fase') ).first()
+        
+        verfase= db_session.query(Fase).filter_by(id_proyecto= session['pry']).filter_by(id=request.args.get('id_fase')).first()
         primerafase= db_session.query(Fase).from_statement("select f2.* from fase f2 where f2.nro_orden = (select min(f.nro_orden) from fase f)").first()
         
         if verfase.nro_orden != primerafase.nro_orden :   

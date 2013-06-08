@@ -78,7 +78,16 @@ def nuevorecurso():
         if request.method == 'POST' and form.validate():
             #init_db(db_session)
             try: 
-                #if form.id_proyecto.data == None:
+                if form.id_proyecto.data == 'None':
+                    form.id_proyecto.data = None
+                else :
+                    form.id_proyecto.data = int(form.id_proyecto.data)
+                
+                if form.id_fase.data == 'None':
+                    form.id_fase.data = None
+                else :
+                    form.id_fase.data = int(form.id_fase.data)
+                
                 rec = Recurso(form.nombre.data, form.id_proyecto.data, form.id_fase.data )
                 #else:
                 #    rec = Recurso(form.nombre.data, form.id_proyecto.data,   None ) 
