@@ -1,0 +1,54 @@
+{% extends "principal.html" %} 
+{% block content %}
+<div class="primary">
+<div >
+<h1>Nuevo Recurso</h1>		
+<p></p>
+{% with errors = get_flashed_messages(category_filter=["error"]) %} 
+		{% if errors %}
+			<div class="block-message">
+				<a class="close" href="{{ url_for( 'seleccionrecurso' ) }}"
+					dir="rtl">×</a>
+					<ul>
+						{%- for msg in errors %}
+							<li>{{ msg }}</li> {% endfor -%}
+					</ul>
+			</div>
+		{% endif %} 
+{% endwith %}
+
+<form id=buscar method=get action="/recurso/seleccionrecurso">
+		<em>Seleccione un Recurso</em>
+		<select name=parametro>
+			<option value="fase">Fase</option>
+			<option value="proyecto">Proyecto</option>
+		</select> 
+		<input type=submit name="Buscar" value=Seleccionar /> 
+	</form>
+	
+
+
+<div style="height:350px;width:850px;overflow:auto;">
+<table border="1">
+		<TR>
+			<TH class="c1"></TH>
+			<TH class="c3">Nombre</TH>
+			<TH class="c4">Descripcion</TH>
+		</TR>
+		{% for lis in lista %}
+			<TD class="c1" width="100">
+				<a href="{{ url_for('nuevorecurso', id_recurso= lis.id, recursoTipo= param) }}" onclick="javascript:return confirmar()"><img src="../static/images/a.png" alt="Elejir" height="20" width="20" title="Elejir" style="vertical-align: middle;"> </a></TD>		
+			<TD class="c3"><SPAN>{{lis.nombre|e}}</SPAN></TD>			
+			<TD class="c4"><SPAN>{{lis.descripcion|e}}</SPAN></TD>
+		<TR>
+		{% else %}
+			<TR>
+				<em>Sin registro de Recursos</em>
+			</TR>
+		{% endfor %}
+	</table>
+	</div>
+
+</div>
+</div>
+{% endblock %}

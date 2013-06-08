@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 from loginC import app
 
 from util.database import init_db, engine
@@ -30,16 +30,58 @@ def flash_errors(form):
             ),'error')
                 
 
+@app.route('/recurso/seleccionrecurso', methods=['GET', 'POST'])
+def seleccionrecurso():
+    
+    parametro = request.args['parametro']
+    list =[]
+    if parametro == 'fase' :
+        list = db_session.query(Fase).all()
+    elif parametro == 'proyecto' :
+        list = db_session.query(Proyecto).all()
+    else:
+        parametro= None    
+        
+    return render_template('recurso/seleccionrecurso.html',lista = list, param= parametro)
+    
+    
 @app.route('/recurso/nuevorecurso', methods=['GET', 'POST'])
 def nuevorecurso():
         """ Funcion para agregar registros a la tabla recursos""" 
         form = RecursoFormulario(request.form)
         #init_db(db_session)
         
+        if  request.args.get('id_recurso') == None:
+            id_recurso= request.form.get('id_recurso')
+        else:
+            id_recurso= request.args.get('id_recurso')
+            
+        if  request.args.get('recursoTipo') == None:
+            parametro= request.form.get('param')
+        else:
+            parametro= request.args.get('recursoTipo')
+            
+        
+             
+        if  request.method != 'POST' :
+            id_recurso= request.args.get('id_recurso')
+            parametro= request.args.get('recursoTipo')
+            if parametro == 'fase' :
+                list = db_session.query(Fase).filter_by(id= id_recurso).first()
+                form.id_fase.data= list.id
+                form.recurso.data = list.nombre
+            elif parametro == 'proyecto' :
+                list = db_session.query(Proyecto).filter_by(id= id_recurso).first()
+                form.id_proyecto.data= list.id
+                form.recurso.data= list.nombre   
+           
         if request.method == 'POST' and form.validate():
             #init_db(db_session)
             try: 
-                rec = Recurso(form.nombre.data, form.id_proyecto.data, form.id_fase.data)
+                #if form.id_proyecto.data == None:
+                rec = Recurso(form.nombre.data, form.id_proyecto.data, form.id_fase.data )
+                #else:
+                #    rec = Recurso(form.nombre.data, form.id_proyecto.data,   None ) 
                 db_session.add(rec)
                 db_session.commit()
                 flash('El Recurso ha sido registrado con exito','info')
@@ -54,11 +96,16 @@ def nuevorecurso():
 
 
 @app.route('/recurso/eliminarrecurso', methods=['GET', 'POST'])
-def eliminaratributo():
+def eliminarrecurso():
     """funcion que elimina un recurso"""
     try:
         id_rec = request.args.get('id_recurso')
         #init_db(db_session)
+        permiso = db_session.query(Permiso).filter_by(id_recurso= id_rec).first()
+        if permiso != None :
+            flash('No se ha podido Eliminar..','info')
+            return redirect('/recurso/administrarrecurso')     
+    
         recurso = db_session.query(Recurso).filter_by(id= id_rec).first()
         #init_db(db_session)
         db_session.delete(recurso)
@@ -106,5 +153,4 @@ def shutdown_session(response):
     """Cierra la sesion de la conexion con la base de datos"""
     db_session.remove()
     return response
-=======
->>>>>>> refs/remotes/origin/master
+
