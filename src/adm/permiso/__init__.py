@@ -5,6 +5,7 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from flask import Flask, render_template, request, redirect, url_for, flash 
 from adm.mod.Permiso import Permiso
 from adm.mod.RolPermiso import RolPermiso
+from sqlalchemy.exc import DatabaseError
 from adm.permiso.PermisoFormulario import PermisoFormulario
 import flask, flask.views
 from UserPermission import UserPermission, UserRol
@@ -32,11 +33,18 @@ def nuevopermiso():
     if permission.can():
         form = PermisoFormulario(request.form)
         if request.method == 'POST' and form.validate():
-            permiso = Permiso(form.codigo.data, form.descripcion.data, form.id_recurso.data)
-            db_session.add(permiso)
-            db_session.commit()
-            flash('El permiso ha sido registrado con exito','info')
-            return redirect('/permiso/administrarpermiso')
+            try:
+                permiso = Permiso(form.codigo.data, form.descripcion.data, form.id_recurso.data)
+                db_session.add(permiso)
+                db_session.commit()
+                flash('El permiso ha sido registrado con exito','info')
+                return redirect('/permiso/administrarpermiso')
+            except DatabaseError, e:
+                if e.args[0].find('duplicate key value violates unique') != -1:
+                    flash('Clave unica violada por favor ingrese otra combinacion de permiso con recurso unica' , 'error')
+                else:
+                    flash('Error en la Base de Datos' + e.args[0], 'error')
+                return render_template('permiso/nuevopermiso.html', form=form)
         return render_template('permiso/nuevopermiso.html', form=form)
     else:
         return 'sin permisos'
