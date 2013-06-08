@@ -13,6 +13,9 @@ import os
 import datetime
 import md5
 from adm.mod.UsuarioRol import UsuarioRol
+from adm.mod.Rol import Rol
+from adm.mod.Recurso import Recurso
+from adm.mod.Proyecto import Proyecto
     
 db_session = scoped_session(sessionmaker(autocommit=False,
                                          autoflush=False,
@@ -169,8 +172,9 @@ def administrarusuario():
         return render_template('usuario/administrarusuario.html', usuarios = usuarios)
     else:
         return 'sin permisos'
-    
-def asignarrolesusuario():
+
+@app.route('/usuario/asignarrol')    
+def asignarrol():
     permission = UserRol('ADMINISTRADOR')
     if permission.can():
         idusuario = request.args.get('usu')
@@ -189,10 +193,111 @@ def asignarrolesusuario():
                     db_session.merge(rolusu)
                     db_session.commit()
             return redirect('/administrarusuario')
-        return redirect(url_for('asignarrolesusuario', idusuario = idusuario, asignados = asignados))
+        return redirect(url_for('asignarrol', idusuario = idusuario, asignados = asignados))
     else:
         return 'sin permisos'
     
+@app.route('/usuario/agregarrolusu', methods=['GET', 'POST'])
+def agregarrolusu():
+    """ Funcion para asignar Roles a un Usuario""" 
+    #init_db(db_session)   
+    if  request.args.get('usu') == None:
+        id_usu= request.form.get('id')
+    else:
+        id_usu=request.args.get('usu')
+    usu = db_session.query(Usuario).filter_by(id=id_usu).first()
+    rolesv=  db_session.query(Rol).from_statement("select * from rol where id not in (select id_rol from usuario_rol where id_usuario="+str(usu.id)+")").all()
+    aux=[]
+    for rl in rolesv :
+        pro=  db_session.query(Proyecto).from_statement("select * from proyecto where id in (select id_proyecto from recurso where id in "+ 
+       " ( select id_recurso from permiso where id in (select id_permiso from rol_permiso where id_rol="+str(rl.id)+" limit 1)))").first()
+        aux.append(pro)
+    form = UsuarioFormulario(request.form,usu)
+    usuario = db_session.query(Usuario).filter_by(id=usu.id).first()     
+    if request.method == 'POST' : 
+        roles=request.form.getlist('selectrol')
+        try:
+            list_aux=[]
+            for rl in roles :
+                r = db_session.query(Rol).filter_by(id=rl).first()    
+                list_aux.append(r)
+
+            if list_aux == None or list_aux == []:
+                flash('Debe seleccionar un Rol','info')
+                return render_template('usuario/administrarusuario.html')         
+                    
+            #se guarda la sol junto con los item pertenecientes al mismo          
+            for rl in list_aux:
+                re = db_session.query(Recurso).from_statement("select * from recurso where id in ( select id_recurso from permiso where id in " +
+                    " (select id_permiso from rol_permiso where id_rol="+str(rl.id)+" limit 1))").first() 
+                if re != None:
+                    rousu = UsuarioRol(rl.id, usuario.id, re.id_proyecto )
+                    db_session.add(rousu)
+                    db_session.commit()
+                else:
+                    flash('El Rol aun no tiene asignado Permisos','info')   
+                    return redirect('/usuario/administrarusuario')
+            flash('Se agrego el Rol con Exito','info')   
+            return redirect('/usuario/administrarusuario')
+        except DatabaseError, e:
+            flash('Error en la Base de Datos' + e.args[0],'error')
+            return render_template('usuario/agregarrolusu.html', form=form, roles= rolesv, pro=aux)  
+    return render_template('usuario/agregarrolusu.html', form=form, roles= rolesv, pro=aux)  
+
+@app.route('/usuario/quitarrolusu', methods=['GET', 'POST'])
+def quitarrolusu():
+    """ Funcion para quitar Roles al Usuario""" 
+    #init_db(db_session)   
+    if  request.args.get('usu') == None:
+        id_usu= request.form.get('id')
+    else:
+        id_usu=request.args.get('usu')    
+    usu = db_session.query(Usuario).filter_by(id=id_usu).first()  
+    form = UsuarioFormulario(request.form,usu)    
+    rolesv=  db_session.query(Rol).from_statement("select * from rol where id in (select id_rol from usuario_rol where id_usuario="+str(usu.id)+")").all()
+    aux=[]
+    for rl in rolesv :
+        pro=  db_session.query(Proyecto).from_statement("select * from proyecto where id in (select id_proyecto from recurso where id in "+ 
+       " ( select id_recurso from permiso where id in (select id_permiso from rol_permiso where id_rol="+str(rl.id)+" limit 1)))").first()
+        aux.append(pro)
+    if request.method == 'POST' : 
+        roles=request.form.getlist('selectrol')
+        try:
+            list_aux=[]
+            if len(rolesv) == len(roles):
+                flash('El Usuario no puede quedarse sin Roles','info')   
+                return redirect('/usuario/administrarusuario')
+            for rl in roles :
+                r = db_session.query(Rol).filter_by(id=rl).first()
+                list_aux.append(r)
+                
+            #se elimina el id de los item de la sol          
+            for rl in list_aux:
+                ur = db_session.query(UsuarioRol).filter_by(id_rol=rl.id).first()  
+                db_session.delete(ur)
+                db_session.commit()
+                 
+            flash('Se quito el Rol con Exito','info')   
+            return redirect('/usuario/administrarusuario')
+        except DatabaseError, e:
+            flash('Error en la Base de Datos' + e.args[0],'error')
+            return render_template('usuario/quitarrolusu.html', form=form, roles=rolesv, pro=aux)
+    return render_template('usuario/quitarrolusu.html', form=form, roles=rolesv, pro=aux)  
+
+@app.route('/usuario/verrolusu')
+def verrolusu():
+    """ Funcion para listar Roles de un Usuario""" 
+    #init_db(db_session)   
+    id_usu = request.args.get('usu') 
+    usu = db_session.query(Usuario).filter_by(id=id_usu).first()
+    rolesv=  db_session.query(Rol).from_statement("select * from rol where id in (select id_rol from usuario_rol where id_usuario="+str(usu.id)+")").all()
+    aux=[]
+    for rl in rolesv :
+        pro=  db_session.query(Proyecto).from_statement("select * from proyecto where id in (select id_proyecto from recurso where id in "+ 
+       " ( select id_recurso from permiso where id in (select id_permiso from rol_permiso where id_rol="+str(rl.id)+" limit 1)))").first()
+        aux.append(pro)
+    form = UsuarioFormulario(request.form,usu)
+    return render_template('usuario/verrolusu.html', form=form, roles= rolesv, pro=aux)  
 
 @app.errorhandler(404)
 def page_not_found(error):
