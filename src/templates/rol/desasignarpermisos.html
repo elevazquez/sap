@@ -21,14 +21,14 @@
 			<TH class="c3"></TH>
 			<TH class="c3">Código</TH>
 			<TH class="c3">Descripción</TH>
-			<TH class="c3">Fase</TH>
+			<TH class="c3">Recurso</TH>
 		</TR>
 		{% for permiso in permisos %}
 			<TR>
 				<TD class="c4"> <input type="checkbox" name="permisos" value="{{ permiso.id }}" checked="checked"/> </TD>
 				<TD class="c4" id="codpermiso"><SPAN>{{permiso.codigo|e}}</SPAN></TD>
 				<TD class="c4"><SPAN>{{permiso.descripcion|e}}</SPAN></TD>
-				<TD class="c4"><SPAN>{{permiso.permisofase.nombre|e}}</SPAN></TD>
+				<TD class="c4"><SPAN>{{permiso.permisoRecurso.nombre|e}}</SPAN></TD>
 			</TR>
 		{% else %}
 			<TR>

@@ -6,6 +6,7 @@ from adm.mod.Rol import Rol
 from adm.mod.Recurso import Recurso
 from adm.mod.RolPermiso import RolPermiso
 from adm.mod.UsuarioRol import UsuarioRol
+from des.mod.Fase import Fase
 from adm.permiso import administrarpermiso, getPermisosByRol
 from adm.rol.RolFormulario import RolFormulario
 from flask import Flask, render_template, request, redirect, url_for, flash
@@ -276,17 +277,14 @@ def listadoPermisosNoAsignados(idproyecto, idrol):
 
 def getProyectoByPermiso(permisos):
     bandera = False
-    fase = None
+    pry = None
     for p in permisos:
-        if not(p.id_fase == None) and not (bandera) :
+        recurso = db_session.query(Recurso).filter_by(id = p.id_recurso).first()
+        if recurso.id_proyecto == None and not (bandera) :
+            pry = db_session.query(Proyecto).join(Fase, Fase.id_proyecto == Proyecto.id).filter(Fase.id == recurso.id_fase).first();
             bandera = True
-            fase = p.id_fase
-        else:
-            if not bandera : 
-                print p.codigo
-                pos = p.codigo.rfind(' P')
-                if not (pos == -1):
-                    return int(p.codigo[pos:])
-            
-    proyecto = db_session.query(Proyecto).join(Recurso, Recurso.id_proyecto == Proyecto.id).filter(Recurso.id == Recurso).first()
-    return proyecto.id
+        else :
+            if not(recurso.id_proyecto == None) and not (bandera) :
+                bandera = True
+                pry = db_session.query(Proyecto).filter(Proyecto.id == recurso.id_proyecto).first();
+    return pry.id

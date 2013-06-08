@@ -31,13 +31,7 @@ def nuevopermiso():
     permission = UserRol('ADMINISTRADOR')
     if permission.can():
         form = PermisoFormulario(request.form)
-        if form.id_recurso.choices.count((0, '')) == 0 :
-            form.id_recurso.choices.insert(0, (0, ''))
         if request.method == 'POST' and form.validate():
-            if(form.id_recurso.data == 0):
-                form.id_recurso.data = None
-            else :
-                form.codigo.data = form.codigo.data + ' F' +  str(form.id_recurso.data)
             permiso = Permiso(form.codigo.data, form.descripcion.data, form.id_recurso.data)
             db_session.add(permiso)
             db_session.commit()
@@ -54,8 +48,6 @@ def editarpermiso():
     if permission.can():
         p = db_session.query(Permiso).filter_by(codigo=request.args.get('codigo')).first()
         form = PermisoFormulario(request.form,p)
-        if form.id_recurso.choices.count((0, '')) == 0 :
-            form.id_recurso.choices.insert(0, (0, ''))
         permiso = db_session.query(Permiso).filter_by(codigo=form.codigo.data).first()
         if request.method == 'POST':
             if form.validate():

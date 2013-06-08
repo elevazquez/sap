@@ -73,12 +73,7 @@ def on_identity_loaded(sender, identity):
                 identity.provides.add(ItemNeed(role.usuariorolrol.codigo, int(role.id_proyecto) , 'manage'))
             permisos = db_session.query(Permiso).join(RolPermiso, RolPermiso.id_permiso == Permiso.id).filter(RolPermiso.id_rol == role.id_rol).all()
             for p in permisos:
-                if p.id_fase == None and role.id_proyecto != None:
-                    identity.provides.add(ItemNeed(p.codigo, role.id_proyecto , 'manage'))
-                elif p.id_fase !=None :
-                    identity.provides.add(ItemNeed(p.codigo, p.id_fase , 'manage'))
-                else:
-                    identity.provides.add(ItemNeed(p.codigo, None , 'manage'))
+                identity.provides.add(ItemNeed(p.codigo, p.id_recurso , 'manage'))
 
 
 #===============================================================================
