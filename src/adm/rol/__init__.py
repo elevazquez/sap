@@ -1,14 +1,14 @@
+from loginC import app
 from UserPermission import UserRol
 from adm.mod.Permiso import Permiso
 from adm.mod.Proyecto import Proyecto
 from adm.mod.Rol import Rol
+from adm.mod.Recurso import Recurso
 from adm.mod.RolPermiso import RolPermiso
 from adm.mod.UsuarioRol import UsuarioRol
 from adm.permiso import administrarpermiso, getPermisosByRol
 from adm.rol.RolFormulario import RolFormulario
-from des.mod.Fase import Fase
 from flask import Flask, render_template, request, redirect, url_for, flash
-from loginC import app
 from sqlalchemy.exc import DatabaseError
 from sqlalchemy import or_
 from sqlalchemy.orm import scoped_session, sessionmaker
@@ -265,13 +265,13 @@ def getPermisosByProyecto(idproyecto):
     """Obtiene todos los permisos pertenecientes a un proyecto, mediante el id de la fase"""
     var = str(idproyecto)
     var = '%P'+ var
-    yourPermisos = db_session.query(Permiso).join(Fase, or_(Fase.id == Permiso.id_fase, Permiso.codigo.like(var))).join(Proyecto, Proyecto.id == Fase.id_proyecto).filter(Proyecto.id == idproyecto).all()
+    yourPermisos = db_session.query(Permiso).join(Recurso, or_(Recurso.id == Permiso.id_recurso, Permiso.codigo.like(var))).join(Proyecto, Proyecto.id == Recurso.id_proyecto).filter(Proyecto.id == idproyecto).all()
     return yourPermisos
 
 def listadoPermisosNoAsignados(idproyecto, idrol):
     var = str(idproyecto)
     var = '%P'+ var
-    permisos = db_session.query(Permiso).join(Fase, or_(Fase.id == Permiso.id_fase, Permiso.codigo.like(var))).join(Proyecto, Proyecto.id == Fase.id_proyecto).filter(Proyecto.id == idproyecto).filter(~Permiso.id.in_(db_session.query(Permiso.id).join(RolPermiso, RolPermiso.id_permiso == Permiso.id).filter(RolPermiso.id_rol == idrol))).all()
+    permisos = db_session.query(Permiso).join(Recurso, or_(Recurso.id == Permiso.id_recurso, Permiso.codigo.like(var))).join(Proyecto, Proyecto.id == Recurso.id_proyecto).filter(Proyecto.id == idproyecto).filter(~Permiso.id.in_(db_session.query(Permiso.id).join(RolPermiso, RolPermiso.id_permiso == Permiso.id).filter(RolPermiso.id_rol == idrol))).all()
     return permisos
 
 def getProyectoByPermiso(permisos):
@@ -288,5 +288,5 @@ def getProyectoByPermiso(permisos):
                 if not (pos == -1):
                     return int(p.codigo[pos:])
             
-    proyecto = db_session.query(Proyecto).join(Fase, Fase.id_proyecto == Proyecto.id).filter(Fase.id == fase).first()
+    proyecto = db_session.query(Proyecto).join(Recurso, Recurso.id_proyecto == Proyecto.id).filter(Recurso.id == Recurso).first()
     return proyecto.id

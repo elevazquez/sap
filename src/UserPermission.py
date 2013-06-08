@@ -1,4 +1,3 @@
-from loginC import app
 from flask_principal import Permission, ItemNeed, RoleNeed
 from util.database import engine
 from sqlalchemy.orm import scoped_session, sessionmaker
