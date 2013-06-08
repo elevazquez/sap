@@ -8,6 +8,7 @@ db_session = scoped_session(sessionmaker(autocommit=False,
                                        bind=engine))
 
 class UsuarioFormulario(Form):
+    id = IntegerField('Id')     
     usuario = TextField('Usuario', [validators.Length(min=2, max=50), validators.Required()])
     password = PasswordField('Contrasenha', [validators.Length(min=2, max=100), validators.Required()])
     confirmar = PasswordField('Confirmar', [validators.Length(min=2, max=100), validators.Required()])
