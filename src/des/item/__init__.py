@@ -25,6 +25,8 @@ from sqlalchemy.exc import DatabaseError
 from UserPermission import UserPermission
 import os
 import datetime
+import psycopg2
+import binascii
 
 
 UPLOAD_FOLDER = '/path/to/the/uploads'
@@ -111,7 +113,7 @@ def nuevoitem():
                 
             #f=open(form.archivo.data ,'rb')
             #fb= f.read()
-            #arch = request.FILES[form.archivo.name].read()
+           # arch = request.FILES[form.archivo.name].read()
             # open(os.path.join(UPLOAD_PATH, form.archivo.data), 'w').write(arch)
            
             # f = open(form.archivo.file, 'rb')
@@ -121,10 +123,30 @@ def nuevoitem():
             #curs.execute("insert into blobs (file) values (%s)",    
             #archivo=file(form.archivo.data,'rb').read()  
             #---------------------------------
+            
+                
             file = request.form.get('archivo')
+            uploaded_file = flask.request.files['archivo']
+            print uploaded_file   
+            #f = file(uploaded_file, 'rb').read()
+            print  uploaded_file.filename 
+            print  uploaded_file.read()  
+            print bin(reduce(lambda x, y: 256*x+y, (ord(c) for c in "'"+uploaded_file.read()+"'" ), 0))
+           
+
+            #print bin(reduce(lambda x, y: 256*x+y, (ord(c) for c in uploaded_file.filename ), 0))
+            #print uploaded_file.save(uploaded_file.read())    
+             
+             
+           # print uploaded_file.data 
+           # print "archivo "+ str(fb)  
+            #print " acth "+ str(file)
+           # f = open(form.archivo.file, 'rb')
+            #binary = f.read()  
+            #print "jooo "+str(f)+" by "+str(binary)
             item = Item(form.codigo.data, form.nombre.data, form.descripcion.data, 
                     form.estado.data, form.complejidad.data, form.fecha.data, form.costo.data, 
-                    form.usuario.data , form.version.data, id_faseg , id_tipog,  file )
+                    form.usuario.data , form.version.data, id_faseg , id_tipog, file   )
             db_session.add(item)
             db_session.commit() 
             #psycopg2.Binary(form.archivo.data)  (psycopg2.Binary(file),) 
