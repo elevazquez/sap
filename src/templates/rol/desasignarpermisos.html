@@ -1,0 +1,48 @@
+{% extends "principal.html" %} {% block content %}
+<div class="primary">
+	<h1>Permisos</h1>
+	{% with infos = get_flashed_messages(category_filter=["info"]) %} {%
+		if infos %}
+			<div class="block-message">
+				<a class="close" href="{{ url_for( 'desasignarPermisos' ) }}"
+					dir="rtl">×</a>
+					<ul>
+						{%- for msg in infos %}
+							<li>{{ msg }}</li> {% endfor -%}
+					</ul>
+			</div>
+		{% endif %} 
+	{% endwith %}
+	<form id=desasignarPermisos method=post action="/rol/desasignarpermiso">
+		<input type="text" hidden="true" name="idrol" value="{{ idrol }}"/>
+	<div style="height:350px;width:530px;overflow:auto;">
+	<table id="tablapermisos" border="1">
+		<TR>
+			<TH class="c3"></TH>
+			<TH class="c3">Código</TH>
+			<TH class="c3">Descripción</TH>
+			<TH class="c3">Fase</TH>
+		</TR>
+		{% for permiso in permisos %}
+			<TR>
+				<TD class="c4"> <input type="checkbox" name="permisos" value="{{ permiso.id }}" checked="checked"/> </TD>
+				<TD class="c4" id="codpermiso"><SPAN>{{permiso.codigo|e}}</SPAN></TD>
+				<TD class="c4"><SPAN>{{permiso.descripcion|e}}</SPAN></TD>
+				<TD class="c4"><SPAN>{{permiso.permisofase.nombre|e}}</SPAN></TD>
+			</TR>
+		{% else %}
+			<TR>
+				<em>Sin registro de permisos</em>
+			</TR>
+		{% endfor %}
+	</table>
+	</div>
+	{% if (permisos|length) > 0 %}
+	<input type=submit name="Desasignar Permisos" value="Desasignar Permisos" />
+	{% else %}
+	<input type=submit name="Desasignar Permisos" value="Desasignar Permisos" disabled="disabled" />
+	{% endif %}
+	<input type="button" value="Cancelar"  onClick="document.location.href='{{ url_for( 'administrarrol' ) }}';"> 
+	</form>
+</div>
+{% endblock %}
