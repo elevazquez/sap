@@ -105,8 +105,18 @@ def votar():
     db_session.merge(comiteCambio)
     db_session.commit()
     aprobarSolicitud(session['pry'], idsolicitud)
+    is_solicitud(iduser)
     return redirect('/solicitudavotar/administrarsolicitudavotar')
-        
+
+def is_solicitud(userid): 
+            solicitud = db_session.query(ResolucionMiembros).from_statement("select rm.* from miembros_comite mc, resolucion_miembros rm, solicitud_cambio sc " +
+                                                                      " where mc.id_usuario= "+str(userid)+" and mc.id_proyecto = "+str(session['pry'])+" and sc.id= rm.id_solicitud_cambio " +
+                                                                      " and sc.estado='E' and mc.id_usuario= rm.id_usuario").first()
+            if solicitud != None :
+                    session['is_solicitud'] = False  #ya voto
+            else :
+                    session['is_solicitud'] = True
+                            
 def aprobarSolicitud(idproyecto, idsolicitud):
     cantidadvotante = db_session.query(ResolucionMiembros).filter(ResolucionMiembros.id_solicitud_cambio == idsolicitud).count();
     cantidadaprobado = db_session.query(ResolucionMiembros).filter(ResolucionMiembros.id_solicitud_cambio == idsolicitud).filter(ResolucionMiembros.voto == True).count();

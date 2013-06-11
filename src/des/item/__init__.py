@@ -30,22 +30,12 @@ import flask.views
 import os
 import psycopg2
 
-
-
-UPLOAD_FOLDER = '/path/to/the/uploads'
-ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
-
-
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
-# fase_global= None;
-# tipo_global = None; 
 estado_global = None;
-# id_item_global= None;
 
 db_session = scoped_session(sessionmaker(autocommit=False,
                                          autoflush=False,
                                          bind=engine))
+
 class ItemControlador(flask.views.MethodView):
     def get(self):
         return flask.render_template('item.html')
@@ -62,27 +52,33 @@ def flash_errors(form):
  
 @app.route('/item/listafase', methods=['GET', 'POST'])
 def listafase(): 
-    """ Funcion que lista las fases en la cual se creara el item"""      
-    # #init_db(db_session)    
+    """ Funcion que lista las fases en la cual se creara el item"""   
     fases = db_session.query(Fase).from_statement(" select * from fase where id_proyecto = " + str(session['pry']) + " and estado != 'A' order by nro_orden ")
     return render_template('item/listafase.html', fases=fases)  
     
  
     
+def verificarPermiso ( id_fase, permiso):
+    recurso = db_session.query(Recurso).filter_by(id_fase=id_fase).first()
+    if recurso != None: 
+        permission = UserPermission(permiso, int(recurso.id))
+        if permission.can() == False:
+            return False
+        else: 
+            return True
+    else :
+        return False
+     
+        
 @app.route('/item/listatipoitem', methods=['GET', 'POST'])
 def listatipoitem():   
     """ Funcion que lista los tipo de items posibles del item a crear""" 
-    # #init_db(db_session)
     idfase = request.args.get('id_fase')
-    recurso = db_session.query(Recurso).filter_by(id_fase=idfase).first()
-    var = "INSERTAR ITEM"
-    permission = UserPermission(var, int(recurso.id))
-    if permission.can() == False:
-            flash('No Posee los permisos suficientes para Agregar un Item', 'info')
-            return redirect('/item/administraritem') 
-    tipo = db_session.query(TipoItem).from_statement(" select * from tipo_item where id_fase = " + request.args.get('id_fase') + " order by codigo ")
-    # global fase_global
-    # fase_global = request.args.get('id_fase')
+    if verificarPermiso(idfase, "INSERTAR ITEM") == False:
+        flash('No Posee los permisos suficientes para Agregar un Item', 'info')
+        return redirect('/item/administraritem')
+     
+    tipo = db_session.query(TipoItem).from_statement(" select * from tipo_item where id_fase = " + request.args.get('id_fase') + " order by codigo ")   
     return render_template('item/listatipoitem.html', tipos=tipo)  
   
 
@@ -92,7 +88,6 @@ def nuevoitem():
     today = datetime.date.today()  
     atributo = db_session.query(Atributo).join(TItemAtributo , TItemAtributo.id_atributo == Atributo.id).join(TipoItem, TipoItem.id == TItemAtributo.id_tipo_item).filter(TipoItem.id == request.args.get('id_tipo')).all()
     form = ItemFormulario(request.form)
-    # #init_db(db_session)
     form.usuario.data = session['user_id']     
     if  request.args.get('id_tipo') == None:
         id_tipog = request.form.get('id_tipo_f')
@@ -108,9 +103,6 @@ def nuevoitem():
     form.fecha.data = today 
     form.id_tipo_f.data = id_tipog
     form.id_fase_f.data = id_faseg
-    # if request.method != 'POST':   
-    #     global tipo_global
-    #    tipo_global=  request.args.get('id_tipo') 
         
     if request.method == 'POST' and form.validate():
         try:
@@ -132,12 +124,12 @@ def nuevoitem():
                 
             file = request.form.get('archivo')
             uploaded_file = flask.request.files['archivo']
-            print uploaded_file   
-            # f = file(uploaded_file, 'rb').read()
-            print  uploaded_file.filename 
-            print  uploaded_file.read()  
-            print bin(reduce(lambda x, y: 256 * x + y, (ord(c) for c in "'" + uploaded_file.read() + "'"), 0))
-           
+#            print uploaded_file   
+#            # f = file(uploaded_file, 'rb').read()
+#            print  uploaded_file.filename 
+#            print  uploaded_file.read()  
+#            print bin(reduce(lambda x, y: 256 * x + y, (ord(c) for c in "'" + uploaded_file.read() + "'"), 0))
+#           
 
             # print bin(reduce(lambda x, y: 256*x+y, (ord(c) for c in uploaded_file.filename ), 0))
             # print uploaded_file.save(uploaded_file.read())    
@@ -274,14 +266,14 @@ def editaritem():
     item = db_session.query(Item).filter_by(nombre=form.nombre.data).filter_by(id=id_itemg).first()  
     form.usuario.data = session['user_id']  
     form.fecha.data = today    
-    # atributo=  db_session.query(Atributo).join(TItemAtributo, Atributo.id== TItemAtributo.id_atributo).filter(TipoItem.id == id_tipog ).all() 
+   
     atributo = db_session.query(Atributo).from_statement(" select at.* from tipo_item ti , titem_atributo ta, atributo at " + 
                                                         " where ti.id = ta.id_tipo_item and at.id = ta.id_atributo and ti.id=  " + str(id_tipog))
     
     valoresatr = db_session.query(ItemAtributo).from_statement(" select ia.* from item_atributo ia where ia.id_item= " + str(id_itemg))
-    form.estado.choices = [('I', 'Abierto'), ('P', 'En Progreso'), ('R', 'Resuelto'), ('A', 'Aprobado'),
+    form.estado.choices = [ ('P', 'En Progreso'), ('R', 'Resuelto'), ('A', 'Aprobado'),
                                           ('Z', 'Rechazado'), ('V', 'Revision')  ]     
-    # estado= request.args.get('es')    
+     
    
     if request.method != 'POST':   
         fase_selected = db_session.query(Fase).filter_by(id=id_faseg).first()      
@@ -293,7 +285,10 @@ def editaritem():
         form.version.data = form.version.data + 1  # modifica la version        
          
     # verificaciones
-      
+    if verificarPermiso(id_faseg, "MODIFICACION ITEM") == False:
+        flash('No Posee los permisos suficientes para realizar esta Operacion.', 'info')
+        return redirect('/item/administraritem')  
+    
     verlb = db_session.query(LbItem).join(LineaBase, LineaBase.id == LbItem.id_linea_base).filter(LbItem.id_item == id_itemg).filter(LineaBase.estado == 'V').first() 
     if verlb != None :
         flash('El Item se encuentra en una Linea Base debe Liberarla para continuar', 'info')
@@ -321,20 +316,12 @@ def editaritem():
         try:     
             # verifica permisos de modificacion
             if form.estado.data == 'P' or form.estado.data == 'R' :
-                idfase = id_faseg
-                recurso = db_session.query(Recurso).filter_by(id_fase=idfase).first()
-                var = "MODIFICACION ITEM"
-                permission = UserPermission(var, int(recurso.id))
-                if permission.can() == False:
+                if verificarPermiso(id_faseg, "MODIFICACION ITEM") == False:
                         flash('No posee los Permisos suficientes para realizar el cambio de estado', 'error')
                         return render_template('item/editaritem.html', form=form, att=atributo, vals=valoresatr)
                  
             if form.estado.data == 'A' or form.estado.data == 'Z':
-                idfase = id_faseg
-                recurso = db_session.query(Recurso).filter_by(id_fase=idfase).first()
-                var = "APROBACION ITEM"
-                permission = UserPermission(var, int(recurso.id))
-                if permission.can() == False:
+                if verificarPermiso(id_faseg, "APROBACION ITEM") == False:
                         flash('No posee los Permisos suficientes para realizar el cambio de estado', 'error')
                         return render_template('item/editaritem.html', form=form, att=atributo, vals=valoresatr)
             
@@ -420,22 +407,6 @@ def editaritem():
             # cambios en items padres
             if list_item_padres != None     :
                 for padre in list_item_padres :
-#                    atri2 = db_session.query(Atributo).from_statement(" select at.* from tipo_item ti , titem_atributo ta, atributo at "+
-#                                                        " where ti.id = ta.id_tipo_item and at.id = ta.id_atributo and ti.id=  " +str(padre.id_tipo_item) )
-#    
-#                    valores_atr2 = db_session.query(ItemAtributo).from_statement(" select ia.* from item_atributo ia where ia.id_item= " +str(padre.id) )
-#                    item3 = Item(padre.codigo, padre.nombre, padre.descripcion, 'V', padre.complejidad, today, padre.costo, 
-#                    session['user_id']  , padre.version +1 , padre.id_fase , padre.id_tipo_item , padre.archivo)            
-#                    db_session.add(item3)
-#                    db_session.commit()  
-#                    # se actualizan los atributos del item si es que tienen
-#                    if atri2 != None :
-#                        for atr in atri2 :
-#                            for val in valores_atr2 :   
-#                                if val.id_atributo == atr.id :                  
-#                                    ia= ItemAtributo(val.valor, item3.id, atr.id)
-#                                    db_session.add(ia)
-#                                    db_session.commit()   
                     for rel_padre in list_relac_padres:
                         rel_padre.estado = 'E'
                         db_session.merge(rel_padre)
@@ -447,7 +418,6 @@ def editaritem():
             linea = db_session.query(LbItem).join(LineaBase, LineaBase.id == LbItem.id_linea_base).filter(LbItem.id_item == id_itemg).first() 
             
             if linea != None:
-                lb = db_session.query(LineaBase).filter_by(id=linea.id_linea_base)
                 db_session.delete(linea)
                 db_session.commit()
                 lin = LbItem(linea.id_linea_base, item.id)
@@ -455,8 +425,9 @@ def editaritem():
                 db_session.commit() 
                 # si el item pasa a revision su lb pasa a un estado no valido
                 if item.estado == 'V':
-                    lb.estado = 'N'
-                    db_session.merge(lb)
+                    lbase = db_session.query(LineaBase).filter_by(id=lin.id_linea_base).first()
+                    lbase.estado = 'N'
+                    db_session.merge(lbase)
                     db_session.commit() 
                     
                 
@@ -478,10 +449,7 @@ def eliminaritem():
  
     try:
         idfase = request.args.get('fase')
-        recurso = db_session.query(Recurso).filter_by(id_fase=idfase).first()
-        var = "ELIMINAR ITEM"
-        permission = UserPermission(var, int(recurso.id))
-        if permission.can() == False:
+        if verificarPermiso(idfase, "ELIMINAR ITEM") == False:
             flash('No posee los permisos suficientes para realizar la Operacion', 'info')
             return render_template('item/administraritem.html')
     
@@ -572,23 +540,7 @@ def eliminaritem():
                  
             # cambios en items padres
             if list_item_padres != None     :
-                for padre in list_item_padres :
-#                    atri2 = db_session.query(Atributo).from_statement(" select at.* from tipo_item ti , titem_atributo ta, atributo at "+
-#                                                        " where ti.id = ta.id_tipo_item and at.id = ta.id_atributo and ti.id=  " +str(padre.id_tipo_item) )
-#    
-#                    valores_atr2 = db_session.query(ItemAtributo).from_statement(" select ia.* from item_atributo ia where ia.id_item= " +str(padre.id) )
-#                    item3 = Item(padre.codigo, padre.nombre, padre.descripcion, 'V', padre.complejidad, today, padre.costo, 
-#                    session['user_id']  , padre.version +1 , padre.id_fase , padre.id_tipo_item , padre.archivo)            
-#                    db_session.add(item3)
-#                    db_session.commit()  
-#                    # se actualizan los atributos del item si es que tienen
-#                    if atri2 != None :
-#                        for atr in atri2 :
-#                            for val in valores_atr2 :   
-#                                if val.id_atributo == atr.id :                  
-#                                    ia= ItemAtributo(val.valor, item3.id, atr.id)
-#                                    db_session.add(ia)
-#                                    db_session.commit()   
+                for padre in list_item_padres :  
                     for rel_padre in list_relac_padres:
                         rel_padre.estado = 'E'
                         db_session.merge(rel_padre)
@@ -641,24 +593,7 @@ def eliminaritem():
                        
                  
         # cambios en items padres
-        if list_item_padres != None     :
-#                for padre in list_item_padres :
-#                    atri2 = db_session.query(Atributo).from_statement(" select at.* from tipo_item ti , titem_atributo ta, atributo at "+
-#                                                        " where ti.id = ta.id_tipo_item and at.id = ta.id_atributo and ti.id=  " +str(padre.id_tipo_item) )
-#    
-#                    valores_atr2 = db_session.query(ItemAtributo).from_statement(" select ia.* from item_atributo ia where ia.id_item= " +str(padre.id) )
-#                    item3 = Item(padre.codigo, padre.nombre, padre.descripcion, 'V', padre.complejidad, today, padre.costo, 
-#                    session['user_id']  , padre.version +1 , padre.id_fase , padre.id_tipo_item , padre.archivo)            
-#                    db_session.add(item3)
-#                    db_session.commit()  
-#                    # se actualizan los atributos del item si es que tienen
-#                    if atri2 != None :
-#                        for atr in atri2 :
-#                            for val in valores_atr2 :   
-#                                if val.id_atributo == atr.id :                  
-#                                    ia= ItemAtributo(val.valor, item3.id, atr.id)
-#                                    db_session.add(ia)
-#                                    db_session.commit()   
+        if list_item_padres != None     : 
                     for rel_padre in list_relac_padres:
                             relacion = db_session.query(Relacion).filter_by(id=rel_padre.id).first()
                             relacion.estado = 'E'
@@ -707,12 +642,8 @@ def reversionaritem():
         id_faseg = request.form.get('id_fase_f')
     else:
         id_faseg = request.args.get('fase')
-    
-    idfase = id_faseg
-    recurso = db_session.query(Recurso).filter_by(id_fase=idfase).first()
-    var = "MODIFICACION ITEM"
-    permission = UserPermission(var, int(recurso.id))
-    if permission.can() == False:
+        
+    if verificarPermiso(id_faseg, "MODIFICACION ITEM") == False:
             flash('No posee los Permisos suficientes para realizar esta Operacion', 'error')
             return redirect('/item/administraritem')   
     
@@ -763,7 +694,6 @@ def reversionaritem():
         elif estado == 'B':
             form.estado.data = 'Bloqueado'
         
-    # atributo=  db_session.query(Atributo).join(TItemAtributo, Atributo.id== TItemAtributo.id_atributo).filter(TipoItem.id == id_tipog ).all() 
     atributo = db_session.query(Atributo).from_statement(" select at.* from tipo_item ti , titem_atributo ta, atributo at " + 
                                                         " where ti.id = ta.id_tipo_item and at.id = ta.id_atributo and ti.id=  " + str(id_tipog))
    
@@ -837,23 +767,7 @@ def reversionaritem():
                  
             # cambios en items padres
             if list_item_padres != None     :
-                for padre in list_item_padres :
-#                    atri2 = db_session.query(Atributo).from_statement(" select at.* from tipo_item ti , titem_atributo ta, atributo at "+
-#                                                        " where ti.id = ta.id_tipo_item and at.id = ta.id_atributo and ti.id=  " +str(padre.id_tipo_item) )
-#    
-#                    valores_atr2 = db_session.query(ItemAtributo).from_statement(" select ia.* from item_atributo ia where ia.id_item= " +str(padre.id) )
-#                    item3 = Item(padre.codigo, padre.nombre, padre.descripcion, 'V', padre.complejidad, today, padre.costo, 
-#                    session['user_id']  , padre.version +1 , padre.id_fase , padre.id_tipo_item , padre.archivo)            
-#                    db_session.add(item3)
-#                    db_session.commit()  
-#                    # se actualizan los atributos del item si es que tienen
-#                    if atri2 != None :
-#                        for atr in atri2 :
-#                            for val in valores_atr2 :   
-#                                if val.id_atributo == atr.id :                  
-#                                    ia= ItemAtributo(val.valor, item3.id, atr.id)
-#                                    db_session.add(ia)
-#                                    db_session.commit()   
+                for padre in list_item_padres : 
                     for rel_padre in list_relac_padres:
                         rel_padre.estado = 'E'
                         db_session.merge(rel_padre)
@@ -903,15 +817,11 @@ def historialitem():
     else:
         id_faseg = request.args.get('fase')
      
-    idfase = id_faseg
-    recurso = db_session.query(Recurso).filter_by(id_fase=idfase).first()
-    var = "MODIFICAR ITEM"
-    permission = UserPermission(var, int(recurso.id))
-    if permission.can() == False:
+
+    if verificarPermiso(id_faseg, "MODIFICACION ITEM") == False:
             flash('No posee los Permisos suficientes para realizar esta Operacion', 'error')
             return redirect('/item/administraritem')   
-    
-   
+       
                    
     form = ItemEditarFormulario(request.form, i)             
     item = db_session.query(Item).filter_by(nombre=form.nombre.data).filter_by(id=id_itemg).first()  
@@ -941,7 +851,6 @@ def historialitem():
         elif estado == 'B':
             form.estado.data = 'Bloqueado'
         
-    # atributo=  db_session.query(Atributo).join(TItemAtributo, Atributo.id== TItemAtributo.id_atributo).filter(TipoItem.id == id_tipog ).all() 
     atributo = db_session.query(Atributo).from_statement(" select at.* from tipo_item ti , titem_atributo ta, atributo at " + 
                                                         " where ti.id = ta.id_tipo_item and at.id = ta.id_atributo and ti.id=  " + str(id_tipog))
    
@@ -991,13 +900,11 @@ def reviviritem():
     else:
         id_faseg = request.args.get('fase')
         
-    idfase = id_faseg
-    recurso = db_session.query(Recurso).filter_by(id_fase=idfase).first()
-    var = "MODIFICACION ITEM"
-    permission = UserPermission(var, int(recurso.id))
-    if permission.can() == False:
+    
+    if verificarPermiso(id_faseg, "MODIFICACION ITEM") == False:
             flash('No posee los Permisos suficientes para realizar esta Operacion', 'error')
             return redirect('/item/administraritem') 
+        
     form = ItemEditarFormulario(request.form, i)   
               
     item = db_session.query(Item).filter_by(nombre=form.nombre.data).filter_by(id=id_itemg).first()  

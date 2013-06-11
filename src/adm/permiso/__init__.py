@@ -5,6 +5,7 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from flask import Flask, render_template, request, redirect, url_for, flash 
 from adm.mod.Permiso import Permiso
 from adm.mod.RolPermiso import RolPermiso
+from adm.mod.Recurso import Recurso
 from sqlalchemy.exc import DatabaseError
 from adm.permiso.PermisoFormulario import PermisoFormulario
 import flask, flask.views
@@ -32,6 +33,7 @@ def nuevopermiso():
     permission = UserRol('ADMINISTRADOR')
     if permission.can():
         form = PermisoFormulario(request.form)
+        form.id_recurso.choices= [(r.id, r.nombre) for r in db_session.query(Recurso).order_by(Recurso.nombre)]
         if request.method == 'POST' and form.validate():
             try:
                 permiso = Permiso(form.codigo.data, form.descripcion.data, form.id_recurso.data)

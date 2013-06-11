@@ -2,7 +2,9 @@
 {% block content %}
 <div class="primary">
 <div >
-
+<div style="text-align: right;">
+<a href="{{ url_for('index') }}">Salir</a>
+</div>	
 <h1>Linea Base</h1>		
 <form id=buscarlineabase method=get action="/lineaBase/buscarlineabase">
 			<input type="text" name="patron" /> 
