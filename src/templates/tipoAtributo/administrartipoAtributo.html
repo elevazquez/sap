@@ -12,7 +12,9 @@
 		} 
 	} 
 </SCRIPT> 
-	
+<div style="text-align: right;">
+<a href="{{ url_for('index') }}">Salir</a>
+</div>		
 <h1>Tipos Atributo</h1>
 <form id=buscar method=get action="/tipoAtributo/buscartipoAtributo">
 			<input type="text" name="patron" /> 
@@ -36,7 +38,7 @@
 </div>
 {% endif %}
 {% endwith %}
-<div style="height:150px;width:290px;overflow:auto;">
+<div style="height:300px;width:500px;overflow:auto;">
 <table border="1">
 	<TR>
 		<TH class="c1"></TH>
