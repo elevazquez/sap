@@ -6,7 +6,11 @@
 	{% if current_user.is_authenticated() %}
 		<!--<p> Bienvenido {{session['username']}}!</p> -->
 		<p> Bienvenido {{ current_user.getUserName() }}!</p>
-		
+		{% if 'is_solicitud' in session %}
+			{% if session['is_solicitud'] %}
+			<p style="background:#E9EAEB;"> Posee Solicitudes de Cambio por Votar!</p>
+			{% endif %}
+		{% endif %}
 	{% else %}		
 		<form action="{{ url_for('index') }}" method="post" >
 			<p>Usuario: <br/>

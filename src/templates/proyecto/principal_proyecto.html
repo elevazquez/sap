@@ -36,7 +36,7 @@
 				<p></p>
 				<ul>
     				{% for proyecto in proyectos %}
-    					<li><a href="{{ url_for('proyectoActual', pyo=proyecto.id) }}" >{{ proyecto.nombre|e }}</a></li>
+    					<li><a href="{{ url_for('proyectoActual', pyo=proyecto.id, usuario=id_usuario) }}" >{{ proyecto.nombre|e }}</a></li>
     				{% endfor -%}
   				</ul>
 				</div>

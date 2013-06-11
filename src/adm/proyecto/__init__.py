@@ -13,6 +13,8 @@ from adm.mod.Recurso import Recurso
 from adm.mod.Permiso import Permiso
 from adm.mod.RolPermiso import RolPermiso
 from adm.mod.MiembrosComite import MiembrosComite
+from ges.mod.SolicitudCambio import SolicitudCambio
+from ges.mod.ResolucionMiembros import ResolucionMiembros
 from adm.proyecto.ProyFormulario import ProyFormulario
 from UserPermission import UserPermission, UserRol
 import flask, flask.views
@@ -294,9 +296,10 @@ def getProyectoByUsuario():
     """Funcion que obtiene la lista de los proyectos de un usuario"""
     usuario = request.args['id_usuario']
     p = db_session.query(Proyecto).join(UsuarioRol, Proyecto.id == UsuarioRol.id_proyecto).filter(UsuarioRol.id_usuario == usuario).group_by(Proyecto.id).all()
+    
     if(len(p) == 0):
         return redirect(url_for('index'))
-    return render_template('proyecto/principal_proyecto.html', proyectos = p)
+    return render_template('proyecto/principal_proyecto.html', proyectos = p, id_usuario= usuario)
 
 @app.route('/proyectoActual')
 def proyectoActual():
@@ -315,12 +318,24 @@ def proyectoActual():
     rol2 = "COMITE CAMBIOS"
     habilitacion2 = UserPermission(rol2, int(proyecto))
     session['permiso_miembro'] = habilitacion2
+    usuario= request.args['usuario']
+    is_solicitud(usuario)         
+   
     return redirect(url_for('index'))
     #===========================================================================
     # else:
     #    return 'sin permisos'
     #===========================================================================
 
+def is_solicitud(userid): 
+            solicitud = db_session.query(ResolucionMiembros).from_statement("select rm.* from miembros_comite mc, resolucion_miembros rm, solicitud_cambio sc " +
+                                                                      " where mc.id_usuario= "+str(userid)+" and mc.id_proyecto = "+str(session['pry'])+" and sc.id= rm.id_solicitud_cambio " +
+                                                                      " and sc.estado='E' and mc.id_usuario= rm.id_usuario").first()
+            if solicitud != None :
+                    session['is_solicitud'] = False  #ya voto
+            else :
+                    session['is_solicitud'] = True
+                    
 @app.route('/proyecto/iniciarproyecto')
 def iniciarproyecto():
     """Funcion para iniciar el Proyecto"""
