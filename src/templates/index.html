@@ -6,6 +6,7 @@
 	{% if current_user.is_authenticated() %}
 		<!--<p> Bienvenido {{session['username']}}!</p> -->
 		<p> Bienvenido {{ current_user.getUserName() }}!</p>
+		
 	{% else %}		
 		<form action="{{ url_for('index') }}" method="post" >
 			<p>Usuario: <br/>

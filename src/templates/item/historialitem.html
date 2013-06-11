@@ -1,7 +1,10 @@
 {% extends "principal.html" %} 
 {% block content %}
+<div style="text-align: right;">
+<a href="javascript:history.go(-1)">Volver</a>
+</div>
 <div class="primary">
-	<h1>Reversion de Item</h1>
+	<h1>Historial de Item</h1>
 	{% with errors = get_flashed_messages(category_filter=["error"]) %} 
 			{% if errors %}
 			<div class="block-message">

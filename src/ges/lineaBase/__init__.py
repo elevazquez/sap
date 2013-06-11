@@ -42,7 +42,16 @@ def flash_errors(form):
                 error
             ),'error')
             
-            
+def verificarPermiso ( id_fase, permiso):
+    recurso = db_session.query(Recurso).filter_by(id_fase=id_fase).first()
+    if recurso != None: 
+        permission = UserPermission(permiso, int(recurso.id))
+        if permission.can() == False:
+            return False
+        else: 
+            return True
+    else :
+        return False            
  
   
 @app.route('/lineaBase/listafaselb', methods=['GET', 'POST'])
@@ -59,10 +68,7 @@ def listaitem():
     """ Funcion que lista los items posibles a formar parte de una linea base"""     
     ##init_db(db_session)
     idfase = request.args.get('id_fase')
-    recurso = db_session.query(Recurso).filter_by(id_fase = idfase).first()
-    var = "CREAR LINEA BASE"
-    permission = UserPermission(var, int(recurso.id))
-    if permission.can() == False:
+    if verificarPermiso(idfase, "CREAR LINEA BASE") == False:
             flash('No posee los Permisos suficientes para realizar esta Operacion','info')
             return redirect('/lineaBase/administrarlineabase') 
         
@@ -92,20 +98,13 @@ def nuevalineabase():
     
     form =  LineaBaseFormulario(request.form)
     form.fechaCreacion.data= today
-    ##init_db(db_session)                 
-#    else:              
+             
     items = db_session.query(Item).from_statement("Select it.*  from item it, "+ 
                         " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id "+
                         " and f.id_proyecto = "+str(session['pry'])+"  group by codigo order by 1 ) s "+
                         " where it.codigo = cod and it.version= vermax and (it.estado = 'A' and it.estado != 'B') and it.id_fase= "+str(request.args.get('id_fase'))+" and it.id not in (select  id_item from lb_item ) order by it.codigo " )
    
-    
-#    var = "CREAR LINEA BASE"
-#    permission = UserPermission(var, int(recurso.id))
-#    if permission.can() == False:
-#            flash('No posee los Permisos suficientes para realizar esta Operacion','info')
-#            return redirect('/lineaBase/administrarlineabase') 
-#           
+      
            
     if request.method != 'POST' :
         items = db_session.query(Item).from_statement("Select it.*  from item it, "+ 
@@ -119,11 +118,8 @@ def nuevalineabase():
                 idfase= it.id_fase
     
     
-        recurso = db_session.query(Recurso).filter_by(id_fase = idfase).first()
-        var = "CREAR LINEA BASE"
-        permission = UserPermission(var, int(recurso.id))
-        
-        if permission.can() == False:
+    
+        if verificarPermiso(idfase, "CREAR LINEA BASE") == False:
             flash('No posee los Permisos suficientes para realizar esta Operacion','info')
             return redirect('/lineaBase/administrarlineabase') 
         
@@ -284,10 +280,7 @@ def agregaritem():
                         " where it.codigo = cod and it.version= vermax and (it.estado = 'A' and it.estado != 'B') and it.id_fase= "+str(item_aux.id_fase)+" and it.id not in (select  id_item from lb_item ) order by it.codigo " )
     
     idfase = item_aux.id_fase
-    recurso = db_session.query(Recurso).filter_by(id_fase = idfase).first()
-    var = "AGREGAR ITEM LINEA BASE"
-    permission = UserPermission(var, int(recurso.id))
-    if permission.can() == False:
+    if verificarPermiso(idfase, "AGREGAR ITEM LINEA BASE") == False:
             flash('No posee los Permisos suficientes para realizar esta Operacion','info')
             return redirect('/lineaBase/administrarlineabase') 
            
@@ -433,10 +426,7 @@ def quitaritem():
         form.estado.data = 'Liberado'
     
     idfase = item_aux.id_fase
-    recurso = db_session.query(Recurso).filter_by(id_fase = idfase).first()
-    var = "QUITAR ITEM LINEA BASE"
-    permission = UserPermission(var, int(recurso.id))
-    if permission.can() == False:
+    if verificarPermiso(idfase, "QUITAR ITEM LINEA BASE") == False:
             flash('No posee los Permisos suficientes para realizar esta Operacion','info')
             return redirect('/lineaBase/administrarlineabase') 
             
@@ -555,10 +545,7 @@ def editarlineabase():
     form.fecha_creacion.data=  request.args.get('fecha_crea')
     
     idfase = item_aux.id_fase
-    recurso = db_session.query(Recurso).filter_by(id_fase = idfase).first()
-    var = "VER LINEA BASE"
-    permission = UserPermission(var, int(recurso.id))
-    if permission.can() == False:
+    if verificarPermiso(idfase, "VER LINEA BASE") == False:
             flash('No posee los Permisos suficientes para realizar esta Operacion','info')
             return redirect('/lineaBase/administrarlineabase') 
         
@@ -684,10 +671,7 @@ def liberarlineabase():
     form.fecha_creacion.data=  request.args.get('fecha_crea') 
      
     idfase = item_aux.id_fase
-    recurso = db_session.query(Recurso).filter_by(id_fase = idfase).first()
-    var = "LIBERAR LINEA BASE"
-    permission = UserPermission(var, int(recurso.id))
-    if permission.can() == False:
+    if verificarPermiso(idfase, "LIBERAR LINEA BASE") == False:
             flash('No posee los Permisos suficientes para realizar esta Operacion','info')
             return redirect('/lineaBase/administrarlineabase') 
    
@@ -746,6 +730,12 @@ def liberarOn(itemslb, id_linea):
                                     ia= ItemAtributo(val.valor, item.id, atr.id)
                                     db_session.add(ia)
                                     db_session.commit()  
+                                    
+                item_solicitud= db_session.query(SolicitudItem).filter_by(id_item= i.id).first()
+                if item_solicitud != None:
+                    item_solicitud.id_item= item.id
+                    db_session.merge(item_solicitud)
+                    db_session.commit()
                 # --------------------------------------------------------------------------------------------------
                 #  # si el item poseia alguna relacion
                 #---------------------------------------------------------------------------------------------------
@@ -805,6 +795,8 @@ def liberarOn(itemslb, id_linea):
                             relacion= Relacion(rel_padre.fecha_creacion, today, rel_padre.id_tipo_relacion, rel_padre.id_item, item.id, 'A')
                             db_session.add(relacion)
                             db_session.commit() 
+                
+                
     
     linea = db_session.query(LineaBase).filter_by(id= id_linea).first()        
     linea.estado='L'            
@@ -963,10 +955,7 @@ def componerlineabase():
         
     form.fecha_creacion.data=  request.args.get('fecha_crea')  
     idfase = item_aux.id_fase
-    recurso = db_session.query(Recurso).filter_by(id_fase = idfase).first()
-    var = "COMPONER LINEA BASE"
-    permission = UserPermission(var, int(recurso.id))
-    if permission.can() == False:
+    if verificarPermiso(idfase, "COMPONER LINEA BASE") == False:
             flash('No posee los Permisos suficientes para realizar esta Operacion','info')
             return redirect('/lineaBase/administrarlineabase') 
         
