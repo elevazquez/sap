@@ -1,0 +1,27 @@
+{% extends "principal.html" %} 
+{% block content %}
+<div style="text-align: right;">
+<a href="javascript:history.go(-1)">Volver</a>
+</div>
+<div class="primary">
+	<h1>Reporte de Solicitud de Cambio</h1>
+	{% with errors = get_flashed_messages(category_filter=["error"]) %} 
+			{% if errors %}
+			<div class="block-message">
+				<a class="close" href="#"
+					dir="rtl">×</a>
+					<ul>
+						{%- for msg in errors %}
+							<li>{{ msg }}</li> {% endfor -%}
+					</ul>
+			</div>
+		{% endif %} 
+	{% endwith %}
+	<form id=reporte method=post action="/solicitud/reportesolicitud">
+			<label>Descripción</label>
+  			<label>Fecha</label><input type="date" name="fecha" value="hola" id="fecha" />
+    	<p><input type=submit value=Imprimir>
+  		<input type="button" value="Cancelar"  onClick="document.location.href='{{ url_for( 'administrarsolicitud' ) }}';"> 
+	</form>
+</div>
+{% endblock %}
