@@ -12,10 +12,13 @@ from ges.mod.SolicitudItem import SolicitudItem
 from des.mod.Item import Item
 from ges.mod.ResolucionMiembros import ResolucionMiembros
 from ges.solicitud.SolicitudFormulario import SolicitudFormulario
+from ges.solicitud.SolicitudReporte import SolicitudReporte
 from flask_login import current_user
 import flask, flask.views
 import os
 import datetime
+from geraldo.generators import PDFGenerator
+cur_dir = os.path.dirname(os.path.abspath(__file__))
 
 db_session = scoped_session(sessionmaker(autocommit=False,
                                          autoflush=False,
@@ -411,6 +414,13 @@ def versolicitud():
     elif solicitud.estado=='R':
         form.estado.data='Rechazada'
     return render_template('solicitud/versolicitud.html', form=form, items=itemssol, res=res)
+
+@app.route('/solicitud/reportesol', methods=['GET', 'POST'])
+def reportesol():   
+    """ Funcion que imprime el reporte de la sol """ 
+    report = SolicitudReporte(queryset=db_session.query(SolicitudCambio).filter_by(id_proyecto=session['pry']))
+    report.generate_by(PDFGenerator, filename=os.path.join(cur_dir, '/home/lila/reportes/Solicitudes.pdf'))
+    return render_template('solicitud/reportesolicitud.html')
 
 @app.errorhandler(404)
 def page_not_found(error):

@@ -33,6 +33,7 @@
 			</select> 
 			<input type=submit name="Buscar" value=Buscar /> 			
 		<a href="{{ url_for('nuevasolicitud') }}" ><img src="../static/images/a.png" alt="Nuevo" height="30" width="30" title="Nuevo" ></a>
+		<a href="{{ url_for('reportesol') }}" ><img src="../static/images/a.png" alt="Reporte" height="30" width="30" title="Reporte" ></a>
 </form>
 <p></p>
 {% with errors = get_flashed_messages(category_filter=["info"]) %}
