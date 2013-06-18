@@ -29,6 +29,8 @@ import flask
 import flask.views
 import os
 import psycopg2
+import pickle
+from xml.etree import ElementTree
 
 estado_global = None;
 
@@ -123,7 +125,10 @@ def nuevoitem():
             
                 
             file = request.form.get('archivo')
-            uploaded_file = flask.request.files['archivo']
+            
+            #escritorFile = open(file,'wb')
+            
+            #pickle.dump("hola", escritorFile,2)
 #            print uploaded_file   
 #            # f = file(uploaded_file, 'rb').read()
 #            print  uploaded_file.filename 
@@ -147,6 +152,16 @@ def nuevoitem():
             db_session.add(item)
             db_session.commit() 
             # psycopg2.Binary(form.archivo.data)  (psycopg2.Binary(file),) 
+            uploaded_file = flask.request.files['archivo']
+            
+#            nombre = os.path.join(os.path.dirname(__file__), uploaded_file.filename)
+#            print "path "+ os.path.basename(uploaded_file.filename) 
+#            print nombre 
+#            archivo = ElementTree.parse(nombre) 
+#            print archivo
+#            arc= Archivo(item.id, nombre, archivo)
+#            db_session.add(arc)
+#            db_session.commit()
             
             # cambia el estado de la fase si este es inicial
             fase = db_session.query(Fase).filter_by(id=item.id_fase).first()  
