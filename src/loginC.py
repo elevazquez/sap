@@ -27,6 +27,10 @@ from ges.solicitud import *
 from ges.solicitudavotar import *
 from ges.calculoImpacto import *
 from ges.calculoCosto import *
+from adm.recurso import *
+from ges.mod.SolicitudCambio import SolicitudCambio
+from adm.mod.MiembrosComite import MiembrosComite
+
 
 #load the extension
 principal = Principal(app)
@@ -122,10 +126,13 @@ class Main(views.MethodView):
             identity_changed.send(current_app._get_current_object(),
                                  identity=Identity(user.id))
             is_administrador(user.id)
+            
             #session['pry'] = 1
             #===================================================================
             # session['username'] = username
             #===================================================================
+          
+                    
             if 'is_administrador' in session:
                 if not session['is_administrador']:
                     return redirect(url_for('getProyectoByUsuario', id_usuario = current_user.id))
@@ -133,6 +140,9 @@ class Main(views.MethodView):
                     permission = UserRol('ADMINISTRADOR')
                     session['permission_admin'] = permission
                     return redirect(url_for('getProyectoByUsuario', id_usuario = current_user.id))
+            
+          
+             
             
         return redirect(url_for('index'))
 
@@ -157,8 +167,11 @@ def logout():
     session.pop('permission_admin', None)
     session.pop('permiso_lider', None)
     session.pop('proyecto_nombre', None)
+    session.pop('is_solicitud',None)
     return redirect(url_for('index'))
 
+
+                    
 def is_administrador(userid):
     roles = db_session.query(UsuarioRol).filter_by(id_usuario=userid).all()
     isadmin = False

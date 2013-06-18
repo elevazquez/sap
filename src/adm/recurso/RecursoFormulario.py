@@ -1,4 +1,4 @@
-from wtforms import Form, TextField, validators, SelectField
+from wtforms import Form, TextField, validators, SelectField, IntegerField
 from des.mod.Fase import Fase
 from adm.mod.Proyecto import Proyecto
 from util.database import engine
@@ -12,5 +12,7 @@ class RecursoFormulario(Form):
     nombre = TextField('Nombre', [validators.Length(min=2, max=100), validators.Required()])
     #id_fase = SelectField('Fase', choices=[(r.id, r.nombre) for r in db_session.query(Fase).order_by(Fase.nombre)], coerce=int)
     id_proyecto = TextField('Proyecto')
-    id_fase = TextField('Proyecto')
-    
+    id_fase = TextField('fase')
+    recurso = TextField('Recurso')
+    param = TextField('Param')
+    id_recurso = TextField('id recurso')

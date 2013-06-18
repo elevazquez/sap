@@ -1,0 +1,38 @@
+{% extends "principal.html" %} 
+{% block content %}
+<div style="text-align: right;">
+<a href="javascript:history.go(-1)">Volver</a>
+</div>
+<div class="primary">
+<div >
+<h1>Nuevo Recurso</h1>		
+<p></p>
+{% with errors = get_flashed_messages(category_filter=["error"]) %} 
+		{% if errors %}
+			<div class="block-message">
+				<a class="close" href="{{ url_for( 'nuevorecurso' ) }}"
+					dir="rtl">×</a>
+					<ul>
+						{%- for msg in errors %}
+							<li>{{ msg }}</li> {% endfor -%}
+					</ul>
+			</div>
+		{% endif %} 
+{% endwith %}
+
+
+<form id=nuevorecurso method=post action="/recurso/nuevorecurso">
+    		<input type="text" name="id_fase" value="{{ form.id_fase.data }}" id="id_fase" hidden="true"/>
+    		<input type="text" name="id_proyecto" value="{{ form.id_proyecto.data }}" id="id_proyecto" hidden="true"/>    		
+    		<input type="text" name="param" value="{{ form.param.data }}" id="param" hidden="true"/>    		
+    		<input type="text" name="id_recurso" value="{{ form.id_recurso.data }}" id="id_recurso" hidden="true"/> 
+    		<label>Nombre</label> {{ form.nombre() }}
+    		<label>Recurso</label><input type="text" name="recurso" value="{{ form.recurso.data }}" id="recurso" readonly="true"/>
+    		
+    	<p><input type=submit value=Guardar>
+  		<input type="button" value="Cancelar"  onClick="document.location.href='{{ url_for( 'administrarrecurso' ) }}';"> 
+	</form>
+
+</div>
+</div>
+{% endblock %}

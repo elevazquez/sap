@@ -264,13 +264,38 @@ def getRolesByUsuario(idusuario):
 
 def getPermisosByProyecto(idproyecto):
     """Obtiene todos los permisos pertenecientes a un proyecto, mediante el id de la fase"""
-    var = str(idproyecto)
-    var = '%P'+ var
-    yourPermisos = db_session.query(Permiso).join(Recurso, or_(Recurso.id == Permiso.id_recurso, Permiso.codigo.like(var))).join(Proyecto, Proyecto.id == Recurso.id_proyecto).filter(Proyecto.id == idproyecto).all()
+    #yourPermisos = db_session.query(Permiso).join(Recurso, Recurso.id == Permiso.id_recurso).join(Proyecto, Proyecto.id == Recurso.id_proyecto).join(Fase, Fase.id == Recurso.id_fase).filter(or_(Proyecto.id == idproyecto, Permiso.id.in_(db_session.query(Permiso.id).join(Recurso, Recurso.id == Permiso.id_recurso).join(Fase, Fase.id == Recurso.id_fase).join(Proyecto, Proyecto.id == Fase.id_proyecto).filter(Proyecto.id == idproyecto)))).all()
+    yourPermisos = db_session.query(Permiso).from_statement('SELECT p.id FROM permiso p' +
+    ' JOIN recurso r ON r.id = p.id_recurso JOIN ('+
+        ' (SELECT rec.id AS recu, pr.id AS proy FROM recurso rec'+
+        ' JOIN proyecto pr ON pr.id = rec.id_proyecto'+ 
+        ' WHERE pr.id= '+str(idproyecto)+')'+
+        ' UNION ALL'+
+        ' (SELECT recur.id AS recu, pro.id AS proy FROM recurso recur'+
+        ' JOIN fase fa ON fa.id = recur.id_fase'+
+        ' JOIN proyecto pro ON pro.id = fa.id_proyecto'+ 
+        ' WHERE pro.id = '+str(idproyecto)+')) AS all_rec'+
+    ' ON r.id = all_rec.recu'+
+    ' WHERE all_rec.proy = '+str(idproyecto)).all()
     return yourPermisos
 
 def listadoPermisosNoAsignados(idproyecto, idrol):
-    permisos = db_session.query(Permiso).join(Recurso, Recurso.id == Permiso.id_recurso).join(Proyecto, Proyecto.id == Recurso.id_proyecto).filter(Proyecto.id == idproyecto).filter(~Permiso.id.in_(db_session.query(Permiso.id).join(RolPermiso, RolPermiso.id_permiso == Permiso.id).filter(RolPermiso.id_rol == idrol))).all()
+    #permisos = db_session.query(Permiso).join(Recurso, Recurso.id == Permiso.id_recurso).join(Proyecto, Proyecto.id == Recurso.id_proyecto).filter(Proyecto.id == idproyecto).filter(~Permiso.id.in_(db_session.query(Permiso.id).join(RolPermiso, RolPermiso.id_permiso == Permiso.id).filter(RolPermiso.id_rol == idrol))).all()
+    permisos = db_session.query(Permiso).from_statement('SELECT p.id FROM permiso p' +
+    ' JOIN recurso r ON r.id = p.id_recurso JOIN ('+
+        ' (SELECT rec.id AS recu, pr.id AS proy FROM recurso rec'+
+        ' JOIN proyecto pr ON pr.id = rec.id_proyecto'+ 
+        ' WHERE pr.id= '+str(idproyecto)+')'+
+        ' UNION ALL'+
+        ' (SELECT recur.id AS recu, pro.id AS proy FROM recurso recur'+
+        ' JOIN fase fa ON fa.id = recur.id_fase'+
+        ' JOIN proyecto pro ON pro.id = fa.id_proyecto'+ 
+        ' WHERE pro.id = '+str(idproyecto)+')) AS all_rec'+
+    ' ON r.id = all_rec.recu'+
+    ' WHERE all_rec.proy = '+str(idproyecto) +
+    ' AND p.id NOT IN (SELECT per.id FROM permiso per'+ 
+                ' JOIN rol_permiso rp ON rp.id_permiso = per.id'
+                ' WHERE rp.id_rol = '+str(idrol)+')').all()
     return permisos
 
 def getProyectoByPermiso(permisos):

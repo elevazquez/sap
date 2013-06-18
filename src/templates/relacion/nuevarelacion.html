@@ -1,8 +1,12 @@
 {% extends "principal.html" %} 
 {% block content %}
+<div style="text-align: right;">
+<a href="javascript:history.go(-1)">Volver</a>
+</div>
 <div class="primary">
 	<h1>Agregar Relación</h1>
 	<br><b>Paso 1: Seleccionar item hijo o sucesor</b></br>
+<div style="height:420px;width:850px;overflow:auto;">
 	<table id="tablanuevarelacion" border="1">
 		<TR>
 			<TH class="c3"></TH>
@@ -31,5 +35,6 @@
 			</TR>
 		{% endfor %}
 	</table>
+</div>
 </div>
 {% endblock %}
