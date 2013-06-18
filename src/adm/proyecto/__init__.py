@@ -47,7 +47,7 @@ def nuevoproyecto():
         r2 = db_session.query(Rol).filter_by(codigo='LIDER PROYECTO').first()
         form.id_usuario_lider.choices= [(u.id, u.nombre + " " + u.apellido) for u in db_session.query(Usuario).order_by(Usuario.nombre).all()]  
         if request.method == 'POST' and form.validate():
-            #init_db(db_session)
+            #init_db(db_session) 
             if form.fecha_inicio.data > form.fecha_fin.data :
                 flash('La fecha de inicio no puede ser mayor que la fecha de finalizacion','error')
                 return render_template('proyecto/nuevoproyecto.html', form=form)
