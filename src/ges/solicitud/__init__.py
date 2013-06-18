@@ -419,7 +419,7 @@ def versolicitud():
 def reportesol():   
     """ Funcion que imprime el reporte de la sol """ 
     report = SolicitudReporte(queryset=db_session.query(SolicitudCambio).filter_by(id_proyecto=session['pry']))
-    report.generate_by(PDFGenerator, filename=os.path.join(cur_dir, '/home/lila/reportes/Solicitudes.pdf'))
+    report.generate_by(PDFGenerator, filename=os.path.join(cur_dir, 'reportes/Solicitudes.pdf'))
     return render_template('solicitud/reportesolicitud.html')
 
 @app.errorhandler(404)
