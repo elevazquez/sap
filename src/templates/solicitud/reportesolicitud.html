@@ -17,11 +17,10 @@
 			</div>
 		{% endif %} 
 	{% endwith %}
-	<form id=reporte method=post action="/solicitud/reportesolicitud">
-			<label>Descripción</label>
-  			<label>Fecha</label><input type="date" name="fecha" value="hola" id="fecha" />
+ 	<form target="_blank" id=reporte method=post action="/solicitud/reportesolicitud">
+		<label>Fecha</label><input type="date" name="fecha" value='{{ form.fecha.data }}' id="fecha" />
     	<p><input type=submit value=Imprimir>
-  		<input type="button" value="Cancelar"  onClick="document.location.href='{{ url_for( 'administrarsolicitud' ) }}';"> 
+    	<input type="button" value="Cancelar"  onClick="document.location.href='{{ url_for( 'administrarsolicitud' ) }}';"> 
 	</form>
 </div>
 {% endblock %}
