@@ -286,9 +286,9 @@ def editaritem():
                                                         " where ti.id = ta.id_tipo_item and at.id = ta.id_atributo and ti.id=  " + str(id_tipog))
     
     valoresatr = db_session.query(ItemAtributo).from_statement(" select ia.* from item_atributo ia where ia.id_item= " + str(id_itemg))
-    form.estado.choices = [ ('P', 'En Progreso'), ('R', 'Resuelto'), ('A', 'Aprobado'),
-                                          ('Z', 'Rechazado'), ('V', 'Revision')  ]     
-     
+#    form.estado.choices = [ ('P', 'En Progreso'), ('R', 'Resuelto'), ('A', 'Aprobado'),
+#                                          ('Z', 'Rechazado'), ('V', 'Revision')  ]     
+   
    
     if request.method != 'POST':   
         fase_selected = db_session.query(Fase).filter_by(id=id_faseg).first()      
@@ -297,7 +297,17 @@ def editaritem():
         form.tipo_item.data = tipo_selected.nombre
         form.id_fase_f.data = id_faseg
         form.id_tipo_f.data = id_tipog
-        form.version.data = form.version.data + 1  # modifica la version        
+        form.version.data = form.version.data + 1  # modifica la version 
+        if form.estado.data == 'P' or form.estado.data =='V' :
+            form.estado.choices = [ ('P', 'En Progreso'),('V', 'Revision') ,('R', 'Resuelto')]  
+        elif form.estado.data == 'R':  
+            form.estado.choices = [ ('R', 'Resuelto'),('A', 'Aprobado'), ('Z', 'Rechazado') ] 
+        elif form.estado.data =='A':
+            form.estado.choices = [ ('A', 'Aprobado'),('R', 'Resuelto') ] 
+        elif form.estado.data =='Z':  
+            form.estado.choices = [  ('Z', 'Rechazado') , ('R', 'Resuelto')]  
+        elif form.estado.data== 'I':   
+            form.estado.choices = [ ('I', 'Abierto'),('P', 'En Progreso') ]       
          
     # verificaciones
     if verificarPermiso(id_faseg, "MODIFICACION ITEM") == False:
@@ -336,7 +346,7 @@ def editaritem():
                         return render_template('item/editaritem.html', form=form, att=atributo, vals=valoresatr)
                  
             if form.estado.data == 'A' or form.estado.data == 'Z':
-                if verificarPermiso(id_faseg, "APROBACION ITEM") == False:
+                if verificarPermiso(id_faseg, "APROBAR ITEM") == False:
                         flash('No posee los Permisos suficientes para realizar el cambio de estado', 'error')
                         return render_template('item/editaritem.html', form=form, att=atributo, vals=valoresatr)
             

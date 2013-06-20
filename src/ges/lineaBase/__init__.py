@@ -966,8 +966,8 @@ def componerlineabase():
             #se cambia el estado de los items a ser agregados
             itemslb2=  db_session.query(Item).join(LbItem, Item.id== LbItem.id_item).filter(LbItem.id_linea_base== id_linea ).filter(Item.estado=='A').first()   
            
-            itemslb=  db_session.query(Item).join(LbItem, Item.id== LbItem.id_item).filter(LbItem.id_linea_base== id_linea ).filter(Item.estado=='A').all()   
-           
+            itemslb=  db_session.query(Item).join(LbItem, Item.id== LbItem.id_item).filter(LbItem.id_linea_base== id_linea ).filter(Item.estado=='A').all()
+    
             if itemslb2 == None:
                 flash('Los Item deben estar Aprobados para componer la Linea Base','info')
                 return redirect('/lineaBase/administrarlineabase')
