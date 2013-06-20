@@ -49,7 +49,7 @@ def nuevoproyecto():
         r2 = db_session.query(Rol).filter_by(codigo='LIDER PROYECTO').first()
         form.id_usuario_lider.choices= [(u.id, u.nombre + " " + u.apellido) for u in db_session.query(Usuario).order_by(Usuario.nombre).all()]  
         if request.method == 'POST' and form.validate():
-            #init_db(db_session)
+            #init_db(db_session) 
             if form.fecha_inicio.data > form.fecha_fin.data :
                 flash('La fecha de inicio no puede ser mayor que la fecha de finalizacion','error')
                 return render_template('proyecto/nuevoproyecto.html', form=form)
@@ -328,13 +328,24 @@ def proyectoActual():
     #===========================================================================
 
 def is_solicitud(userid): 
-            solicitud = db_session.query(ResolucionMiembros).from_statement("select rm.* from miembros_comite mc, resolucion_miembros rm, solicitud_cambio sc " +
-                                                                      " where mc.id_usuario= "+str(userid)+" and mc.id_proyecto = "+str(session['pry'])+" and sc.id= rm.id_solicitud_cambio " +
-                                                                      " and sc.estado='E' and mc.id_usuario= rm.id_usuario").first()
-            if solicitud != None :
+    
+#            res = db_session.query(ResolucionMiembros).from_statement("select rm.* from miembros_comite mc, resolucion_miembros rm, solicitud_cambio sc " +
+#                                                                      " where mc.id_usuario= "+str(userid)+" and mc.id_proyecto = "+str(session['pry'])+" and sc.id= rm.id_solicitud_cambio " +
+#                                                                      " and sc.estado='E' and mc.id_usuario= rm.id_usuario").first()
+           
+           
+    es_comite = db_session.query(MiembrosComite).filter_by(id_usuario= userid).first()
+    if es_comite != None:
+        solicitudes= db_session.query(SolicitudCambio).filter_by(estado ='E').filter_by(id_proyecto=session['pry']).all()
+        for sol in solicitudes :
+            if sol != None:
+                voto= db_session.query(ResolucionMiembros).filter_by(id_usuario= userid).filter_by(id_solicitud_cambio= sol.id).first() 
+                if voto != None :
                     session['is_solicitud'] = False  #ya voto
-            else :
+                else :
                     session['is_solicitud'] = True
+    else :
+        session['is_solicitud'] = False
                     
 @app.route('/proyecto/iniciarproyecto')
 def iniciarproyecto():

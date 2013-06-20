@@ -1,5 +1,8 @@
 {% extends "principal.html" %} 
 {% block content %}
+<div style="text-align: right;">
+<a href="{{ url_for('index') }}">Salir</a>
+</div>	
 <div class="primary">
 <h1>Solicitud de Cambios a votar</h1>
 <form id=buscar method=get action="/solicitudavotar/buscarsolicitudavotar">

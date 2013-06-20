@@ -12,7 +12,9 @@
 		} 
 	} 
 </SCRIPT> 
-	
+<div style="text-align: right;">
+<a href="{{ url_for('index') }}">Salir</a>
+</div>		
 <h1>Tipo Item</h1>
 <form id=buscartipoItem method=get action="/tipoItem/buscartipoItem">
 			<input type="text" name="patron" /> 
@@ -43,7 +45,7 @@
 </div>
 {% endif %}
 {% endwith %}
-<div style="height:250px;width:470px;overflow:auto;">
+<div style="height:250px;width:550px;overflow:auto;">
 <table border="1">
 	<TR>
 	{% if 'permiso_lider' in session %}
