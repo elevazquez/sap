@@ -433,6 +433,10 @@ def reportesol():
         flash_errors(form) 
     return render_template('solicitud/reportesolicitud.html', form=form)
 
+@app.route('/solicitud/administrarreportes', methods=['GET', 'POST'])
+def administrarreportes():   
+    return render_template('reportes/administrarreportes.html')
+
 @app.errorhandler(404)
 def page_not_found(error):
     """Lanza un mensaje de error en caso de que la pagina solicitada no exista"""
