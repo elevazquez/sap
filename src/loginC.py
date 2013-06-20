@@ -1,15 +1,18 @@
 from flask import Flask, views, current_app, request, session, flash, redirect, url_for, render_template
-import os
+#import os
 from flask_principal import Principal, identity_changed, Identity, AnonymousIdentity, identity_loaded, RoleNeed, UserNeed, ItemNeed
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
-from util.database import init_db, engine
+from util.database import engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 import md5
-from adm.mod.UsuarioRol import *
-from adm.mod.Usuario import *
+from adm.mod.UsuarioRol import UsuarioRol
+from adm.mod.Usuario import Usuario
+from ges.mod.SolicitudCambio import SolicitudCambio
+from adm.mod.MiembrosComite import MiembrosComite
 
 app = Flask(__name__)
 app.secret_key="sap"
+app.debug = True
 
 from adm.usuario import *
 from adm.rol import *
@@ -28,8 +31,6 @@ from ges.solicitudavotar import *
 from ges.calculoImpacto import *
 from ges.calculoCosto import *
 from adm.recurso import *
-from ges.mod.SolicitudCambio import SolicitudCambio
-from adm.mod.MiembrosComite import MiembrosComite
 
 
 #load the extension
@@ -107,16 +108,13 @@ class Main(views.MethodView):
                 flash("Error: {0} es Requerido.".format(r))
                 return redirect(url_for('index'))
         username = request.form['username']
-        passwd = request.form['passwd']
-
-        """ Se un objeto md5 para encriptar la contrasenha del usuario """    
-        #=======================================================================
+        #passwd = request.form['passwd']
+        # Se un objeto md5 para encriptar la contrasenha del usuario   
         con = md5.new()    
         con.update(request.form['passwd'])
         passwd = con.hexdigest()
-#        #=======================================================================
         
-        user = db_session.query(Usuario).filter_by(usuario=username,password= passwd ).first() 
+        user = db_session.query(Usuario).filter_by(usuario=username,password = passwd).first() 
         if user == None :
             flash("Usuario o Password Incorrecto", "success")
         else:

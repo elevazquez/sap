@@ -1,6 +1,6 @@
 from loginC import app
 from util.database import init_db, engine
-from sqlalchemy import distinct
+from sqlalchemy import distinct, or_
 from sqlalchemy.orm import scoped_session, sessionmaker
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from ges.mod.Relacion import Relacion
@@ -28,10 +28,10 @@ def flash_errors(form):
                 getattr(form, field).label.text,
                 error
             ),'error')
-
-""" Funcion para agregar registros a la tabla relacion""" 
+ 
 @app.route('/relacion/nuevarelacion', methods=['GET', 'POST'])
 def nuevarelacion():
+    """ Funcion para agregar registros a la tabla relacion"""
     #===========================================================================
     # permission = UserPermission('administrador')
     # if permission.can():
@@ -120,17 +120,23 @@ def buscarrelacion():
         return administrarrelacion()
     else:
         if parametro == 'fecha_creacion' or parametro == 'fecha_modificacion':
-            relaciones = db_session.query(Relacion).from_statement("SELECT * FROM relacion WHERE to_char("+parametro+", 'YYYY-mm-dd') ilike '%"+valor+"%'").all()
+            consulta = selectRelacionUltimaVersionItem()
+            relaciones = consulta.filter(Relacion.id.in_(db_session.query(Relacion.id).from_statement("SELECT * FROM relacion WHERE to_char("+parametro+", 'YYYY-mm-dd') ilike '%"+valor+"%'").all())).all()
+            #relaciones = db_session.query(Relacion).from_statement("SELECT * FROM relacion WHERE to_char("+parametro+", 'YYYY-mm-dd') ilike '%"+valor+"%'").all()
         elif parametro == 'id_tipo_relacion':
-            relaciones = db_session.query(Relacion).from_statement("SELECT * FROM relacion WHERE relacion."+parametro+" IN (SELECT id FROM tipo_relacion WHERE tipo_relacion.codigo ILIKE '%"+valor+"%')").all()
+            consulta = selectRelacionUltimaVersionItem()
+            relaciones = consulta.filter(Relacion.id.in_(db_session.query(Relacion.id).from_statement("SELECT * FROM relacion WHERE relacion."+parametro+" IN (SELECT id FROM tipo_relacion WHERE tipo_relacion.codigo ILIKE '%"+valor+"%')").all())).all()
+            #relaciones = db_session.query(Relacion).from_statement("SELECT * FROM relacion WHERE relacion."+parametro+" IN (SELECT id FROM tipo_relacion WHERE tipo_relacion.codigo ILIKE '%"+valor+"%')").all()
         elif parametro == 'id_item' or parametro == 'id_item_duenho':
-            relaciones = db_session.query(Relacion).from_statement("SELECT * FROM relacion WHERE "+parametro+" IN (SELECT id FROM item WHERE codigo ILIKE '%"+valor+"%')").all()
+            consulta = selectRelacionUltimaVersionItem()
+            relaciones = consulta.filter(Relacion.id.in_(db_session.query(Relacion.id).from_statement("SELECT * FROM relacion WHERE "+parametro+" IN (SELECT id FROM item WHERE codigo ILIKE '%"+valor+"%')").all())).all()
+            #relaciones = db_session.query(Relacion).from_statement("SELECT * FROM relacion WHERE "+parametro+" IN (SELECT id FROM item WHERE codigo ILIKE '%"+valor+"%')").all()
             #relaciones = db_session.query(Relacion).from_statement("SELECT * FROM relacion where to_char("+parametro+", '99999') ilike '%"+valor+"%'").all()
             #p = db_session.query(Relacion).from_statement("SELECT * FROM relacion where "+parametro+" = CAST("+valor+" AS Int)").all()
         else:
             return administrarrelacion()
     #p = db_session.query(Relacion).filter(Relacion.codigo.like('%'+valor+'%'))
-        return render_template('relacion/administrarrelacion.html', relacions = relaciones)
+        return render_template('relacion/administrarrelacion.html', relaciones = relaciones)
 
 @app.route('/relacion/administrarrelacion')
 def administrarrelacion():
@@ -138,19 +144,19 @@ def administrarrelacion():
     relaciones = getRelUltiVerEnProg()
     return render_template('relacion/administrarrelacion.html', relaciones = relaciones)
 
-"""Lanza un mensaje de error en caso de que la pagina solicitada no exista"""
 @app.errorhandler(404)
 def page_not_found(error):
+    """Lanza un mensaje de error en caso de que la pagina solicitada no exista"""
     return 'Esta Pagina no existe', 404
 
-"""Cierra la sesion de la conexion con la base de datos"""
 @app.after_request
 def shutdown_session(response):
+    """Cierra la sesion de la conexion con la base de datos"""
     db_session.remove()
     return response
 
-""" Obtiene los items de un proyecto, para lo cual obtiene el id del proyecto guardado en la session"""
 def getItemByProyecto():
+    """ Obtiene los items de un proyecto, para lo cual obtiene el id del proyecto guardado en la session"""
     id_proy =  session['pry']
     items = db_session.query(Item).from_statement("Select it.id  from item it, "+ 
                         " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id "+
@@ -166,9 +172,23 @@ def getItemByProyBefoActFase(id_item):
     items = db_session.query(Item).join(Fase, Fase.id == Item.id_fase).join(Proyecto, Proyecto.id == Fase.id_proyecto).filter(Proyecto.id == id_proy).filter(Fase.nro_orden <= fase_actual.nro_orden).filter(~Item.id.in_(db_session.query(Relacion.id_item).from_statement("SELECT relacion.id_item from relacion where relacion.id_item_duenho = "+ id_item))).filter(~Item.id.in_(db_session.query(Relacion.id_item).from_statement("SELECT relacion.id_item_duenho from relacion where relacion.id_item = "+ id_item))).filter(Item.id != id_item).filter(Item.id.in_(db_session.query(Item.id).from_statement("Select it.id  from item it, (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id and f.id_proyecto = "+str(id_proy)+"  group by codigo order by 1 ) s where it.codigo = cod and it.version= vermax and it.estado != 'E' " ))).all()
     #items = db_session.query(Item).join(Fase, Fase.id == Item.id_fase).join(Proyecto, Proyecto.id == Fase.id_proyecto).filter(Proyecto.id == id_proy).filter(Fase.id <= fase_actual).filter(~Item.id.in_(db_session.query(Relacion.id_item).from_statement("SELECT relacion.id_item from relacion where relacion.id_item_duenho = "+ id_item))).filter(~Item.id.in_(db_session.query(Relacion.id_item).from_statement("SELECT relacion.id_item_duenho from relacion where relacion.id_item = "+ id_item))).filter(Item.id != id_item).all()
     return items
-def getRelUltiVerEnProg():
+
+def getRelUltiVerEnProg():    
     id_proy = session['pry']
-    return db_session.query(Relacion).join(Item, Item.id == Relacion.id_item_duenho).join(Fase, Fase.id == Item.id_fase).join(Proyecto, Proyecto.id == Fase.id_proyecto).filter(Proyecto.id == id_proy).filter(Relacion.estado == 'A').all()
+    return db_session.query(Relacion).join(Item, or_(Item.id == Relacion.id_item_duenho, Item.id == Relacion.id_item)).join(Fase, Fase.id == Item.id_fase).join(Proyecto, Proyecto.id == Fase.id_proyecto).filter(Item.id.in_(db_session.query(Item.id).from_statement("Select it.id  from item it, "+ 
+                        " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id "+
+                        " and f.id_proyecto = "+str(id_proy)+"  group by codigo order by 1 ) s "+
+                        " where it.codigo = cod and it.version= vermax and it.estado != 'E' " ).all())).filter(Proyecto.id == id_proy).filter(Relacion.estado == 'A').all()
+
+def selectRelacionUltimaVersionItem():
+    id_proy = session['pry']
+    return db_session.query(Relacion).join(Item, or_(Item.id == Relacion.id_item_duenho, Item.id == Relacion.id_item)).join(Fase, Fase.id == Item.id_fase).join(Proyecto, Proyecto.id == Fase.id_proyecto).filter(Item.id.in_(db_session.query(Item.id).from_statement("Select it.id  from item it, "+ 
+                        " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id "+
+                        " and f.id_proyecto = "+str(id_proy)+"  group by codigo order by 1 ) s "+
+                        " where it.codigo = cod and it.version= vermax and it.estado != 'E' " ).all())).filter(Proyecto.id == id_proy).filter(Relacion.estado == 'A')
+                        
+
+                
 #===============================================================================
 # 
 # filter(Item.id.in_(db_session.query(Item.id).from_statement("Select it.id  from item it, "+ 
