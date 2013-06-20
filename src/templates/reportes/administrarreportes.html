@@ -2,28 +2,10 @@
 {% block content %}
 <div class="primary">
 <div >
-<SCRIPT> 
-	function confirmar() { 
-		if(!confirm("¿Deseas eliminar esta Solicitud de Cambio?")) { 
-			return false; //no se borra 
-		} 
-		else { 
-			return true;//si se borra  
-		} 
-	}
-	function confirmarEnv() { 
-		if(!confirm("¿Deseas enviar esta Solicitud de Cambio para su aprobación?")) { 
-			return false; //no se borra 
-		} 
-		else { 
-			return true;//si se borra  
-		} 
-	}
-</SCRIPT> 
 <div style="text-align: right;">
 <a href="{{ url_for('index') }}">Salir</a>
 </div>		
-<h1>Solicitud de Cambios</h1>
+<h1>Reportes</h1>
 <form id=buscar method=get action="/solicitud/buscarsolicitud">
 			<input type="text" name="patron" /> 
 			<select name=parametro>
@@ -33,6 +15,7 @@
 			</select> 
 			<input type=submit name="Buscar" value=Buscar /> 			
 		<a href="{{ url_for('nuevasolicitud') }}" ><img src="../static/images/a.png" alt="Nuevo" height="30" width="30" title="Nuevo" ></a>
+		<a href="{{ url_for('reportesol') }}" ><img src="../static/images/a.png" alt="Reporte" height="30" width="30" title="Reporte" ></a>
 </form>
 <p></p>
 {% with errors = get_flashed_messages(category_filter=["info"]) %}
