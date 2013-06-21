@@ -15,9 +15,14 @@ from ges.solicitud.SolicitudFormulario import SolicitudFormulario
 from ges.solicitud.ReporteFormulario import ReporteFormulario
 from ges.solicitud.SolicitudReporte import SolicitudReporte
 from flask_login import current_user
+from flask import Response 
 import flask, flask.views
 import os
 import datetime
+from des.item.ReporteHistorialFormulario import ReporteHistorialFormulario
+from des.item.HistorialReporte import HistorialReporte
+from des.item.ListaItemFormulario import ListaItemFormulario
+from des.item.ListaReporte import ListaReporte
 from geraldo.generators import PDFGenerator
 
 cur_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -423,15 +428,56 @@ def reportesol():
     today = datetime.date.today()
     form = ReporteFormulario(request.form)
     form.fecha.data = today
-    #request.method == 'POST' and 
-    if  form.validate():
+    if  request.method == 'POST' and form.validate():
         reporte = SolicitudReporte(queryset=db_session.query(SolicitudCambio).filter_by(id_proyecto=session['pry']))
         reporte.generate_by(PDFGenerator, filename=os.path.join(cur_dir, cur_dir + '/static/reportes/Solicitudes.pdf'))
-        if (reporte != None) :
-            return render_template('solicitud/solicitud.html')
+        return render_template('solicitud/solicitud.html')
     else:
         flash_errors(form) 
     return render_template('solicitud/reportesolicitud.html', form=form)
+
+@app.route('/solicitud/reportehistorial', methods=['GET', 'POST'])
+def reportehistorial():   
+    """ Funcion que imprime el reporte del historial """
+    form = ReporteHistorialFormulario(request.form)
+    items = db_session.query(Item).from_statement("Select it.*  from item it, "+ 
+                        " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id "+
+                        " and f.id_proyecto = "+str(session['pry'])+ " group by codigo order by 1 ) s "+
+                        " where it.codigo = cod and it.version= vermax order by it.codigo ")
+    if  request.method == 'POST' and form.validate():
+        multiselect= request.form.getlist('selectitem')  
+        list_aux=[]
+        for it in multiselect : 
+            i = db_session.query(Item).filter_by(id=it).first()    
+            list_aux.append(i)
+        if list_aux == None or list_aux == []:
+            flash('Debe seleccionar un item','info')
+            return render_template('solicitud/administrarsolicitud.html')
+        i = list_aux[0]
+        reporte = HistorialReporte(queryset=db_session.query(Item).from_statement("select i.id, f.descripcion as id_fase, ti.descripcion as id_tipo_item, " +
+        " i.codigo, i.version, i.descripcion, i.estado, i.costo, i.complejidad from item i, fase f, tipo_item ti where i.codigo = '"+ str(i.codigo) +
+        "' and f.id = i.id_fase and ti.id = i.id_tipo_item order by version "))
+        reporte.generate_by(PDFGenerator, filename=os.path.join(cur_dir, cur_dir + '/static/reportes/HistorialItem.pdf'))
+        return render_template('item/historial.html')
+    else:
+        flash_errors(form) 
+    return render_template('item/reportehistorial.html', form=form, items=items)
+
+@app.route('/solicitud/reportelista', methods=['GET', 'POST'])
+def reportelista():   
+    """ Funcion que imprime el reporte la lista de items """
+    today = datetime.date.today()
+    form = ListaItemFormulario(request.form)
+    form.fecha.data = today
+    if  request.method == 'POST' and form.validate():
+        reporte = ListaReporte(queryset=db_session.query(Item).from_statement("Select it.id_fase, fa.descripcion as nombre, it.id, it.descripcion, it.version, it.complejidad from item it, fase fa," +  
+        " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id and f.id_proyecto = "+str(session['pry'])+ " group by codigo order by 1 ) s " +
+        " where it.codigo = cod and it.version= vermax and it.id_fase = fa.id order by it.id_fase, it.codigo "))
+        reporte.generate_by(PDFGenerator, filename=os.path.join(cur_dir, cur_dir + '/static/reportes/ListaItem.pdf'))
+        return render_template('item/ritem.html')
+    else:
+        flash_errors(form) 
+    return render_template('item/reporteitem.html', form=form)
 
 @app.route('/solicitud/administrarreportes', methods=['GET', 'POST'])
 def administrarreportes():   
