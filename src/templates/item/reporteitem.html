@@ -1,0 +1,51 @@
+{% extends "principal.html" %} 
+{% block content %}
+<div style="text-align: right;">
+<a href="javascript:history.go(-1)">Volver</a>
+</div>
+<div class="primary">
+	<h1>Reporte Lista de Ítems</h1>
+	{% with errors = get_flashed_messages(category_filter=["error"]) %} 
+			{% if errors %}
+			<div class="block-message">
+				<a class="close" href="#"
+					dir="rtl">×</a>
+					<ul>
+						{%- for msg in errors %}
+							<li>{{ msg }}</li> {% endfor -%}
+					</ul>
+			</div>
+		{% endif %} 
+	{% endwith %}
+ 	<form target="_blank" id=reporte method=post action="/solicitud/reportelista">
+ 		<label>Seleccione una Fase:</label>
+ 		<div style="height:250px;width:800px;overflow:auto;">
+<table border="1">
+	<TR>
+		<TH class="c1"></TH>
+		<TH class="c2">Número</TH>
+		<TH class="c3">Nombre</TH>
+		<TH class="c4">Descripción</TH>
+		<TH class="c5">Estado</TH>
+	</TR>
+	{% for fase in fases %}
+	<TR>
+		<TD class="c1"> <input type="checkbox" name="selectitem" value="{{ fase.id }}"/> </TD>	
+		<TD class="c2"><SPAN>{{fase.nro_orden|e}}</SPAN></TD>
+		<TD class="c3"><SPAN>{{fase.nombre|e}}</SPAN></TD>
+		<TD class="c4"><SPAN>{{fase.descripcion|e}}</SPAN></TD>
+		<TD class="c5"><SPAN>{{'Inicial' if fase.estado=='I' else 'En Progreso' if fase.estado=='P' 
+		else 'En Linea Base' if fase.estado=='L' else 'Aprobado' if fase.estado=='A'|e}}</SPAN></TD>
+	</TR>
+	{% else %}
+  	<TR>
+		<em>Sin registro de fases</em>
+	</TR>
+	{% endfor %}
+</table>
+</div>
+		<p><input type=submit value=Imprimir onclick="document.location.reload();">
+    	<input type="button" value="Cancelar"  onClick="document.location.href='{{ url_for( 'administrarreportes' ) }}';"> 
+	</form>
+</div>
+{% endblock %}
