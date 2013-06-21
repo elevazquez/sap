@@ -429,7 +429,12 @@ def reportesol():
     form = ReporteFormulario(request.form)
     form.fecha.data = today
     if  request.method == 'POST' and form.validate():
-        reporte = SolicitudReporte(queryset=db_session.query(SolicitudCambio).filter_by(id_proyecto=session['pry']))
+        sql = db_session.query(SolicitudCambio).filter_by(id_proyecto=session['pry'])
+        a = sql.first()
+        if (a == None) :
+            flash('No se encuentran registros para el reporte','info')   
+            return redirect('/solicitud/administrarreportes')
+        reporte = SolicitudReporte(queryset=sql)
         reporte.generate_by(PDFGenerator, filename=os.path.join(cur_dir, cur_dir + '/static/reportes/Solicitudes.pdf'))
         return render_template('solicitud/solicitud.html')
     else:
@@ -454,9 +459,14 @@ def reportehistorial():
             flash('Debe seleccionar un item','info')
             return render_template('solicitud/administrarsolicitud.html')
         i = list_aux[0]
-        reporte = HistorialReporte(queryset=db_session.query(Item).from_statement("select i.id, f.descripcion as id_fase, ti.descripcion as id_tipo_item, " +
+        sql = db_session.query(Item).from_statement("select i.id, f.descripcion as id_fase, ti.descripcion as id_tipo_item, " +
         " i.codigo, i.version, i.descripcion, i.estado, i.costo, i.complejidad from item i, fase f, tipo_item ti where i.codigo = '"+ str(i.codigo) +
-        "' and f.id = i.id_fase and ti.id = i.id_tipo_item order by version "))
+        "' and f.id = i.id_fase and ti.id = i.id_tipo_item order by version ")
+        a = sql.first()
+        if (a == None) :
+            flash('No se encuentran registros para el reporte','info')   
+            return redirect('/solicitud/administrarreportes')
+        reporte = HistorialReporte(queryset= sql)
         reporte.generate_by(PDFGenerator, filename=os.path.join(cur_dir, cur_dir + '/static/reportes/HistorialItem.pdf'))
         return render_template('item/historial.html')
     else:
@@ -469,15 +479,41 @@ def reportelista():
     today = datetime.date.today()
     form = ListaItemFormulario(request.form)
     form.fecha.data = today
+    fases = db_session.query(Fase).filter_by(id_proyecto=session['pry']).order_by(Fase.nro_orden)
     if  request.method == 'POST' and form.validate():
-        reporte = ListaReporte(queryset=db_session.query(Item).from_statement("Select it.id_fase, fa.descripcion as nombre, it.id, it.descripcion, it.version, it.complejidad from item it, fase fa," +  
-        " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id and f.id_proyecto = "+str(session['pry'])+ " group by codigo order by 1 ) s " +
-        " where it.codigo = cod and it.version= vermax and it.id_fase = fa.id order by it.id_fase, it.codigo "))
-        reporte.generate_by(PDFGenerator, filename=os.path.join(cur_dir, cur_dir + '/static/reportes/ListaItem.pdf'))
+        multiselect= request.form.getlist('selectitem')  
+        list_aux=[]
+        f = None
+        if multiselect != None and multiselect != [] :
+            for fa in multiselect : 
+                f = db_session.query(Fase).filter_by(id=fa).first()    
+                list_aux.append(f)
+            if list_aux != None and list_aux != [] :
+                f = list_aux[0]
+        if (f==None) :
+            sql = db_session.query(Item).from_statement("Select it.id_fase, fa.descripcion as nombre, it.id, it.descripcion, it.version, it.complejidad from item it, fase fa," +  
+            " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id and f.id_proyecto = "+str(session['pry'])+ " group by codigo order by 1 ) s " +
+            " where it.codigo = cod and it.version= vermax and it.id_fase = fa.id order by it.id_fase, it.codigo ")
+            a = sql.first()
+            if (a == None) :
+                flash('No se encuentran registros para el reporte','info')   
+                return redirect('/solicitud/administrarreportes')
+            reporte = ListaReporte(queryset= sql)
+            reporte.generate_by(PDFGenerator, filename=os.path.join(cur_dir, cur_dir + '/static/reportes/ListaItem.pdf'))
+        else :
+            sql = db_session.query(Item).from_statement("Select it.id_fase, fa.descripcion as nombre, it.id, it.descripcion, it.version, it.complejidad from item it, fase fa," +  
+            " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id and f.id_proyecto = "+str(session['pry'])+ " group by codigo order by 1 ) s " +
+            " where it.codigo = cod and it.version= vermax and it.id_fase = fa.id and it.id_fase="+str(f.id)+" order by it.id_fase, it.codigo ")
+            a = sql.first()
+            if (a == None) :
+                flash('No se encuentran registros para el reporte','info')   
+                return redirect('/solicitud/administrarreportes')
+            reporte = ListaReporte(queryset= sql)
+            reporte.generate_by(PDFGenerator, filename=os.path.join(cur_dir, cur_dir + '/static/reportes/ListaItem.pdf'))
         return render_template('item/ritem.html')
     else:
         flash_errors(form) 
-    return render_template('item/reporteitem.html', form=form)
+    return render_template('item/reporteitem.html', form=form, fases=fases)
 
 @app.route('/solicitud/administrarreportes', methods=['GET', 'POST'])
 def administrarreportes():   

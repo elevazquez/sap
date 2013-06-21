@@ -6,6 +6,18 @@
 <a href="{{ url_for('index') }}">Salir</a>
 </div>		
 <h1>Reportes</h1>
+	{% with errors = get_flashed_messages(category_filter=["info"]) %} 
+			{% if errors %}
+			<div class="block-message">
+				<a class="close" href="#"
+					dir="rtl">×</a>
+					<ul>
+						{%- for msg in errors %}
+							<li>{{ msg }}</li> {% endfor -%}
+					</ul>
+			</div>
+		{% endif %} 
+	{% endwith %}
 	<table border="0">
 	{% if 'permiso_lider' in session %}
 		{% if( session['permiso_lider'].can() ) %}		
