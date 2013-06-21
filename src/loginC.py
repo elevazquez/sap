@@ -124,12 +124,10 @@ class Main(views.MethodView):
             identity_changed.send(current_app._get_current_object(),
                                  identity=Identity(user.id))
             is_administrador(user.id)
-            
             #session['pry'] = 1
             #===================================================================
             # session['username'] = username
             #===================================================================
-          
                     
             if 'is_administrador' in session:
                 if not session['is_administrador']:
@@ -168,8 +166,6 @@ def logout():
     session.pop('is_solicitud',None)
     return redirect(url_for('index'))
 
-
-                    
 def is_administrador(userid):
     roles = db_session.query(UsuarioRol).filter_by(id_usuario=userid).all()
     isadmin = False

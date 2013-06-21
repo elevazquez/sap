@@ -34,12 +34,12 @@
 				<TD class="c4"><SPAN>{{rol.descripcion|e}}</SPAN></TD>
 				<TD class="c4"><SPAN>{{ pro[posicion].nombre }}</SPAN></TD>
 			</TR>
+			{% set posicion = posicion + 1 %}
 		{% else %}
 			<TR>
 				<em>No cuenta con Roles que pueden ser asignados al Usuario.</em>
 			</TR>
 		{% endfor %}
-		{% set posicion = posicion + 1 %}
 	</table>
 	</div>
 	<input type="text" name="id" value="{{ form.id.data }}" id="id" readonly="true" hidden="true"/>

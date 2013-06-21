@@ -210,12 +210,19 @@ def agregarrolusu():
     else:
         id_usu=request.args.get('usu')
     usu = db_session.query(Usuario).filter_by(id=id_usu).first()
-    rolesv=  db_session.query(Rol).from_statement("select * from rol where id not in (select id_rol from usuario_rol where id_usuario="+str(usu.id)+")").all()
+    rolesv=  db_session.query(Rol).from_statement("select * from rol where id not in (select id_rol from usuario_rol where id_usuario="+str(usu.id)+
+                                                  ") and rol.codigo <> 'LIDER PROYECTO' and rol.codigo <> 'COMITE CAMBIOS'").all()
     aux=[]
     for rl in rolesv :
-        pro=  db_session.query(Proyecto).from_statement("select * from proyecto where id in (select id_proyecto from recurso where id in "+ 
-       " ( select id_recurso from permiso where id in (select id_permiso from rol_permiso where id_rol="+str(rl.id)+" limit 1)))").first()
+        print rl.id
+        pro=  db_session.query(Proyecto).from_statement("select * from proyecto where id in "+
+                                                        "(select id_proyecto from fase where id in"+
+                                                            "(select id_fase from recurso where id in"+
+                                                                "(select id_recurso from permiso where id in"+
+                                                                    "(select id_permiso from rol_permiso where id_rol="+str(rl.id)+" limit 1)"+
+                                                                ")))").first()
         aux.append(pro)
+        print pro
     form = UsuarioFormulario(request.form,usu)
     usuario = db_session.query(Usuario).filter_by(id=usu.id).first()     
     if request.method == 'POST' : 
@@ -232,26 +239,31 @@ def agregarrolusu():
                              
             for rl in list_aux:
                 recu = db_session.query(Recurso).join(Permiso, Permiso.id_recurso == Recurso.id).join(RolPermiso, Permiso.id ==RolPermiso.id_permiso).filter(RolPermiso.id_rol == rl.id).first()
-                proyecto = db_session.query(Proyecto).join(Recurso, Recurso.id_proyecto == Proyecto.id ).filter(Proyecto.id == recu.id_proyecto).first()
-                if proyecto == None:
-                    proyecto = db_session.query(Proyecto).join(Fase, Fase.id_proyecto == Proyecto.id).join(Recurso, Recurso.id_fase == Fase.id).filter(Recurso.id_fase == recu.id_fase).first()
-                
+                if recu != None:
+                    proyecto = db_session.query(Proyecto).join(Recurso, Recurso.id_proyecto == Proyecto.id ).filter(Proyecto.id == recu.id_proyecto).first()
+                    if proyecto == None:
+                        proyecto = db_session.query(Proyecto).join(Fase, Fase.id_proyecto == Proyecto.id).join(Recurso, Recurso.id_fase == Fase.id).filter(Recurso.id_fase == recu.id_fase).first()
+                    if proyecto != None:
+                        rousu = UsuarioRol(rl.id, usuario.id, proyecto.id)
+                        db_session.add(rousu)
+                        db_session.commit()
+                    else:
+                        flash('El Rol aun no tiene asignado Permisos','info')   
+                        return redirect('/usuario/administrarusuario')
+                else:
+                    if rl.codigo =='ADMINISTRADOR':
+                        rousu = UsuarioRol(rl.id, usuario.id, None)
+                        db_session.add(rousu)
+                        db_session.commit()
                 #===============================================================
                 # re = db_session.query(Recurso).from_statement("select * from recurso where id in ( select id_recurso from permiso where id in " +
                 #    " (select id_permiso from rol_permiso where id_rol="+str(rl.id)+" limit 1))").first() 
                 #===============================================================
-                if proyecto != None:
-                    rousu = UsuarioRol(rl.id, usuario.id, proyecto.id)
-                    db_session.add(rousu)
-                    db_session.commit()
-                else:
-                    flash('El Rol aun no tiene asignado Permisos','info')   
-                    return redirect('/usuario/administrarusuario')
             flash('Se agrego el Rol con Exito','info')   
             return redirect('/usuario/administrarusuario')
         except DatabaseError, e:
             flash('Error en la Base de Datos' + e.args[0],'error')
-            return render_template('usuario/agregarrolusu.html', form=form, roles= rolesv, pro=aux)  
+        return render_template('usuario/agregarrolusu.html', form=form, roles= rolesv, pro=aux)  
     return render_template('usuario/agregarrolusu.html', form=form, roles= rolesv, pro=aux)  
 
 @app.route('/usuario/quitarrolusu', methods=['GET', 'POST'])

@@ -25,6 +25,18 @@
 			{{message}}
 	    {% endfor %}
 	 {% endwith %}
+	 {% with permisos = get_flashed_messages(category_filter=["permiso"]) %}
+		{% if permisos %}
+	<div class="block-message">
+  		<a class="close" href="{{ url_for( 'index' ) }}" dir="rtl">×</a>
+ 		<ul>
+    		{%- for msg in permisos %}
+    		<li>{{ msg }}</li>
+    		{% endfor -%}
+		</ul>
+	</div>
+		{% endif %}
+	{% endwith %}
 	
 </div>
 {% endblock %}
