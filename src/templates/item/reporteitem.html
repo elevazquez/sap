@@ -4,7 +4,7 @@
 <a href="javascript:history.go(-1)">Volver</a>
 </div>
 <div class="primary">
-	<h1>Reporte de Solicitud de Cambio</h1>
+	<h1>Reporte Lista de Ítems</h1>
 	{% with errors = get_flashed_messages(category_filter=["error"]) %} 
 			{% if errors %}
 			<div class="block-message">
@@ -17,10 +17,9 @@
 			</div>
 		{% endif %} 
 	{% endwith %}
- 	<form target="_blank" id=reporte method=post action="/solicitud/reportesol">
+ 	<form target="_blank" id=reporte method=post action="/solicitud/reportelista">
 		<label>Fecha</label><input type="date" name="fecha" value='{{ form.fecha.data }}' id="fecha" />
     	<p><input type=submit value=Imprimir onclick="document.location.reload();">
-    	<a target="_blank" href="../static/reportes/Solicitudes.pdf">descarga</a>
     	<input type="button" value="Cancelar"  onClick="document.location.href='{{ url_for( 'administrarreportes' ) }}';"> 
 	</form>
 </div>

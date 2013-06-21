@@ -6,59 +6,21 @@
 <a href="{{ url_for('index') }}">Salir</a>
 </div>		
 <h1>Reportes</h1>
-<form id=buscar method=get action="/solicitud/buscarsolicitud">
-			<input type="text" name="patron" /> 
-			<select name=parametro>
-				<option value="descripcion">Descripción</option>
-				<option value="fecha">Fecha</option>
-				<option value="estado">Estado</option>
-			</select> 
-			<input type=submit name="Buscar" value=Buscar /> 			
-		<a href="{{ url_for('nuevasolicitud') }}" ><img src="../static/images/a.png" alt="Nuevo" height="30" width="30" title="Nuevo" ></a>
-		<a href="{{ url_for('reportesol') }}" ><img src="../static/images/a.png" alt="Reporte" height="30" width="30" title="Reporte" ></a>
-</form>
-<p></p>
-{% with errors = get_flashed_messages(category_filter=["info"]) %}
-{% if errors %}
-<div class="block-message">
-  <a class="close" href="{{ url_for( 'administrarsolicitud' ) }}" dir="rtl">×</a>
-  <ul>
-    {%- for msg in errors %}
-    <li>{{ msg }}</li>
-    {% endfor -%}
-  </ul>
-</div>
-{% endif %}
-{% endwith %}
-<div style="height:250px;width:780px;overflow:auto;">
-<table border="1">
+	<table border="0">
+	{% if 'permiso_lider' in session %}
+		{% if( session['permiso_lider'].can() ) %}		
 	<TR>
-		<TH class="c1"></TH>
-		<TH class="c2">Descripción</TH>
-		<TH class="c3">Fecha</TH>
-		<TH class="c4">Estado</TH>
+		<TD class="c1"><a href="{{ url_for('reportesol') }}" >Solicitudes de Cambio</a></TD>
 	</TR>
-	{% for solicitud in solicituds %}
+		{% endif %}
+	{% endif %}
 	<TR>
-		<TD class="c1"><a href="{{ url_for('versolicitud', id=solicitud.id) }}" ><img src="../static/images/ver.png" alt="Ver" height="20" width="20" title="Visualizar" style="vertical-align: middle;"></a>
-		<a href="{{ url_for('editarsolicitud', id=solicitud.id) }}" ><img src="../static/images/e.png" alt="Editar" height="20" width="20" title="Editar" style="vertical-align: middle;"></a>
-		<a href="{{ url_for('eliminarsolicitud', id=solicitud.id) }}" onclick="javascript:return confirmar()"><img src="../static/images/b.png" alt="Eliminar" height="20" width="20" title="Eliminar" style="vertical-align: middle;"> </a>
-		<a href="{{ url_for('agregaritemsol', id_sol = solicitud.id ) }}"><img src="../static/images/mas.png" alt="Agregar Items" height="20" width="20" title="Agregar Items" style="vertical-align: middle;"></a>
-		<a href="{{ url_for('quitaritemsol', id_sol = solicitud.id ) }}"><img src="../static/images/menos.png" alt="Quitar Items" height="20" width="20" title="Quitar Items" style="vertical-align: middle;"></a>
-		<a href="{{ url_for('enviarsolicitud', id=solicitud.id) }}" onclick="javascript:return confirmarEnv()"><img src="../static/images/env.png" alt="Enviar" height="20" width="20" title="Enviar" style="vertical-align: middle;"> </a>
-		</TD>
-		<TD class="c2"><SPAN>{{solicitud.descripcion|e}}</SPAN></TD>
-		<TD class="c3"><SPAN>{{solicitud.fecha|e}}</SPAN></TD>
-		<TD class="c5"><SPAN>{{'Nueva' if solicitud.estado=='N' else 'Enviada' if solicitud.estado=='E' 
-		else 'Aprobada' if solicitud.estado=='A' else 'Rechazada' if solicitud.estado=='R'|e}}</SPAN></TD>
+		<TD class="c1"><a href="{{ url_for('reportelista') }}" >Lista de Ítems</a></TD>
 	</TR>
-	{% else %}
-  	<TR>
-		<em>Sin registro de Solicitud de Cambios</em>
+	<TR>
+		<TD class="c1"><a href="{{ url_for('reportehistorial') }}" >Historial de Ítem</a></TD>
 	</TR>
-	{% endfor %}
 </table>
-</div>
 </div>
 </div>
 {% endblock %}
