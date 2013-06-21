@@ -277,7 +277,12 @@ def administrarproyecto():
         else :
             proyectos = db_session.query(Proyecto).order_by(Proyecto.nombre)
     else:
-        proyectos = db_session.query(Proyecto).filter(Proyecto.id == idproy).all()
+        permission = UserPermission('LIDER PROYECTO', idproy)
+        if permission.can():
+            proyectos = db_session.query(Proyecto).filter(Proyecto.id == idproy).all()
+        else:
+            flash('Sin permisos para administrar proyectos', 'permiso')
+            return render_template('index.html')
     return render_template('proyecto/administrarproyecto.html', proyectos = proyectos)
 
 @app.errorhandler(404)

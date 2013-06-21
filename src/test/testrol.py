@@ -32,7 +32,7 @@ class RolTestCase(unittest.TestCase):
         print '##----++++ PRUEBA UNITARIA ROL ++++----##'
         print '+++ Obtener todos los roles +++'
         request = self.client.get('/administrarrol', follow_redirects=True)
-        self.assertNotIn('sin permisos', request.data, 'No tiene permisos para ver los roles')
+        self.assertNotIn('Sin permisos para administrar roles', request.data, 'No tiene permisos para ver los roles')
         self.assertEqual(request._status, '200 OK', 'Error al obtener roles como '+ TEST_USER)
         print '*-- Obtiene todos los roles -- request result: ' + request._status + ' --*'
         print'*---test 1 rol---*'
@@ -42,6 +42,7 @@ class RolTestCase(unittest.TestCase):
         print '+++ Creacion de rol +++'
         request = self._crear_rol('rolprueba', 'este es un rol de prueba')
         print '*-- datos de prueba ::: codigo = rolprueba, descripcion = este es un rol de prueba --*'
+        self.assertNotIn('Sin permisos para agregar roles', request.data, 'No tiene permisos para ver los roles')
         self.assertIn('El rol ha sido registrado con exito', request.data, 'Error al crear el rol')
         print '*-- request result: ' + request._status + ' --*'
         self.assertIn('rolprueba', request.data, 'El rol creado no se encuentra en la tabla')
@@ -53,6 +54,7 @@ class RolTestCase(unittest.TestCase):
         print '+++ Creacion de rol con nombre repetido +++'
         request = self._crear_rol('rolprueba', 'este es un rol de prueba')
         print '*-- datos de prueba ::: codigo = rolprueba, descripcion = este es un rol de prueba --*'
+        self.assertNotIn('Sin permisos para agregar roles', request.data, 'No tiene permisos para ver los roles')
         self.assertIn('Clave unica violada por favor ingrese otro CODIGO de Rol', request.data, 'Rol creado, no existe el codigo de rol')
         print '*-- Verificacion completa, no se pueden crear dos roles con el mismo nombre --*'
         print '*---test 3 rol---*'
@@ -62,6 +64,7 @@ class RolTestCase(unittest.TestCase):
         print '+++ Buscar un rol existente por codigo +++'
         request = self._buscar_rol('rolprueba', 'codigo')
         print '*-- datos de prueba ::: patron = rolprueba, parametro = codigo --*'
+        self.assertNotIn('Sin permisos para buscar roles', request.data, 'No tiene permisos para ver los roles')
         self.assertNotIn('Sin registro de roles', request.data, 'No se encontro roles con dicho parametro')
         self.assertIn('rolprueba', request.data, 'El rol no existe en la tabla')
         print '*-- Rol encontrado exitosamente --*'
@@ -72,21 +75,27 @@ class RolTestCase(unittest.TestCase):
         print '+++ Editar rol existente +++'
         request = self._editar_rol('rolprueba', 'este es un rol de prueba editado')
         print '*-- datos de prueba ::: codigo = rolprueba, descripcion = este es un rol de prueba editado --*'
+        self.assertNotIn('Sin permisos para editar roles', request.data, 'No tiene permisos para ver los roles')
         self.assertIn('El rol ha sido modificado con exito', request.data, 'Error al modificar rol')  
         self.assertIn('este es un rol de prueba editado',request.data,'El rol no se encuentra editado en la tabla')
         print '*-- Rol editado correctamente --*'
         print '*---test 5 rol---*'
 
     def test_f_eliminar_rol(self):
-        """Prueba de verificacion si se puede eliminar un rol   """
+        """Prueba de verificacion si se puede eliminar un rol"""
         print '+++ Eliminacion de rol existente +++'
         borrar_request = self._eliminar_rol('rolprueba')
         print '*-- datos de prueba ::: codigo = rolprueba --*'
+        self.assertNotIn('Sin permisos para eliminar roles', borrar_request.data, 'No tiene permisos para ver los roles')
         self.assertIn('El rol ha sido eliminado con exito', borrar_request.data, 'Rol creado, no existe el codigo de rol')
         self.assertNotIn('rolprueba', borrar_request.data, 'El rol no ha sido borrado')
         print '*-- Verificacion completa, se elimino correctamente--*'
         print '*---test 6 rol---*'
         print '##----++++ FIN PRUEBA UNITARIA ROL ++++----##'
+        
+    def test_g_asignar_rol(self):
+        """Prueba para asignar un permiso al rol"""
+        
             
     def _get(self, url ='/administrarrol'):
         """obtiene la pagina administrar roles """
@@ -111,6 +120,6 @@ class RolTestCase(unittest.TestCase):
     def _eliminar_rol(self, codigo='rolprueba'):     
         request = self.client.post('/eliminar?cod='+codigo, follow_redirects=True)
         return request
-    
+        
 if __name__ == '__main__':
     unittest.main()

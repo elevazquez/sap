@@ -58,7 +58,8 @@ def add():
             flash_errors(form) 
         return render_template('rol/nuevorol.html', form=form)
     else:
-        return 'sin permisos'
+        flash('Sin permisos para agregar roles', 'permiso')
+        return render_template('index.html')
 
 @app.route('/editar', methods=['GET', 'POST'])
 def editar():
@@ -83,7 +84,8 @@ def editar():
             flash_errors(form)
         return render_template('rol/editarrol.html', form=form)
     else:
-        return 'sin permisos'
+        flash('Sin permisos para editar roles', 'permiso')
+        return render_template('index.html')
 
 @app.route('/eliminar', methods=['GET', 'POST'])
 def eliminar():
@@ -103,7 +105,8 @@ def eliminar():
             flash('Error en la Base de Datos' + e.args[0], 'info')
             return render_template('rol/administrarrol.html')
     else:
-        return 'sin permisos'
+        flash('Sin permisos para eliminar roles', 'permiso')
+        return render_template('index.html')
 
 @app.route('/buscar', methods=['GET', 'POST'])
 def buscar():
@@ -124,7 +127,8 @@ def buscar():
             return 'no existe concordancia'
         return render_template('rol/administrarrol.html', roles=r)
     else:
-        return 'sin permisos'
+        flash('Sin permisos para buscar roles', 'permiso')
+        return render_template('index.html')
 
 @app.route('/administrarrol', methods=['GET', 'POST'])
 def administrarrol():
@@ -135,7 +139,8 @@ def administrarrol():
         roles = db_session.query(Rol).order_by(Rol.codigo)
         return render_template('rol/administrarrol.html', roles=roles)
     else:
-        return 'sin permisos'
+        flash('Sin permisos para administrar roles', 'permiso')
+        return render_template('index.html')
 
 @app.route('/rol/asignarpermiso', methods=['GET', 'POST'])
 def asignarpermiso():
