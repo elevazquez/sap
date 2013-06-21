@@ -1,5 +1,5 @@
-import re
-import xml.etree.ElementTree as ET
+#import re
+#import xml.etree.ElementTree as ET
 #from flask import  session
 #from UserPermission import UserRol
 

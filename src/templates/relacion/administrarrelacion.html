@@ -40,7 +40,7 @@
 			</div>
 		{% endif %} 
 	{% endwith %}
-	<div style="height:580px;width:700px;overflow:auto;">
+	<div style="height:580px;width:800px;overflow:auto;">
 	<table id="tablarelaciones" border="1">
 		<TR>
 			<TH class="c3"></TH>
@@ -50,7 +50,9 @@
 				 -->
 			<TH class="c3">Tipo de relación</TH>
 			<TH class="c3">Item código</TH>
+			<TH class="c3">Item versión</TH>
 			<TH class="c3">Item dueño código</TH>
+			<TH class="c3">Item dueño versión</TH>
 		</TR>
 		{% for relacion in relaciones %}
 			<TR>
@@ -70,7 +72,9 @@
 					 -->
 				<TD class="c4"><SPAN>{{relacion.relaciontipo_relacion.codigo|e}}</SPAN></TD>
 				<TD class="c4"><SPAN>{{relacion.relacionitem.codigo|e}}</SPAN></TD>
+				<TD class="c4"><SPAN>{{relacion.relacionitem.version|e}}</SPAN></TD>
 				<TD class="c4"><SPAN>{{relacion.relacionitem_duenho.codigo|e}}</SPAN></TD>
+				<TD class="c4"><SPAN>{{relacion.relacionitem_duenho.version|e}}</SPAN></TD>
 			</TR>
 		{% else %}
 			<TR>
