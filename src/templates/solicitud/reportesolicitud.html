@@ -20,7 +20,7 @@
  	<form target="_blank" id=reporte method=post action="/solicitud/reportesol">
 		<label>Fecha</label><input type="date" name="fecha" value='{{ form.fecha.data }}' id="fecha" />
     	<p><input type=submit value=Imprimir onclick="document.location.reload();">
-    	<a target="_blank" href="../static/reportes/Solicitudes.pdf">descarga</a>
+    	<!--  <a target="_blank" href="../static/reportes/Solicitudes.pdf">descarga</a>-->
     	<input type="button" value="Cancelar"  onClick="document.location.href='{{ url_for( 'administrarreportes' ) }}';"> 
 	</form>
 </div>
