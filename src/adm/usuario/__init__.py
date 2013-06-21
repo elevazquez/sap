@@ -280,14 +280,12 @@ def quitarrolusu():
             for rl in roles :
                 r = db_session.query(Rol).filter_by(id=rl).first()
                 list_aux.append(r)
-                
-            #se elimina el id de los item de la sol          
+                          
             for rl in list_aux:
                 ur = db_session.query(UsuarioRol).filter_by(id_rol=rl.id).first()  
                 db_session.delete(ur)
                 db_session.commit()
-                 
-            flash('Se quito el Rol con Exito','info')   
+                flash('Se quito el Rol con Exito','info')   
             return redirect('/usuario/administrarusuario')
         except DatabaseError, e:
             flash('Error en la Base de Datos' + e.args[0],'error')
