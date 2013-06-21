@@ -5,10 +5,14 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.exc import DatabaseError
 from flask import Flask, render_template, request, redirect, url_for, flash 
 from adm.mod.Usuario import Usuario
+from adm.mod.Permiso import Permiso
+from adm.mod.RolPermiso import RolPermiso
+from des.mod.Fase import Fase
 from adm.usuario.UsuarioFormulario import UsuarioFormulario
 from adm.rol import getRolesByUsuario
 import flask, flask.views
 from UserPermission import UserRol
+from sqlalchemy import or_
 import os
 import datetime
 import md5
@@ -225,13 +229,19 @@ def agregarrolusu():
             if list_aux == None or list_aux == []:
                 flash('Debe seleccionar un Rol','info')
                 return render_template('usuario/administrarusuario.html')         
-                    
-            #se guarda la sol junto con los item pertenecientes al mismo          
+                             
             for rl in list_aux:
-                re = db_session.query(Recurso).from_statement("select * from recurso where id in ( select id_recurso from permiso where id in " +
-                    " (select id_permiso from rol_permiso where id_rol="+str(rl.id)+" limit 1))").first() 
-                if re != None:
-                    rousu = UsuarioRol(rl.id, usuario.id, re.id_proyecto )
+                recu = db_session.query(Recurso).join(Permiso, Permiso.id_recurso == Recurso.id).join(RolPermiso, Permiso.id ==RolPermiso.id_permiso).filter(RolPermiso.id_rol == rl.id).first()
+                proyecto = db_session.query(Proyecto).join(Recurso, Recurso.id_proyecto == Proyecto.id ).filter(Proyecto.id == recu.id_proyecto).first()
+                if proyecto == None:
+                    proyecto = db_session.query(Proyecto).join(Fase, Fase.id_proyecto == Proyecto.id).join(Recurso, Recurso.id_fase == Fase.id).filter(Recurso.id_fase == recu.id_fase).first()
+                
+                #===============================================================
+                # re = db_session.query(Recurso).from_statement("select * from recurso where id in ( select id_recurso from permiso where id in " +
+                #    " (select id_permiso from rol_permiso where id_rol="+str(rl.id)+" limit 1))").first() 
+                #===============================================================
+                if proyecto != None:
+                    rousu = UsuarioRol(rl.id, usuario.id, proyecto.id)
                     db_session.add(rousu)
                     db_session.commit()
                 else:
