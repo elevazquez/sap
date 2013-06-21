@@ -74,6 +74,7 @@ def editar():
                 form.populate_obj(rol)
                 db_session.merge(rol)
                 db_session.commit()
+                flash('El rol ha sido modificado con exito', 'info')
                 return redirect('/administrarrol')
             except DatabaseError, e:
                 flash('Error en la Base de Datos' + e.args[0], 'error')
@@ -96,6 +97,7 @@ def eliminar():
             # init_db(db_session)
             db_session.delete(rol)
             db_session.commit()
+            flash('El rol ha sido eliminado con exito', 'info')
             return redirect('/administrarrol')
         except DatabaseError, e:
             flash('Error en la Base de Datos' + e.args[0], 'info')
