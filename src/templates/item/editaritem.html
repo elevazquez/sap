@@ -1,5 +1,35 @@
 {% extends "principal.html" %} 
 {% block content %}
+{% from "item/macro.html" import render_field %}
+ <SCRIPT LANGUAGE="JavaScript">
+      url_1 = "/item/bajar/ID/"
+      url_2 = "/item/eliminar_archivo/" + {{ id }} + "/ID/"
+
+    
+    id_href_1 = 'bajar_archivo'
+    id_href_2 = 'eliminar_archivo'
+ 
+    function obtener_id(id) {
+          link_1 = document.getElementById(id_href_1)
+          link_2 = document.getElementById(id_href_2)
+          new_url_1 = url_1.replace('ID', id)
+          new_url_2 = url_2.replace('ID', id)
+          link_1.href = new_url_1
+          link_2.href = new_url_2
+        
+    }
+    
+    function pregunta(){
+        if(confirm('Esta seguro de que desea eliminar el archivo?')){
+          return true;
+        }else{
+          return false;
+        }
+      }
+   
+    
+    </SCRIPT>
+
 <div style="text-align: right;">
 <a href="javascript:history.go(-1)">Volver</a>
 </div>
@@ -41,6 +71,8 @@
     	{% else %}
 			<em>El item no posee atributos</em>
     	{% endfor %}	
+    	
+    	
   		<p><input type=submit value=Guardar>
   		<input type="button" value="Cancelar"  onClick="document.location.href='{{ url_for( 'administraritem' ) }}';"> 
 	</form>
