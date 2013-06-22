@@ -17,6 +17,9 @@ from flask import session
 TEST_USER = 'admin'
 TEST_PASS = 'admin'
 
+TEST_USER_LIDER = 'lider'
+TEST_PASS_LIDER = 'lider'
+
 db_session = scoped_session(sessionmaker(autocommit=False,
                                          autoflush=False,
                                          bind=engine))
@@ -28,9 +31,7 @@ def login(app, usuario=TEST_USER, password=TEST_PASS):
     @param nombre: nombre de usuario
     @param contrasenha: contrasenha del usuario
     """
-    #permission = UserRol('ADMINISTRADOR')
-    #session['permission_admin'] = permission
-    
+
     access = app.post('/', data=dict(
         username=usuario,
         passwd=password
@@ -57,6 +58,21 @@ def _on_principal_init(sender, identity):
             permisos = db_session.query(Permiso).join(RolPermiso, RolPermiso.id_permiso == Permiso.id).filter(RolPermiso.id_rol == role.id_rol).all()
             for p in permisos:
                 identity.provides.add(ItemNeed(p.codigo, p.id_recurso , 'manage'))
+                
+def _on_principal_initL(sender, identity):
+        usuario = db_session.query(Usuario).filter_by(usuario='lider').first();
+        identity.provides.add(UserNeed(usuario.id))
+        # Assuming the User model has a list of roles, update the
+        # identity with the roles that the user provides
+        roles = db_session.query(UsuarioRol).filter_by(id_usuario=usuario.id).all()
+        for role in roles:
+            if role.id_proyecto == None :
+                identity.provides.add(RoleNeed(role.usuariorolrol.codigo))
+            else :
+                identity.provides.add(ItemNeed(role.usuariorolrol.codigo, int(role.id_proyecto) , 'manage'))
+            permisos = db_session.query(Permiso).join(RolPermiso, RolPermiso.id_permiso == Permiso.id).filter(RolPermiso.id_rol == role.id_rol).all()
+            for p in permisos:
+                identity.provides.add(ItemNeed(p.codigo, p.id_recurso , 'manage'))
 
 def _on_principal_final():
     for key in ('identity.name', 'identity.auth_type'):
@@ -64,4 +80,8 @@ def _on_principal_final():
     #Tell Flask-Principal the user is anonymous
     identity_changed.send(current_app._get_current_object(),
             identity=AnonymousIdentity())
-    
+
+def seleccionar_proyecto(app,idpro):
+    print 'entra'
+    request = app.get('/proyectoActual?pyo='+str(idpro), follow_redirects=True)
+    return request

@@ -76,7 +76,6 @@ def on_identity_loaded(sender, identity):
             if role.id_proyecto == None :
                 identity.provides.add(RoleNeed(role.usuariorolrol.codigo))
             else :
-                print role.usuariorolrol.codigo + '  ' + str(role.id_proyecto)
                 identity.provides.add(ItemNeed(role.usuariorolrol.codigo, int(role.id_proyecto) , 'manage'))
             permisos = db_session.query(Permiso).join(RolPermiso, RolPermiso.id_permiso == Permiso.id).filter(RolPermiso.id_rol == role.id_rol).all()
             for p in permisos:

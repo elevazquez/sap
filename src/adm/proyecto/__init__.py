@@ -325,7 +325,7 @@ def getProyectoByUsuario():
         return redirect(url_for('index'))
     return render_template('proyecto/principal_proyecto.html', proyectos = p, id_usuario= usuario)
 
-@app.route('/proyectoActual')
+@app.route('/proyectoActual',methods=['GET', 'POST'])
 def proyectoActual():
     """Funcion que obtiene el Proyecto Actual"""
     #===========================================================================
