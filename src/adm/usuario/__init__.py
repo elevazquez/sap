@@ -53,7 +53,7 @@ def nuevousuario():
         today = datetime.date.today()
         form = UsuarioFormulario(request.form)
         """ Se un objeto md5 para encriptar la contrasenha del usuario """    
-        con = md5.new()    
+        con = md5.new()  
         if request.method == 'POST' and form.validate():
             #init_db(db_session)
             if form.fecha_nac.data > today :
@@ -82,7 +82,8 @@ def nuevousuario():
             flash_errors(form) 
         return render_template('usuario/nuevousuario.html', form=form)
     else:
-        return 'sin permisos'
+        flash('Sin permisos para agregar usuarios', 'permiso')
+        return render_template('index.html')
 
 @app.route('/usuario/editarusuario', methods=['GET', 'POST'])
 def editarusuario():
@@ -110,10 +111,13 @@ def editarusuario():
                     return render_template('usuario/editarusuario.html', form=form)  
             try:
                 con.update(form.password.data)
+                aux = usuario.id
                 form.populate_obj(usuario)
                 usuario.password = con.hexdigest()
+                usuario.id = aux
                 db_session.merge(usuario)
                 db_session.commit()
+                flash('El usuario ha sido modificado con exito','info')
                 return redirect('/usuario/administrarusuario')
             except DatabaseError, e:
                 flash('Error en la Base de Datos' + e.args[0],'error')
@@ -122,7 +126,8 @@ def editarusuario():
             flash_errors(form)
         return render_template('usuario/editarusuario.html', form=form)
     else:
-        return 'sin permisos'
+        flash('Sin permisos para editar usuarios', 'permiso')
+        return render_template('index.html')
 
 @app.route('/usuario/eliminarusuario', methods=['GET', 'POST'])
 def eliminarusuario():
@@ -136,12 +141,14 @@ def eliminarusuario():
             #init_db(db_session)
             db_session.delete(usuario)
             db_session.commit()
+            flash('El usuario ha sido eliminado con exito','info')
             return redirect('/usuario/administrarusuario')
         except DatabaseError, e:
             flash('Error en la Base de Datos' + e.args[0],'info')
             return render_template('usuario/administrarusuario.html')
     else:
-        return 'sin permisos'
+        flash('Sin permisos para eliminar usuarios', 'permiso')
+        return render_template('index.html')
     
 @app.route('/usuario/buscarusuario', methods=['GET', 'POST'])
 def buscarusuario():
@@ -161,11 +168,10 @@ def buscarusuario():
         valor = request.args['patron']
         #init_db(db_session)
         r = db_session.query(Usuario).filter_by(usuario=valor)
-        if r == None:
-            return 'no existe concordancia'
         return render_template('usuario/administrarusuario.html', usuarios = r)
     else:
-        return 'sin permisos'
+        flash('Sin permisos para buscar usuarios', 'permiso')
+        return render_template('index.html')
 
 @app.route('/usuario/administrarusuario')
 def administrarusuario():
@@ -175,7 +181,8 @@ def administrarusuario():
         usuarios = db_session.query(Usuario).order_by(Usuario.nombre)
         return render_template('usuario/administrarusuario.html', usuarios = usuarios)
     else:
-        return 'sin permisos'
+        flash('Sin permisos para administrar usuarios', 'permiso')
+        return render_template('index.html')
 
 @app.route('/usuario/asignarrol')    
 def asignarrol():
@@ -214,7 +221,6 @@ def agregarrolusu():
                                                   ") and rol.codigo <> 'LIDER PROYECTO' and rol.codigo <> 'COMITE CAMBIOS'").all()
     aux=[]
     for rl in rolesv :
-        print rl.id
         pro=  db_session.query(Proyecto).from_statement("select * from proyecto where id in "+
                                                         "(select id_proyecto from fase where id in"+
                                                             "(select id_fase from recurso where id in"+
@@ -222,7 +228,6 @@ def agregarrolusu():
                                                                     "(select id_permiso from rol_permiso where id_rol="+str(rl.id)+" limit 1)"+
                                                                 ")))").first()
         aux.append(pro)
-        print pro
     form = UsuarioFormulario(request.form,usu)
     usuario = db_session.query(Usuario).filter_by(id=usu.id).first()     
     if request.method == 'POST' : 

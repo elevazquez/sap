@@ -43,13 +43,12 @@ def nuevoproyecto():
     """ Se obtiene la fecha actual para almacenar la fecha de ultima actualizacion """
     permission = UserRol('ADMINISTRADOR')
     if permission.can():
-        today = datetime.date.today()
+        today = datetime.date.today() 
         form = ProyFormulario(request.form)
         r = db_session.query(Rol).filter_by(codigo='COMITE CAMBIOS').first()
         r2 = db_session.query(Rol).filter_by(codigo='LIDER PROYECTO').first()
         form.id_usuario_lider.choices= [(u.id, u.nombre + " " + u.apellido) for u in db_session.query(Usuario).order_by(Usuario.nombre).all()]  
         if request.method == 'POST' and form.validate():
-            #init_db(db_session) 
             if form.fecha_inicio.data > form.fecha_fin.data :
                 flash('La fecha de inicio no puede ser mayor que la fecha de finalizacion','error')
                 return render_template('proyecto/nuevoproyecto.html', form=form)
@@ -107,7 +106,8 @@ def nuevoproyecto():
             flash_errors(form) 
         return render_template('proyecto/nuevoproyecto.html', form=form)
     else:
-        return 'sin permisos'
+        flash('Sin permisos para agregar proyectos', 'permiso')
+        return render_template('index.html')
 
 @app.route('/proyecto/editarproyecto', methods=['GET', 'POST'])
 def editarproyecto():
@@ -169,7 +169,7 @@ def editarproyecto():
                     li = UsuarioRol(r2.id, proyecto.id_usuario_lider, proyecto.id)
                     db_session.add(li)
                     db_session.commit()
-            
+                flash('El Proyecto ha sido modificado con exito','info')
                 return redirect('/proyecto/administrarproyecto')
             except DatabaseError, e:
                 flash('Error en la Base de Datos' + e.args[0],'error')
@@ -178,7 +178,8 @@ def editarproyecto():
             flash_errors(form)
         return render_template('proyecto/editarproyecto.html', form=form)
     else:
-        return 'sin permisos'
+        flash('Sin permisos para editar proyectos', 'permiso')
+        return render_template('index.html')
 
 @app.route('/proyecto/eliminarproyecto', methods=['GET', 'POST'])
 def eliminarproyecto():
@@ -228,12 +229,14 @@ def eliminarproyecto():
             #init_db(db_session)
             db_session.delete(proyecto)
             db_session.commit()
+            flash('El proyecto ha sido eliminado con exito', 'info')
             return redirect('/proyecto/administrarproyecto')
         except DatabaseError, e:
             flash('Error en la Base de Datos' + e.args[0],'info')
             return render_template('proyecto/administrarproyecto.html')
     else:
-        return 'sin permisos'
+        flash('Sin permisos para eliminar proyectos', 'permiso')
+        return render_template('index.html')
     
 @app.route('/proyecto/buscarproyecto', methods=['GET', 'POST'])
 def buscarproyecto():
@@ -254,14 +257,30 @@ def buscarproyecto():
         else:
             p = db_session.query(Proyecto).from_statement("SELECT * FROM proyecto where "+parametro+" ilike '%"+valor+"%'").all()
         return render_template('proyecto/administrarproyecto.html', proyectos = p)   
-        valor = request.args['patron']
-        #init_db(db_session)
-        r = db_session.query(Proyecto).filter_by(nombre=valor)
-        if r == None:
-            return 'no existe concordancia'
-        return render_template('proyecto/administrarproyecto.html', proyectos = r)
+
     else:
-        return 'sin permisos'
+        idproy = None
+        if 'pry' in session:
+            idproy = session['pry']
+        permiss = UserPermission('LIDER PROYECTO', int(idproy))
+        if permiss.can():
+            valor = request.args['patron']
+            parametro = request.args['parametro']
+            #init_db(db_session)
+            if valor == "" : 
+                administrarproyecto()
+            if parametro == 'cant_miembros' :
+                p = db_session.query(Proyecto).from_statement("SELECT * FROM proyecto where to_char("+parametro+", '99999') ilike '%"+valor+"%' and id = "+str(idproy)).all()
+            elif parametro == 'id_usuario_lider':
+                p = db_session.query(Proyecto).from_statement("SELECT * FROM proyecto where "+parametro+" in (SELECT id FROM usuario where nombre ilike '%"+valor+"%' or apellido ilike '%"+valor+"%') and id = "+str(idproy)).all()
+            elif parametro == 'fecha_inicio' or parametro == 'fecha_fin':
+                p = db_session.query(Proyecto).from_statement("SELECT * FROM proyecto where to_char("+parametro+", 'YYYY-mm-dd') ilike '%"+valor+"%' and id = "+str(idproy)).all()
+            else:
+                p = db_session.query(Proyecto).from_statement("SELECT * FROM proyecto where "+parametro+" ilike '%"+valor+"%' and id = "+str(idproy)).all()
+            return render_template('proyecto/administrarproyecto.html', proyectos = p)
+        else:
+            flash('Sin permisos para buscar proyectos', 'permiso')
+            return render_template('index.html')
 
 @app.route('/proyecto/administrarproyecto')
 def administrarproyecto():
@@ -277,8 +296,8 @@ def administrarproyecto():
         else :
             proyectos = db_session.query(Proyecto).order_by(Proyecto.nombre)
     else:
-        permission = UserPermission('LIDER PROYECTO', idproy)
-        if permission.can():
+        permiss = UserPermission('LIDER PROYECTO', int(idproy))
+        if permiss.can():
             proyectos = db_session.query(Proyecto).filter(Proyecto.id == idproy).all()
         else:
             flash('Sin permisos para administrar proyectos', 'permiso')

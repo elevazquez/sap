@@ -64,3 +64,4 @@ def _on_principal_final():
     #Tell Flask-Principal the user is anonymous
     identity_changed.send(current_app._get_current_object(),
             identity=AnonymousIdentity())
+    
