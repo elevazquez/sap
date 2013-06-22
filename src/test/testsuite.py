@@ -3,6 +3,7 @@ from test.testproyecto import ProyectoTestCase
 from test.testusuario import UsuarioTestCase
 from test.testtipoAtributo import TipoATributoTestCase
 from test.testpermiso import PermisoTestCase
+from test.testfase import FaseTestCase
 import unittest
 
 def suite_2():

@@ -38,7 +38,7 @@ def nuevafase():
     permission =UserPermission('LIDER PROYECTO', int(session['pry']))
     if permission.can()==False:
         flash('No posee los permisos suficientes para realizar la operacion', 'info')
-        return render_template('fase/administrarfase.html') 
+        return render_template('index.html') 
     form = FaseFormulario(request.form)
     ##init_db(db_session)
     n = db_session.query(func.max(Fase.nro_orden, type_=Integer)).filter_by(id_proyecto=session['pry']).scalar()
@@ -119,6 +119,7 @@ def editarfase():
                 fase.estado='A' 
             db_session.merge(fase)
             db_session.commit()
+            flash('La fase ha sido editada con exito','info')
             return redirect('/fase/administrarfase')
         except DatabaseError, e:
             flash('Error en la Base de Datos' + e.args[0],'error')
@@ -154,6 +155,7 @@ def eliminarfase():
         #init_db(db_session)
         db_session.delete(fase)
         db_session.commit()
+        flash('La fase ha sido eliminado con exito','info')
         return redirect('/fase/administrarfase')
     except DatabaseError, e:
             flash('Error en la Base de Datos' + e.args[0],'info')
@@ -198,7 +200,6 @@ def buscarfase2():
 @app.route('/fase/administrarfase')
 def administrarfase():
     """ Funcion para listar registros de la tabla Fase""" 
-    #init_db(db_session)
     fases = db_session.query(Fase).filter_by(id_proyecto=session['pry']).order_by(Fase.nro_orden)
     return render_template('fase/administrarfase.html', fases = fases)
 
