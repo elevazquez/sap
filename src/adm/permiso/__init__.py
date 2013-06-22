@@ -49,7 +49,8 @@ def nuevopermiso():
                 return render_template('permiso/nuevopermiso.html', form=form)
         return render_template('permiso/nuevopermiso.html', form=form)
     else:
-        return 'sin permisos'
+        flash('Sin permisos para agregar permisos', 'permiso')
+        return render_template('index.html')
 
 @app.route('/permiso/editarpermiso', methods=['GET', 'POST'])
 def editarpermiso():
@@ -64,6 +65,7 @@ def editarpermiso():
                 form.populate_obj(permiso)
                 db_session.merge(permiso)
                 db_session.commit()
+                flash('El permiso ha sido modificado con exito','info')
                 return redirect('/permiso/administrarpermiso')
             else:
                 flash_errors(form)
@@ -71,7 +73,8 @@ def editarpermiso():
             flash_errors(form)
         return render_template('permiso/editarpermiso.html', form=form)
     else:
-        return 'sin permisos'
+        flash('Sin permisos para modificar permisos', 'permiso')
+        return render_template('index.html')
     
 @app.route('/permiso/eliminarpermiso', methods=['GET', 'POST'])
 def eliminarpermiso():
@@ -82,9 +85,11 @@ def eliminarpermiso():
         rol = db_session.query(Permiso).filter_by(codigo=cod).first()
         db_session.delete(rol)
         db_session.commit()
+        flash('El permiso ha sido eliminado con exito','info')
         return redirect('/permiso/administrarpermiso')
     else:
-        return 'sin permisos'
+        flash('Sin permisos para eliminar permisos', 'permiso')
+        return render_template('index.html')
 
 @app.route('/permiso/buscarpermiso', methods=['GET', 'POST'])
 def buscarpermiso():
@@ -111,7 +116,8 @@ def buscarpermiso():
             return render_template('permiso/administrarpermiso.html', permisos = p, isAdministrar = False, idrol = idrol, asignados = lista)
         return render_template('permiso/administrarpermiso.html', permisos = p, isAdministrar = True)
     else:
-        return 'sin permisos'
+        flash('Sin permisos para buscar permisos', 'permiso')
+        return render_template('index.html')
 
 @app.route('/permiso/administrarpermiso')
 def administrarpermiso():
@@ -130,7 +136,8 @@ def administrarpermiso():
                 lista.append(p)
         return render_template('permiso/administrarpermiso.html', permisos = permisos, isAdministrar = isAdmin, idrol = rol, asignados = lista)
     else:
-        return 'sin permisos'
+        flash('Sin permisos para administrar proyectos', 'permiso')
+        return render_template('index.html')
 
 """Lanza un mensaje de error en caso de que la pagina solicitada no exista"""
 @app.errorhandler(404)
