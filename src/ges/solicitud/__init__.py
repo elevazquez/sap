@@ -495,7 +495,7 @@ def reportehistorial():
             list_aux.append(i)
         if list_aux == None or list_aux == []:
             flash('Debe seleccionar un item','info')
-            return render_template('solicitud/administrarsolicitud.html')
+        return redirect('/solicitud/administrarreportes')
         i = list_aux[0]
         sql = db_session.query(Item).from_statement("select i.id, f.descripcion as id_fase, ti.descripcion as id_tipo_item, " +
         " i.codigo, i.version, i.descripcion, (CASE WHEN i.estado='P' THEN 'En Progreso' WHEN i.estado='R' THEN 'Resuelto' WHEN " +  

@@ -265,10 +265,11 @@ def finalizarfase():
         return render_template('fase/administrarfase.html') 
     nro = request.args.get('nro')
     fase = db_session.query(Fase).filter_by(nro_orden=nro).filter_by(id_proyecto=session['pry']).first()
-    items = db_session.query(Item).from_statement("Select it.*  from item it, "+ 
-                        " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id "+
-                        " and f.id_proyecto = "+str(session['pry'])+ " and f.id ='"+str(fase.id)+"' group by codigo order by 1 ) s "+
-                        " where it.codigo = cod and it.version= vermax order by it.codigo ")
+    items = db_session.query(Item).from_statement("Select it.*  from item it, " + 
+                        " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id " + 
+                        " and f.id_proyecto = " + str(session['pry']) + "  group by codigo order by 1 ) s " + 
+                        " where it.codigo = cod and it.version= vermax and it.estado != 'E' and it.id_fase= "+str(fase.id))
+    
     i = db_session.query(Item).from_statement("Select it.*  from item it, "+ 
                         " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id "+
                         " and f.id_proyecto = "+str(session['pry'])+ " and f.id ='"+str(fase.id)+"' group by codigo order by 1 ) s "+
@@ -279,7 +280,7 @@ def finalizarfase():
                         " and f.id_proyecto = "+str(session['pry'])+" and f.id ="+str(fase.id)+" group by codigo order by 1 ) s " +
                         " where it.codigo = cod and it.version= vermax order by it.codigo )")
     f='S'
-    if fase.estado!='P':
+    if fase.estado!='P' and fase.estado!='L':
         flash('La fase no puede ser finalizada, debe estar en estado En Progreso','info')
         return redirect('/fase/administrarfase')
     if i==None:
