@@ -429,12 +429,17 @@ def reportesol():
     form = ReporteFormulario(request.form)
     form.fecha.data = today
     if  request.method == 'POST' and form.validate():
-        sql = db_session.query(SolicitudCambio).filter_by(id_proyecto=session['pry'])
-        a = sql.first()
+        # sql = db_session.query(SolicitudCambio).filter_by(id_proyecto=session['pry'])
+        p = db_session.query(Proyecto).filter_by(id=session['pry']).first()
+        sql = db_session.query(SolicitudCambio).from_statement("select sc.id, sc.descripcion, sc.fecha, u.nombre as id_usuario, " +
+        " (CASE WHEN sc.estado='N' THEN 'Nueva' WHEN sc.estado='E' THEN 'Enviada' WHEN sc.estado='A' THEN 'Aprobada' WHEN sc.estado='R' " + 
+        " THEN 'Rechazada' END) as estado, rm.voto as cant_votos from usuario u, solicitud_cambio sc left join resolucion_miembros rm " + 
+        " on sc.id = rm.id_solicitud_cambio and rm.id_usuario = "+str(p.id_usuario_lider)+" where sc.id_proyecto = "+str(session['pry'])+" and sc.id_usuario = u.id order by sc.id ") 
+        a = sql.all()
         if (a == None) :
             flash('No se encuentran registros para el reporte','info')   
             return redirect('/solicitud/administrarreportes')
-        reporte = SolicitudReporte(queryset=sql)
+        reporte = SolicitudReporte(queryset=sql.all())
         reporte.generate_by(PDFGenerator, filename=os.path.join(cur_dir, cur_dir + '/static/reportes/Solicitudes.pdf'))
         return render_template('solicitud/solicitud.html')
     else:
