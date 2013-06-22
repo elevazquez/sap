@@ -67,7 +67,7 @@ def nuevasolicitud():
                         " and f.id_proyecto = "+str(session['pry'])+ " group by codigo order by 1 ) s "+
                         " where it.codigo = cod and it.version= vermax and it.estado = 'B' " + 
                         " and it.id not in(select id_item from solicitud_item where id_solicitud in (select id from solicitud_cambio " +
-                        " where id_proyecto = "+str(session['pry'])+" and (estado='N' or estado ='E'))) order by it.codigo ")
+                        " where id_proyecto = "+str(session['pry'])+" and (estado='N' or estado ='E'))) order by it.codigo ").all()
     if request.method == 'POST' and form.validate():
  #       init_db(db_session)
         try:
@@ -100,7 +100,7 @@ def nuevasolicitud():
                 flash('Clave unica violada por favor ingrese otro NUMERO de Solicitud' ,'error')
             else:
                 flash('Error en la Base de Datos' + e.args[0],'error')
-            return render_template('solicitud/nuevasolicitud.html', items= items, form= form)
+            return render_template('solicitud/nuevasolicitud.html', form= form, items= items)
     else:
         flash_errors(form)  
     return render_template('solicitud/nuevasolicitud.html', form= form ,items= items)
@@ -486,7 +486,7 @@ def reportehistorial():
     items = db_session.query(Item).from_statement("Select it.*  from item it, "+ 
                         " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id "+
                         " and f.id_proyecto = "+str(session['pry'])+ " group by codigo order by 1 ) s "+
-                        " where it.codigo = cod and it.version= vermax order by it.codigo ")
+                        " where it.codigo = cod and it.version= vermax order by it.codigo ").all()
     if  request.method == 'POST' and form.validate():
         multiselect= request.form.getlist('selectitem')  
         list_aux=[]
@@ -495,12 +495,12 @@ def reportehistorial():
             list_aux.append(i)
         if list_aux == None or list_aux == []:
             flash('Debe seleccionar un item','info')
-            return render_template('solicitud/administrarsolicitud.html')
+            return redirect('/solicitud/administrarreportes')
         i = list_aux[0]
         sql = db_session.query(Item).from_statement("select i.id, f.descripcion as id_fase, ti.descripcion as id_tipo_item, " +
         " i.codigo, i.version, i.descripcion, (CASE WHEN i.estado='P' THEN 'En Progreso' WHEN i.estado='R' THEN 'Resuelto' WHEN " +  
         " i.estado='A' THEN 'Aprobado' WHEN i.estado='Z' THEN 'Rechazado' WHEN i.estado='E' THEN 'Eliminado' " + 
-        " WHEN i.estado='V' THEN 'Revision' WHEN i.estado='B' THEN 'Bloqueado' END) as estado, "
+        " WHEN i.estado='V' THEN 'Revision' WHEN i.estado='I' THEN 'Inicial' WHEN i.estado='B' THEN 'Bloqueado' END) as estado, "
         " i.costo, i.complejidad from item i, fase f, tipo_item ti where i.codigo = '"+ str(i.codigo) +
         "' and f.id = i.id_fase and ti.id = i.id_tipo_item order by version ")
         a = sql.first()
@@ -528,7 +528,7 @@ def reportelista():
     today = datetime.date.today()
     form = ListaItemFormulario(request.form)
     form.fecha.data = today
-    fases = db_session.query(Fase).filter_by(id_proyecto=session['pry']).order_by(Fase.nro_orden)
+    fases = db_session.query(Fase).filter_by(id_proyecto=session['pry']).order_by(Fase.nro_orden).all()
     if  request.method == 'POST' and form.validate():
         multiselect= request.form.getlist('selectitem')  
         list_aux=[]

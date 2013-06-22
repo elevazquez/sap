@@ -1,95 +1,114 @@
-import unittest
 from loginC import app
 
-from test_helper import login
+from flask_principal import identity_loaded
+from test_helper import login,_on_principal_initL, logout, TEST_USER_LIDER, TEST_PASS_LIDER
+import unittest
+import datetime
+from test.test_helper import seleccionar_proyecto
 
+TODAY = datetime.date.today()
+PROYECTOID = 4
+nro_orden = 3
+nombre = 'TEST FASE 1 P4'
+descripcion = 'test fase 1 des'
+estado = 'I'
+fecha_inicio = TODAY
+fecha_fin = '2014-05-20'
+id_proyecto = PROYECTOID
+PATRON = nombre
+PARAM = 'nombre'
 
 class FaseTestCase(unittest.TestCase):
     """Clase que implementa los test para el caso de uso Fase."""
     
     def setUp(self):
         """se llama al metodo antes de iniciar el test"""        
-        print "Iniciando test"
-        self.app = app.test_client()
-        self.acceso = login(self.app)
+        self.client = app.test_client()
+        self.acceso = login(self.client, TEST_USER_LIDER, TEST_PASS_LIDER)
+        identity_loaded.connect(_on_principal_initL)
+        self.proyse= seleccionar_proyecto(self.client, PROYECTOID)
+        with app.test_client() as c:
+            with c.session_transaction() as sess:
+                sess['pry'] = PROYECTOID
 
     def tearDown(self):
         """ se llama al metodo al terminar el test"""
-        print "Terminando test"
+        self.salir = logout(self.client)
 
-    def test_get_all_fases_bis(self):
-        """verifica si se puede acceder al listado de faaes """
-        request = self.app.get('/fase/administrarfase', follow_redirects=True)
-        assert 'No posee los permisos suficientes para realizar la operacion' in request.data
-
-    def test_get_all_fases(self):
-        """verifica si se puede acceder al listado de faaes """
-        request = self.app.get('/fase/administrarfase', follow_redirects=True)
-        assert 'fase 2' in request.data
-        self.assertEqual(request._status, '200 OK')
+    def test_a_get_all_fases(self):
+        """Prueba que verifica si se puede acceder al listado de fases"""
+        print '##----++++ PRUEBA UNITARIA FASE ++++----##'
+        print '+++ Obtener todas las fases +++'
+        request = self.client.get('/fase/administrarfase', follow_redirects=True)
+        self.assertNotIn('No posee los permisos suficientes para realizar la operacion', request.data, 'No tiene permisos para ver las fases')
+        self.assertEqual(request._status, '200 OK', 'Error al obtener las fases como '+ TEST_USER_LIDER)
+        print '*-- Obtiene todos las fases -- request result: ' + request._status + ' --*'
+        print'*---test 1 fase---*'
    
-   
-    def test_crear_fases(self):
-        """  crea fase y verifica si  fue creado     """   
-        request = self._crear_fase(1,'fase 2','testing','I',None,None, 1)     
-        print "Respuesta satisfactoria, verificando si creo la fase"
-        request_all = self.app.get('/fase/administrarfase', follow_redirects=True)
-        assert 'La fase ha sido registrada con exito' in request_all.data
-        print "fase creada correctamente"
+    def test_b_crear_fases(self):    
+        """ Prueba de creacion de fase y verifica si la fase fue creada"""
+        print '+++ Creacion de fase +++'
+        request = self._crear_fase(nro_orden, nombre, descripcion, estado, fecha_inicio, fecha_fin, id_proyecto)
+        print '*-- datos de prueba ::: ' + str(nro_orden) + ', '+ nombre+', '+  descripcion+', ' +estado + ', ' + str(fecha_inicio) +', '+ str(fecha_fin) +', '+ str(id_proyecto) +' --*'
+        self.assertNotIn('No posee los permisos suficientes para realizar la operacion', request.data, 'No tiene permisos para crear fases')
+        self.assertNotIn('Error', request.data, 'Tiene errores el form')
+        self.assertIn('La fase ha sido registrada con exito', request.data, 'Error al crear la fase')
+        print '*-- request result: ' + request._status + ' --*'
+        self.assertIn(nombre, request.data, 'La fase creada no se encuentra en la tabla')
+        print '*-- '+nombre+' creada correctamente, aparece en la tabla de fases--*'
+        print '*---test 2 fase---*'
 
-
-    def test_crear_fase_duplicado(self):
-        """prueba si se pueden crear fase duplicados    """
-        #Ahora probamos vovler a crear
-        request = self._crear_fase(1,'fase 2','testing','I',None,None, 1)  
-        print "Respuesta satisfactoria, verificando si dejo crear la fase"
-        assert 'Clave unica violada por favor ingrese otro NUMERO de Fase' in request.data
-
-
-#    def test_eliminar_proyecto(self):
-#        """verifica si se puede eliminar un proyecto  """
-#        print "Creando rol con nombre 'rolprueba2'."
-#        crear_request = self._crear_rol('rolprueba2', 'borrar')
-#        print "Verificando si se creo el rol"
-#        all_request = self._get()
-#        assert 'rolprueba2' in all_request.data
-#        print "Rol creado exitosamente"        
-#        borrar_request = self._eliminar_rol('rolprueba2', 'borrar')
-#        print "verificar si se elimino"
-#        request_all = self._get() #self.app.get('/administrarrol', follow_redirects=True)
-#        assert 'rolprueba2' not in  request_all.data
-#        self.assertEqual(request_all._status, '200 OK')
-#        print "verificacion completa, se elimino"
-        
-        
-    def test_editar_fase(self):
-        """  edita una fase    """        
-        print "Probando editar proyecto"
-        request = self._editar_fase(1,'fase 2','testing editar', 'I', None,None, 1 )   
-        print "Respuesta satisfactoria, verificando si se edito la fase"
-        request_all = self.app.get('/fase/administrarfase', follow_redirects=True)
-        assert 'No se pueden modificar Fases que no se encuentren en estado Inicial' in request_all.data
-        
-    def test_editar_fase_bis(self):
-        """  edita una fase    """        
-        print "Probando editar proyecto"
-        request = self._editar_fase(1,'fase 2','testing editar', 'P', None,None, 1 )   
-        print "Respuesta satisfactoria, verificando si se edito la fase"
-        request_all = self.app.get('/fase/administrarfase', follow_redirects=True)
-        assert 'testing editar' in request_all.data
+    def test_c_crear_fase_duplicado(self):
+        """prueba si se pueden crear fase duplicados"""
+        print '+++ Creacion de fase con mismo numero orden duplicado +++'
+        request = self._crear_fase(nro_orden, nombre, descripcion, estado, fecha_inicio, fecha_fin, id_proyecto)
+        print '*-- datos de prueba ::: ' + str(nro_orden) + ', '+ nombre+', '+  descripcion+', ' +estado + ', ' + str(fecha_inicio) +', '+ str(fecha_fin) +', '+ str(id_proyecto) +' --*'
+        self.assertNotIn('No posee los permisos suficientes para realizar la operacion', request.data, 'No tiene permisos para crear fases')
+        self.assertNotIn('Error', request.data, 'Tiene errores el form')
+        self.assertIn('Clave unica violada por favor ingrese otro NUMERO de Fase', request.data, 'Fase creada, no existe el numero de orden para la nueva fase')
+        self.assertIn(str(nro_orden), request.data, 'La fase creada no se encuentra en la tabla')
+        print '*-- Verificacion completa, no se pueden crear dos fases con el mismo numero de orden --*'
+        print '*---test 3 fase---*'
     
-    def test_editar_fase_bis2(self):
-        """  edita una fase    """        
-        print "Probando editar proyecto"
-        request = self._editar_fase(1,'fase 2','testing editar', 'P', '2013-05-01','2013-04-28', 1 )   
-        print "Respuesta satisfactoria, verificando si se edito la fase"
-        request_all = self.app.get('/fase/administrarfase', follow_redirects=True)
-        assert 'La fecha de inicio no puede ser mayor que la fecha de finalizacion' in request_all.data
+    def test_d_buscar_fase(self):
+        """Prueba de busqueda de una fase"""
+        print '+++ Buscar una fase existente por nombre +++'
+        request = self._buscar_fase(PATRON, PARAM)
+        print '*-- datos de prueba ::: patron = '+ PATRON +', parametro = '+PARAM+' --*'
+        self.assertNotIn('Sin permisos para buscar fase', request.data, 'No tiene permisos para ver las fases')
+        self.assertNotIn('Sin registro de fases', request.data, 'No se encontro fases con dicho parametro')
+        self.assertIn(PATRON, request.data, 'La fase no existe en la tabla')
+        print '*-- Fase encontrada exitosamente --*'
+        print '*---test 4 fase---*'
 
+    def test_e_editar_fase(self):
+        """  edita una fase    """        
+        print '+++ Edicion de fase +++'
+        request = self._editar_fase(nro_orden, nombre, 'decrip editada', estado, fecha_inicio, fecha_fin, id_proyecto)
+        print '*-- datos de prueba ::: ' + str(nro_orden) + ', '+ nombre+', '+ 'decrip editada'+', ' +estado + ', ' + str(fecha_inicio) +', '+ str(fecha_fin) +', '+ str(id_proyecto) +' --*'
+        self.assertNotIn('No posee los permisos suficientes para realizar la operacion', request.data, 'No tiene permisos para editar fases')
+        self.assertNotIn('Error', request.data, 'Tiene errores el form')
+        self.assertIn('La fase ha sido editada con exito', request.data, 'Error al crear la fase')
+        print '*-- request result: ' + request._status + ' --*'
+        self.assertIn(nombre, request.data, 'La fase creada no se encuentra en la tabla')
+        print '*-- '+nombre+' creada correctamente, aparece en la tabla de fases--*'
+        print '*---test 5 fase---*'
+
+    def test_f_eliminar_fase(self):
+        """Prueba de verificacion si se puede eliminar una fase"""
+        print '+++ Eliminacion de proyecto existente +++'
+        borrar_request = self._eliminar_fase(nro_orden)
+        print '*-- datos de prueba ::: numero orden = ' + str(nro_orden) +' --*'
+        self.assertNotIn('No posee los permisos suficientes para realizar la operacion', borrar_request.data, 'No tiene permisos para eliminar fases')
+        self.assertIn('La fase ha sido eliminado con exito', borrar_request.data, 'Fase creada, no existe el nro_oden fase')
+        self.assertNotIn(str(nombre), borrar_request.data, 'La fase no ha sido borrado')
+        print '*-- Verificacion completa, se elimino correctamente--*'
+        print '*---test 6 fase---*'
+        print '##----++++ FIN PRUEBA UNITARIA FASE ++++----##'
             
-    def _crear_fase(self, nro_orden=1, nombre='fase 2', descripcion='testing', estado='I', fecha_inicio=None,
-    fecha_fin=None, id_proyecto=1):     
-        request = self.app.post('/fase/nuevafase', data=dict(
+    def _crear_fase(self, nro_orden=nro_orden, nombre=nombre, descripcion=descripcion, estado=estado, fecha_inicio=fecha_inicio,
+    fecha_fin=fecha_fin, id_proyecto=id_proyecto):     
+        request = self.client.post('/fase/nuevafase', data=dict(
             nro_orden = nro_orden,
             nombre = nombre,
             descripcion = descripcion,
@@ -99,9 +118,9 @@ class FaseTestCase(unittest.TestCase):
             id_proyecto = id_proyecto), follow_redirects=True)
         return request
     
-    def _editar_fase(self, nro_orden=1, nombre='fase 2', descripcion='testing editar', estado='I', fecha_inicio=None,
-    fecha_fin=None, id_proyecto=1):     
-        request = self.app.post('/fase/editarfase', data=dict(
+    def _editar_fase(self, nro_orden=nro_orden, nombre=nombre, descripcion='decrip editada', estado=estado, fecha_inicio=fecha_inicio,
+    fecha_fin=fecha_fin, id_proyecto=id_proyecto):     
+        request = self.client.post('/fase/editarfase', data=dict(
             nro_orden = nro_orden,
             nombre = nombre,
             descripcion = descripcion,
@@ -110,15 +129,18 @@ class FaseTestCase(unittest.TestCase):
             fecha_fin = fecha_fin,
             id_proyecto = id_proyecto), follow_redirects=True)
         return request
+    
+    def _buscar_fase(self, patron = PATRON , parametro = PARAM ):
+        request = self.client.get('/fase/buscarfase2?patron='+patron+'&parametro='+parametro+'&Buscar=Buscar', follow_redirects=True)
+        return request
 
-#    def _eliminar_proyecto(self, codigo='rolprueba2', descripcion='borrar'):     
-#        request = self.app.post('/eliminar', data=dict(
-#            codigo=codigo, descripcion=descripcion), follow_redirects=True)
-#        return request
+    def _eliminar_fase(self, nro_orden=nro_orden):     
+        request = self.client.post('/fase/eliminarfase?nro='+str(nro_orden), follow_redirects=True)
+        return request
     
     def _get(self, url ='/fase/administrarfase'):
         """obtiene la pagina administrar fases """
-        return self.app.get(url, follow_redirects=True)
+        return self.client.get(url, follow_redirects=True)
         
 if __name__ == '__main__':
     unittest.main()
