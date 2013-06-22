@@ -47,7 +47,7 @@ def diagramar():
     """ Funcion que se encarga de construir el grafo"""   
     nodos_explorados=[]
     aristas_exploradas= []
-    if cantidadFase() == 4 :
+    if cantidadFase() == 4 : 
         grafo = pydot.Dot(graph_type='digraph', rankdir="LR", label= "GRAFICO DEL SISTEMA SAP /Blanco= Fase 1 /Azul= Fase 2 /Verde= Fase 3 /Amarillo= Fase 4")
     else:
         grafo = pydot.Dot(graph_type='digraph', rankdir="LR", label= "GRAFICO DEL SISTEMA SAP /Blanco= Fase 1 /Azul= Fase 2 /Verde= Fase 3 ")
