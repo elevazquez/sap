@@ -18,21 +18,13 @@
 			</div>
 		{% endif %} 
 	{% endwith %}
-	<table border="0">
 	{% if 'permiso_lider' in session %}
 		{% if( session['permiso_lider'].can() ) %}		
-	<TR>
-		<TD class="c1"><a href="{{ url_for('reportesol') }}" >Solicitudes de Cambio</a></TD>
-	</TR>
+		<ul><li><a href="{{ url_for('reportesol') }}" >Solicitudes de Cambio</a></li>
 		{% endif %}
 	{% endif %}
-	<TR>
-		<TD class="c1"><a href="{{ url_for('reportelista') }}" >Lista de Ítems</a></TD>
-	</TR>
-	<TR>
-		<TD class="c1"><a href="{{ url_for('reportehistorial') }}" >Historial de Ítem</a></TD>
-	</TR>
-</table>
+		<li><a href="{{ url_for('reportelista') }}" >Lista de Ítems</a></li>
+		<li><a href="{{ url_for('reportehistorial') }}" >Historial de Ítem</a></li></ul>
 </div>
 </div>
 {% endblock %}

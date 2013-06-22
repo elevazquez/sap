@@ -32,7 +32,7 @@ class SolicitudReporte(Report):
             Label(text="Estado", top=0.8*cm, left=12*cm),
             Label(text="Voto", top=0.8*cm, left=15*cm)
         ]
-        borders = {'bottom': Line(stroke_color=red, stroke_width=3)}
+        borders = {'bottom': Line(stroke_color=navy)}
 
     class band_page_footer(ReportBand):
         height = 0.5*cm
@@ -76,31 +76,31 @@ class SolicitudReporte(Report):
     
     subreports = [
          SubReport(
-             queryset_string = '%(object)s. detalle(20)',
+             queryset_string = '%(object)s. detalle(%(object)s.id)',
 #             queryset_string = '%(object)s. db_session.query(LineaBase).from_statement(select lb.* from solicitud_item si, linea_base lb, lb_item lbi where si.id_solicitud=20 ' 
 #             ' and si.id_item = lbi.id_item and lbi.id_linea_base = lb.id order by lb.descripcion ).all()',
              band_header = ReportBand(
                      height=0.5*cm,
                      elements=[
                          Label(text='Linea Base', top=0, left=0.2*cm, style={'fontName': 'Helvetica-Bold'}),
-                         Label(text='Id', top=0, left=0.2*cm, style={'fontName': 'Helvetica-Bold'}),
-                         Label(text='Descripcion', top=0, left=4*cm, style={'fontName': 'Helvetica-Bold'}),
+                         Label(text='Id', top=0, left=4*cm, style={'fontName': 'Helvetica-Bold'}),
+                         Label(text='Descripcion', top=0, left=8*cm, style={'fontName': 'Helvetica-Bold'}),
                      ],
                      borders={'top': True, 'left': True, 'right': True},
                  ),
              band_detail = ReportBand(
                      height=0.5*cm,
                      elements=[
-                         ObjectValue(attribute_name='id', top=0, left=0.2*cm),
-                         ObjectValue(attribute_name='descripcion', top=0, left=4*cm),
+                         ObjectValue(attribute_name='id', top=0, left=4*cm),
+                         ObjectValue(attribute_name='descripcion', top=0, left=8*cm),
                      ],
                      borders={'left': True, 'right': True},
                  ),
              band_footer = ReportBand(
                      height=0.5*cm,
                      elements=[
-                         ObjectValue(attribute_name='id', left=4*cm,\
-                             action=FIELD_ACTION_COUNT, display_format='%s permissions found',
+                         ObjectValue(attribute_name='id', left=8*cm,\
+                             action=FIELD_ACTION_COUNT, display_format='%s lineas base en la Solicitud',
                              style={'fontName': 'Helvetica-Bold'}),
                      ],
                      borders={'bottom': True, 'left': True, 'right': True},
