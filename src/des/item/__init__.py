@@ -904,7 +904,7 @@ def listahistorialitem():
 def listarreviviritem():   
     """funcion que lista los items a ser revividos"""
     # #init_db(db_session)
-    item2 = db_session.query(Item).from_statement(" select i.* from item i where i.estado = 'E' and version = (Select max(i2.version) from item i2 where i2.codigo = i.codigo ) order by i.codigo ")
+    item2 = db_session.query(Item).from_statement(" select i.* from item i, fase f where i.estado = 'E' and f.id = i.id_fase and f.id_proyecto="+ str(session['pry'])+" and version = (Select max(i2.version) from item i2 where i2.codigo = i.codigo ) order by i.codigo ")
     return render_template('item/listarreviviritem.html', items2=item2)  
     
     
@@ -932,9 +932,14 @@ def reviviritem():
         
     
     if verificarPermiso(id_faseg, "MODIFICACION ITEM") == False:
-            flash('No posee los Permisos suficientes para realizar esta Operacion', 'error')
+            flash('No posee los Permisos suficientes para realizar esta Operacion', 'info')
             return redirect('/item/administraritem') 
-        
+     
+    fase= db_session.query(Fase).filter_by(id= id_faseg).filter_by(estado ='A').first()
+    if  fase != None:
+            flash('No se pueden Revivir Item de Fases Finalizadas', 'info')
+            return redirect('/item/administraritem')
+         
     form = ItemEditarFormulario(request.form, i)   
               
     item = db_session.query(Item).filter_by(nombre=form.nombre.data).filter_by(id=id_itemg).first()  
