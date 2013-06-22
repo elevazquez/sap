@@ -4,6 +4,13 @@ from sqlalchemy.orm import *
 from util.database import Base
 from adm.mod.Usuario import Usuario 
 from adm.mod.Proyecto import Proyecto 
+from util.database import init_db, engine
+from sqlalchemy.orm import scoped_session, sessionmaker
+from ges.mod.LineaBase import LineaBase
+
+db_session = scoped_session(sessionmaker(autocommit=False,
+                                         autoflush=False,
+                                         bind=engine))
 
 class SolicitudCambio (Base):
     __tablename__ = 'solicitud_cambio'
@@ -27,6 +34,10 @@ class SolicitudCambio (Base):
         self.id_proyecto = id_proyecto
             
     def __repr__(self):
-        return '<Proyecto %s %s %s %d %d %d>' % (self.descripcion, self.estado,
+        return '<Proyecto %s %s %s %s %s %s>' % (self.descripcion, self.estado,
         self.fecha, self.cant_votos, self.id_usuario, self.id_proyecto)
     
+    def detalle(self, id_solicitud=None):
+        return db_session.query(LineaBase).from_statement('select lb.* from solicitud_item si, linea_base lb, lb_item lbi '+ 
+        ' where si.id_solicitud='+str(id_solicitud)+' and si.id_item = lbi.id_item and lbi.id_linea_base = lb.id order by lb.descripcion ') 
+        

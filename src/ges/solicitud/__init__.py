@@ -6,6 +6,7 @@ from sqlalchemy.exc import DatabaseError
 from sqlalchemy import func, Integer
 from flask import Flask, render_template, request, redirect, url_for, flash, session 
 from adm.mod.Proyecto import Proyecto
+from adm.mod.Usuario import Usuario
 from des.mod.Fase import Fase
 from ges.mod.SolicitudCambio import SolicitudCambio
 from ges.mod.SolicitudItem import SolicitudItem
@@ -428,18 +429,55 @@ def reportesol():
     today = datetime.date.today()
     form = ReporteFormulario(request.form)
     form.fecha.data = today
+    usuarios = db_session.query(Usuario).order_by(Usuario.nombre).all()
+        
     if  request.method == 'POST' and form.validate():
-        sql = db_session.query(SolicitudCambio).filter_by(id_proyecto=session['pry'])
-        a = sql.first()
-        if (a == None) :
-            flash('No se encuentran registros para el reporte','info')   
-            return redirect('/solicitud/administrarreportes')
-        reporte = SolicitudReporte(queryset=sql)
-        reporte.generate_by(PDFGenerator, filename=os.path.join(cur_dir, cur_dir + '/static/reportes/Solicitudes.pdf'))
-        return render_template('solicitud/solicitud.html')
+        # sql = db_session.query(SolicitudCambio).filter_by(id_proyecto=session['pry'])
+        multiselect= request.form.getlist('selectitem')  
+        list_aux=[]
+        f = None
+        if multiselect != None and multiselect != [] :
+            for fa in multiselect : 
+                f = db_session.query(Usuario).filter_by(id=fa).first()    
+                list_aux.append(f)
+            if list_aux != None and list_aux != [] :
+                f = list_aux[0]
+        p = db_session.query(Proyecto).filter_by(id=session['pry']).first()
+        if (f==None) :
+            sql = db_session.query(SolicitudCambio).from_statement("select sc.id, sc.descripcion, sc.fecha, u.nombre as id_usuario, " +
+                                                                   " (CASE WHEN sc.estado='N' THEN 'Nueva' WHEN sc.estado='E' THEN 'Enviada' WHEN sc.estado='A' THEN 'Aprobada' WHEN sc.estado='R' " + 
+                                                                   " THEN 'Rechazada' END) as estado, rm.voto as cant_votos from usuario u, solicitud_cambio sc left join resolucion_miembros rm " + 
+                                                                   " on sc.id = rm.id_solicitud_cambio and rm.id_usuario = "+str(p.id_usuario_lider)+" where sc.id_proyecto = "+str(session['pry'])+" and sc.id_usuario = u.id order by sc.id ") 
+            a = sql.first()
+            if (a == None) :
+                flash('No se encuentran registros para el reporte','info')   
+                return redirect('/solicitud/administrarreportes')
+            reporte = SolicitudReporte(queryset=sql.all())
+            reporte.generate_by(PDFGenerator, filename=os.path.join(cur_dir, cur_dir + '/static/reportes/Solicitudes.pdf'))
+        else :
+            sql = db_session.query(SolicitudCambio).from_statement("select sc.id, sc.descripcion, sc.fecha, u.nombre as id_usuario, " +
+                                                                   " (CASE WHEN sc.estado='N' THEN 'Nueva' WHEN sc.estado='E' THEN 'Enviada' WHEN sc.estado='A' THEN 'Aprobada' WHEN sc.estado='R' " + 
+                                                                   " THEN 'Rechazada' END) as estado, rm.voto as cant_votos from usuario u, solicitud_cambio sc left join resolucion_miembros rm " + 
+                                                                   " on sc.id = rm.id_solicitud_cambio and rm.id_usuario = "+str(p.id_usuario_lider)+" where sc.id_proyecto = "+str(session['pry'])+
+                                                                   " and sc.id_usuario = u.id and u.id= "+str(f.id)+"order by sc.id ") 
+            a = sql.first()
+            if (a == None) :
+                flash('No se encuentran registros para el reporte','info')   
+                return redirect('/solicitud/administrarreportes')
+            reporte = SolicitudReporte(queryset=sql.all())
+            reporte.generate_by(PDFGenerator, filename=os.path.join(cur_dir, cur_dir + '/static/reportes/Solicitudes.pdf'))
+        filename=os.path.join(cur_dir, cur_dir + '/static/reportes/Solicitudes.pdf')
+        results = open(filename ,'rb').read()
+        generator = (cell for row in results
+                    for cell in row) 
+        return Response(generator,
+                       mimetype='application/pdf',
+                       headers={"Content-Disposition":
+                                    "attachment;filename={0}".format('ReporteSolicitud.pdf')}) 
+        #return render_template('solicitud/solicitud.html')
     else:
         flash_errors(form) 
-    return render_template('solicitud/reportesolicitud.html', form=form)
+    return render_template('solicitud/reportesolicitud.html', form=form, usuarios=usuarios)
 
 @app.route('/solicitud/reportehistorial', methods=['GET', 'POST'])
 def reportehistorial():   
@@ -460,7 +498,10 @@ def reportehistorial():
             return render_template('solicitud/administrarsolicitud.html')
         i = list_aux[0]
         sql = db_session.query(Item).from_statement("select i.id, f.descripcion as id_fase, ti.descripcion as id_tipo_item, " +
-        " i.codigo, i.version, i.descripcion, i.estado, i.costo, i.complejidad from item i, fase f, tipo_item ti where i.codigo = '"+ str(i.codigo) +
+        " i.codigo, i.version, i.descripcion, (CASE WHEN i.estado='P' THEN 'En Progreso' WHEN i.estado='R' THEN 'Resuelto' WHEN " +  
+        " i.estado='A' THEN 'Aprobado' WHEN i.estado='Z' THEN 'Rechazado' WHEN i.estado='E' THEN 'Eliminado' " + 
+        " WHEN i.estado='V' THEN 'Revision' WHEN i.estado='B' THEN 'Bloqueado' END) as estado, "
+        " i.costo, i.complejidad from item i, fase f, tipo_item ti where i.codigo = '"+ str(i.codigo) +
         "' and f.id = i.id_fase and ti.id = i.id_tipo_item order by version ")
         a = sql.first()
         if (a == None) :
@@ -468,7 +509,15 @@ def reportehistorial():
             return redirect('/solicitud/administrarreportes')
         reporte = HistorialReporte(queryset= sql)
         reporte.generate_by(PDFGenerator, filename=os.path.join(cur_dir, cur_dir + '/static/reportes/HistorialItem.pdf'))
-        return render_template('item/historial.html')
+        filename=os.path.join(cur_dir, cur_dir + '/static/reportes/HistorialItem.pdf')
+        results = open(filename ,'rb').read()
+        generator = (cell for row in results
+                    for cell in row) 
+        return Response(generator,
+                       mimetype='application/pdf',
+                       headers={"Content-Disposition":
+                                    "attachment;filename={0}".format('ReportehistorialItem.pdf')}) 
+        #return render_template('item/historial.html')
     else:
         flash_errors(form) 
     return render_template('item/reportehistorial.html', form=form, items=items)
@@ -510,7 +559,15 @@ def reportelista():
                 return redirect('/solicitud/administrarreportes')
             reporte = ListaReporte(queryset= sql)
             reporte.generate_by(PDFGenerator, filename=os.path.join(cur_dir, cur_dir + '/static/reportes/ListaItem.pdf'))
-        return render_template('item/ritem.html')
+        filename=os.path.join(cur_dir, cur_dir + '/static/reportes/ListaItem.pdf')
+        results = open(filename ,'rb').read()
+        generator = (cell for row in results
+                    for cell in row) 
+        return Response(generator,
+                       mimetype='application/pdf',
+                       headers={"Content-Disposition":
+                                    "attachment;filename={0}".format('ReporteListaItem.pdf')}) 
+        #return render_template('item/ritem.html')
     else:
         flash_errors(form) 
     return render_template('item/reporteitem.html', form=form, fases=fases)

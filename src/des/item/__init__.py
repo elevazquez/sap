@@ -2,6 +2,7 @@ from UserPermission import UserPermission
 from adm.mod.Permiso import Permiso
 from adm.mod.Recurso import Recurso
 from adm.mod.Usuario import Usuario
+from flask import Response
 from des.item.ItemEditarFormulario import ItemEditarFormulario
 from des.item.ItemFormulario import ItemFormulario
 from des.item.ItemModFormulario import ItemModFormulario
@@ -10,7 +11,7 @@ from des.mod.Fase import Fase
 from des.mod.Item import Item
 from des.mod.ItemAtributo import ItemAtributo
 from des.mod.LbItem import LbItem
-from des.mod.TItemAtributo import TItemAtributo
+from des.mod.TItemAtributo import TItemAtributo 
 from des.mod.TipoItem import TipoItem
 from flask import Flask, request, redirect, url_for, flash, session, \
     render_template
@@ -19,18 +20,17 @@ from ges.mod.Relacion import Relacion
 from ges.mod.SolicitudCambio import SolicitudCambio
 from ges.mod.SolicitudItem import SolicitudItem
 from ges.mod.TipoRelacion import TipoRelacion
+from des.mod.Archivo import Archivo
 from loginC import app
 from sqlalchemy.exc import DatabaseError
 from sqlalchemy.orm import scoped_session, sessionmaker
 from util.database import init_db, engine
-import binascii
+from werkzeug import secure_filename
+from binascii import *
 import datetime
-import flask
 import flask.views
 import os
 import psycopg2
-import pickle
-from xml.etree import ElementTree
 
 estado_global = None;
 
@@ -109,60 +109,38 @@ def nuevoitem():
     if request.method == 'POST' and form.validate():
         try:
             atributo = db_session.query(Atributo).join(TItemAtributo , TItemAtributo.id_atributo == Atributo.id).join(TipoItem, TipoItem.id == TItemAtributo.id_tipo_item).filter(TipoItem.id == id_tipog).all()
-                
-            # f=open(form.archivo.data ,'rb')
-            # fb= f.read()
-           # arch = request.FILES[form.archivo.name].read()
-            # open(os.path.join(UPLOAD_PATH, form.archivo.data), 'w').write(arch)
            
-            # f = open(form.archivo.file, 'rb')
-            # binary = f.read()
-            #############file = request.files['file']
-            # mypic = open(form.archivo.data, 'rb').read()
-            # curs.execute("insert into blobs (file) values (%s)",    
-            # archivo=file(form.archivo.data,'rb').read()  
-            #---------------------------------
-            
-                
-            file = request.form.get('archivo')
-            
-            #escritorFile = open(file,'wb')
-            
+            uploaded_file = flask.request.files['archivo']
             #pickle.dump("hola", escritorFile,2)
-#            print uploaded_file   
+            print uploaded_file   
 #            # f = file(uploaded_file, 'rb').read()
-#            print  uploaded_file.filename 
-#            print  uploaded_file.read()  
-#            print bin(reduce(lambda x, y: 256 * x + y, (ord(c) for c in "'" + uploaded_file.read() + "'"), 0))
-#           
-
-            # print bin(reduce(lambda x, y: 256*x+y, (ord(c) for c in uploaded_file.filename ), 0))
-            # print uploaded_file.save(uploaded_file.read())    
-             
-             
-           # print uploaded_file.data 
-           # print "archivo "+ str(fb)  
-            # print " acth "+ str(file)
-           # f = open(form.archivo.file, 'rb')
-            # binary = f.read()  
-            # print "jooo "+str(f)+" by "+str(binary)
+            print  uploaded_file.filename  
+            print  uploaded_file.read()
+            print   uploaded_file.content_type 
+            
             item = Item(form.codigo.data, form.nombre.data, form.descripcion.data,
                     form.estado.data, form.complejidad.data, form.fecha.data, form.costo.data,
-                    form.usuario.data , form.version.data, id_faseg , id_tipog, file)
+                    form.usuario.data , form.version.data, id_faseg , id_tipog, None)
             db_session.add(item)
             db_session.commit() 
-            # psycopg2.Binary(form.archivo.data)  (psycopg2.Binary(file),) 
-            uploaded_file = flask.request.files['archivo']
+            print"entro "
             
-#            nombre = os.path.join(os.path.dirname(__file__), uploaded_file.filename)
-#            print "path "+ os.path.basename(uploaded_file.filename) 
-#            print nombre 
-#            archivo = ElementTree.parse(nombre) 
-#            print archivo
-#            arc= Archivo(item.id, nombre, archivo)
-#            db_session.add(arc)
-#            db_session.commit()
+            filename = uploaded_file.filename
+            file_data = uploaded_file.read()
+            file_tipo = uploaded_file.content_type
+      
+     
+            #gger.info(form.archivo.data)
+            #current_app.logger.info(file_data)
             
+#            filename = secure_filename(uploaded_file.filename)
+#            file_data = form.archivo.data.read()
+#            file_tipo = form.archivo.data.mimetype
+            archivo= Archivo(item.id, filename,  uploaded_file.read() , file_tipo)            
+            db_session.add(archivo)
+            db_session.commit() 
+            print uploaded_file.read()
+             
             # cambia el estado de la fase si este es inicial
             fase = db_session.query(Fase).filter_by(id=item.id_fase).first()  
             if fase.estado == 'I':
@@ -178,7 +156,10 @@ def nuevoitem():
                         db_session.add(ia)
                         db_session.commit()
             except DatabaseError, e:
-                flash('Error en la Base de Datos' + e.args[0], 'error')
+                if e.args[0].find('duplicate key value violates unique')!=-1:
+                    flash('Clave unica violada' ,'error')
+                else:
+                    flash('Error en la Base de Datos' + e.args[0], 'error')
                 return render_template('item/nuevoitem.html', form=form, att=atributo)                      
             
             # session.pop('tipo_global',None)
@@ -196,7 +177,7 @@ def nuevoitem():
 @app.route('/item/buscarItem', methods=['GET', 'POST'])
 def buscarItem():
     """Funcion que permite realizar busqueda de items"""
-    valor = request.args['patron']
+    valor = request.args['patron'] 
     parametro = request.args['parametro']
     # #init_db(db_session)
    
@@ -254,6 +235,42 @@ def buscarItem():
     return render_template('item/administraritem.html', items=r)
 
 
+@app.route('/item/bajar_archivo',methods=['GET', 'POST'])
+def bajar_archivo():
+    """
+        @param archivo: id del arhivo que se desea descargar
+    """
+    if verificarPermiso(request.args.get('fase'), "ARCHIVO ITEM") == False:
+            flash('No posee los permisos suficientes para realizar la Operacion', 'info')
+            return render_template('item/administraritem.html')
+    a_bajar = db_session.query(Archivo).filter_by(id_item= request.args.get('id')).first() 
+    print a_bajar 
+    print a_bajar
+    results = a_bajar.archivo  
+    generator = (cell for row in results
+                    for cell in row) 
+    #flash(u'Bajando archivo: {0}'.format(a_bajar.nombre))
+    return Response(generator,
+                       mimetype=a_bajar.mime,
+                       headers={"Content-Disposition":
+                                    "attachment;filename={0}".format(a_bajar.nombre)})
+ 
+
+@app.route('/item/eliminar_archivo',methods=['GET', 'POST'])
+def eliminar_archivo():
+    """
+        @param archivo: id del arhivo que se desea eliminar
+    """
+    if verificarPermiso(request.args.get('fase'), "ARCHIVO ITEM") == False:
+            flash('No posee los permisos suficientes para realizar la Operacion', 'info')
+            return render_template('item/administraritem.html')
+    a_borrar = db_session.query(Archivo).filter_by(id_item =request.args.get('id') ).first()
+    nombre = a_borrar.nombre
+    db.session.delete(a_borrar)
+    db.session.commit()
+    flash('Eliminacion Correcta', 'info')
+ 
+ 
 
 @app.route('/item/editaritem', methods=['GET', 'POST'])
 def editaritem():  
@@ -319,18 +336,18 @@ def editaritem():
         flash('El Item se encuentra en una Linea Base debe Liberarla para continuar', 'info')
         return redirect('/item/administraritem')     
     
-    verlb = db_session.query(LbItem).join(LineaBase, LineaBase.id == LbItem.id_linea_base).filter(LbItem.id_item == id_itemg).filter(LineaBase.estado == 'L').first() 
-    if verlb != None:
-        versol = db_session.query(SolicitudItem).join(SolicitudCambio , SolicitudCambio.id == SolicitudItem.id_solicitud).filter(SolicitudItem.id_item == id_itemg).filter(SolicitudCambio.id_usuario == session['user_id']).first()
-        if versol == None:
-            flash('Debe realizar una Solicitud de Cambio para Proceder', 'info')
-            return redirect('/item/administraritem')      
-        else :
-            versol = db_session.query(SolicitudItem).join(SolicitudCambio , SolicitudCambio.id == SolicitudItem.id_solicitud).filter(SolicitudItem.id_item == id_itemg).filter(SolicitudCambio.estado == 'A').filter(SolicitudCambio.id_usuario == session['user_id']).first()
-            if versol == None:
-                flash('La Solicitud de Cambio no ha sido Aprobada', 'info')
-                return redirect('/item/administraritem')     
-         
+#    verlb = db_session.query(LbItem).join(LineaBase, LineaBase.id == LbItem.id_linea_base).filter(LbItem.id_item == id_itemg).filter(LineaBase.estado == 'L').first() 
+#    if verlb != None:
+#        versol = db_session.query(SolicitudItem).join(SolicitudCambio , SolicitudCambio.id == SolicitudItem.id_solicitud).filter(SolicitudItem.id_item == id_itemg).filter(SolicitudCambio.id_usuario == session['user_id']).first()
+#        if versol == None:
+#            flash('Debe realizar una Solicitud de Cambio para Proceder', 'info')
+#            return redirect('/item/administraritem')      
+#        else :
+#            versol = db_session.query(SolicitudItem).join(SolicitudCambio , SolicitudCambio.id == SolicitudItem.id_solicitud).filter(SolicitudItem.id_item == id_itemg).filter(SolicitudCambio.estado == 'A').filter(SolicitudCambio.id_usuario == session['user_id']).first()
+#            if versol == None:
+#                flash('La Solicitud de Cambio no ha sido Aprobada', 'info')
+#                return redirect('/item/administraritem')     
+#         
     
     if item.estado == 'E' :
         flash('El Item no puede ser modificado, ya que esta Eliminado!', 'info')
@@ -392,7 +409,7 @@ def editaritem():
             
             db_session.add(item)
             db_session.commit()
-          
+            
             if atributo != None :
                 for atr in atributo:
                     valor = request.form.get(atr.nombre)                  
@@ -409,6 +426,7 @@ def editaritem():
                                                         " where ti.id = ta.id_tipo_item and at.id = ta.id_atributo and ti.id=  " + str(hijo.id_tipo_item))
     
                     valores_atr = db_session.query(ItemAtributo).from_statement(" select ia.* from item_atributo ia where ia.id_item= " + str(hijo.id))
+                    
                     item2 = Item(hijo.codigo, hijo.nombre, hijo.descripcion, 'V', hijo.complejidad, today, hijo.costo,
                     session['user_id']  , hijo.version + 1 , hijo.id_fase , hijo.id_tipo_item , hijo.archivo)            
                     db_session.add(item2)

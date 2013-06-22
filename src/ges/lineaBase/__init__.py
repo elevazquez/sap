@@ -386,7 +386,7 @@ def agregaritem():
      
             flash('Se agrego el Item con Exito','info')   
             return redirect('/lineaBase/administrarlineabase')
-        except DatabaseError, e:
+        except DatabaseError, e:            
             flash('Error en la Base de Datos' + e.args[0],'error')
             return render_template('lineaBase/agregaritem.html', form=form,  items= itemsdisp)  
     else:
@@ -505,7 +505,10 @@ def quitaritem():
             flash('Se quito el Item con Exito','info')   
             return redirect('/lineaBase/administrarlineabase')
         except DatabaseError, e:
-            flash('Error en la Base de Datos' + e.args[0],'error')
+            if e.args[0].find('duplicate key value violates unique')!=-1:
+                    flash('Clave unica violada' ,'error')
+            else:
+                    flash('Error en la Base de Datos' + e.args[0],'error')
             return render_template('lineaBase/quitaritem.html', form=form,  items= itemslb)
     else:
         flash_errors(form)    
@@ -618,7 +621,10 @@ def editarlineabase():
             flash('La Linea Base se modifico con Exito','info')   
             return redirect('/lineaBase/administrarlineabase')
         except DatabaseError, e:
-            flash('Error en la Base de Datos' + e.args[0],'error')
+            if e.args[0].find('duplicate key value violates unique')!=-1:
+                    flash('Clave unica violada' ,'error')
+            else:
+                    flash('Error en la Base de Datos' + e.args[0],'error')
             return render_template('lineaBase/editarlineabase.html', form=form, itemslb= itemslb)
     else:
         flash_errors(form)
@@ -695,7 +701,10 @@ def liberarlineabase():
             flash('La Linea Base fue liberada. Todos sus Item se encuentran Aprobados!','info')    
             return redirect('/lineaBase/administrarlineabase')
         except DatabaseError, e:
-            flash('Error en la Base de Datos' + e.args[0],'error')
+            if e.args[0].find('duplicate key value violates unique')!=-1:
+                    flash('Clave unica violada' ,'error')
+            else:
+                    flash('Error en la Base de Datos' + e.args[0],'error')
             return render_template('lineaBase/liberarlineabase.html', form=form, itemslb= itemslb )
     else:
         flash_errors(form)
@@ -705,11 +714,26 @@ def liberarlineabase():
  
 def liberarOn(itemslb, id_linea):
     list_aux=[]
-    list_aux2=[]
+    list_aux2=[] 
     today = datetime.date.today()
                        
     linea = db_session.query(LineaBase).filter_by(id= id_linea).first() 
     for i in itemslb :
+        #items padres y sus relaciones
+        list_item_padres = db_session.query(Item).from_statement(" select * from item where id in ( select r.id_item  from item i, relacion r "+
+                                                            " where i.id = r.id_item_duenho and r.id_item_duenho= "+str(i.id)+" and r.estado = 'A' ) ")
+
+        list_relac_padres = db_session.query(Relacion).from_statement("select * from relacion where id in  ( select r.id  from item i, relacion r "+ 
+                                                               " where i.id = r.id_item_duenho and r.id_item_duenho=  "+str(i.id)+" and r.estado = 'A') ")
+                #item hijos y sus relaciones
+        list_item_hijos = db_session.query(Item).from_statement(" select * from item where id in ( select r.id_item_duenho   from item i, relacion r "+
+                                                            " where i.id = r.id_item and r.id_item = "+str(i.id)+" and r.estado = 'A' ) ")
+    
+        list_relac_hijos = db_session.query(Relacion).from_statement("select * from relacion where id in  ( select r.id  from item i, relacion r "+
+                                                                 " where i.id = r.id_item  and r.id_item= "+str(i.id)+" and r.estado = 'A') ")
+        
+        i_ult= db_session.query(Item).from_statement(" Select * from item it where  it.codigo = '"+str(i.codigo)+"' AND it.version =  ( select max(i.version) from item i where i.codigo= '"+str(i.codigo)+"')").first()
+        if i_ult.version == i.version :
                 atri = db_session.query(Atributo).from_statement(" select at.* from tipo_item ti , titem_atributo ta, atributo at "+
                                                         " where ti.id = ta.id_tipo_item and at.id = ta.id_atributo and ti.id=  " +str(i.id_tipo_item) )
     
@@ -718,10 +742,10 @@ def liberarOn(itemslb, id_linea):
                 #i = db_session.query(Item).filter_by(id=it).first()    
                 item = Item(i.codigo, i.nombre, i.descripcion, 'A', i.complejidad, today, i.costo, 
                     session['user_id']  , i.version + 1 , i.id_fase , i.id_tipo_item , i.archivo)            
-                db_session.add(item)
+                db_session.add(item) 
                 db_session.commit()
-                list_aux.append(i) #sale
-                list_aux2.append(item)#liberado
+                list_aux.append(i) #sale 
+                list_aux2.append(item)#liberado 
                 # se actualizan los atributos del item si es que tienen
                 if atri != None :
                         for atr in atri :
@@ -740,69 +764,75 @@ def liberarOn(itemslb, id_linea):
                 #  # si el item poseia alguna relacion
                 #---------------------------------------------------------------------------------------------------
             
-                #items padres y sus relaciones
-                list_item_padres = db_session.query(Item).from_statement(" select * from item where id in ( select r.id_item  from item i, relacion r "+
-                                                            " where i.id = r.id_item_duenho and r.id_item_duenho= "+str(i.id)+" and r.estado = 'A' ) ")
-
-                list_relac_padres = db_session.query(Relacion).from_statement("select * from relacion where id in  ( select r.id  from item i, relacion r "+ 
-                                                               " where i.id = r.id_item_duenho and r.id_item_duenho=  "+str(i.id)+" and r.estado = 'A') ")
-                #item hijos y sus relaciones
-                list_item_hijos = db_session.query(Item).from_statement(" select * from item where id in ( select r.id_item_duenho   from item i, relacion r "+
-                                                            " where i.id = r.id_item and r.id_item = "+str(i.id)+" and r.estado = 'A' ) ")
-    
-                list_relac_hijos = db_session.query(Relacion).from_statement("select * from relacion where id in  ( select r.id  from item i, relacion r "+
-                                                                 " where i.id = r.id_item  and r.id_item= "+str(i.id)+" and r.estado = 'A') ")
+              
+                
                 # cambios en items hijos
                 if list_item_hijos != None   :   
                     for hijo in list_item_hijos : 
                         linea= db_session.query(LbItem).join(LineaBase, LineaBase.id==LbItem.id_linea_base).filter(LbItem.id_item==hijo.id).filter(LineaBase.estado=='V').first()
                         if linea != None:
-                            #ilb=  db_session.query(Item).join(LbItem, Item.id== LbItem.id_item).filter(LbItem.id_linea_base== linea.id_linea_base ).filter(Item.estado=='B').all()   
-                            cambiar_estado(hijo, linea.id_linea_base)
-                            #liberarOn(ilb, linea.id_linea_base)            
+                            cambiar_estado(hijo, linea.id_linea_base)         
                         else:
                            
                             atri = db_session.query(Atributo).from_statement(" select at.* from tipo_item ti , titem_atributo ta, atributo at "+
                                                         " where ti.id = ta.id_tipo_item and at.id = ta.id_atributo and ti.id=  " +str(hijo.id_tipo_item) )
     
                             valores_atr = db_session.query(ItemAtributo).from_statement(" select ia.* from item_atributo ia where ia.id_item= " +str(hijo.id) )
-                            item2 = Item(hijo.codigo, hijo.nombre, hijo.descripcion, 'V', hijo.complejidad, today, hijo.costo, 
-                                         session['user_id']  , hijo.version +1 , hijo.id_fase , hijo.id_tipo_item , hijo.archivo)            
-                            db_session.add(item2)
-                            db_session.commit()  
-                            # se actualizan los atributos del item si es que tienen
-                            if atri != None :
-                                for atr in atri :
-                                    for val in valores_atr :   
-                                        if val.id_atributo == atr.id :                  
-                                            ia= ItemAtributo(val.valor, item2.id, atr.id)
-                                            db_session.add(ia)
-                                            db_session.commit()                   
-                            for rel_hijo in list_relac_hijos :
-                                rel_hijo.estado= 'E'
-                                db_session.merge(rel_hijo)
-                                db_session.commit() 
-                                relacion= Relacion(rel_hijo.fecha_creacion, today, rel_hijo.id_tipo_relacion, item.id, item2.id, 'A')
-                                db_session.add(relacion)
-                                db_session.commit() 
-                 
+                            
+                            hijo_ult= db_session.query(Item).from_statement(" Select * from item it where  it.codigo = '"+str(hijo.codigo)+"' AND it.version =  ( select max(i.version) from item i where i.codigo= '"+str(hijo.codigo)+"')").first()
+                            
+                            if hijo_ult.version != hijo.version and hijo_ult.estado == 'V': 
+                                    hijo2= hijo_ult
+                            else :    
+                                    item2 = Item(hijo.codigo, hijo.nombre, hijo.descripcion, 'V', hijo.complejidad, today, hijo.costo, 
+                                            session['user_id']  , hijo.version +1 , hijo.id_fase , hijo.id_tipo_item , hijo.archivo)            
+                                    db_session.add(item2)
+                                    db_session.commit()  
+                                    # se actualizan los atributos del item si es que tienen
+                                    if atri != None :
+                                        for atr in atri :
+                                            for val in valores_atr :   
+                                                if val.id_atributo == atr.id :                  
+                                                    ia= ItemAtributo(val.valor, item2.id, atr.id)
+                                                    db_session.add(ia)
+                                                    db_session.commit()      
+                                                                 
+                                    for rel_hijo in list_relac_hijos :  
+                                        rel_hijo.estado= 'E'
+                                        db_session.merge(rel_hijo)
+                                        db_session.commit() 
+                                          
+                                        rel_exis = db_session.query(Relacion).filter_by(id_item= item.id).filter_by(id_item_duenho= item2.id).first()
+                                        if rel_exis == None:                                     
+                                            relacion= Relacion(rel_hijo.fecha_creacion, today, rel_hijo.id_tipo_relacion, item.id, item2.id, 'A')                                        
+                                            db_session.add(relacion)
+                                            db_session.commit() 
+                                            
+                                
                 # cambios en items padres
                 if list_item_padres != None     :                     
                         for rel_padre in list_relac_padres:
                             rel_padre.estado= 'E'
                             db_session.merge(rel_padre)
                             db_session.commit() 
-                            relacion= Relacion(rel_padre.fecha_creacion, today, rel_padre.id_tipo_relacion, rel_padre.id_item, item.id, 'A')
-                            db_session.add(relacion)
-                            db_session.commit() 
-                
-                
+                            padre= db_session.query(Item).filter_by(id= rel_padre.id_item).first()
+                            padre_ult= db_session.query(Item).from_statement(" Select * from item it where  it.codigo = '"+str(padre.codigo)+"' AND it.version =  ( select max(i.version) from item i where i.codigo = '"+str(padre.codigo)+"' )").first()                             
+                            padre2 = rel_padre.id_item                         
+                            if padre_ult.version != padre.version :
+                                padre2 = padre_ult
+                            
+                            rel_exis = db_session.query(Relacion).filter_by(id_item= padre2).filter_by(id_item_duenho= item.id).first()
+                            if rel_exis == None:      
+                                relacion= Relacion(rel_padre.fecha_creacion, today, rel_padre.id_tipo_relacion, padre2, item.id, 'A')
+                                db_session.add(relacion)
+                                db_session.commit()  
     
+   
     linea = db_session.query(LineaBase).filter_by(id= id_linea).first()        
     linea.estado='L'            
     linea.fecha_ruptura = today
     db_session.merge(linea)
-    db_session.commit()   
+    db_session.commit()    
             
     #se guarda lb_item  junto con los item de la lb liberada          
     for it in list_aux2:
@@ -828,8 +858,7 @@ def cambiar_estado(i, id_linea):
                                                         " where ti.id = ta.id_tipo_item and at.id = ta.id_atributo and ti.id=  " +str(i.id_tipo_item) )
     
                 valores_atr = db_session.query(ItemAtributo).from_statement(" select ia.* from item_atributo ia where ia.id_item= " +str(i.id) )
-                 
-                #i = db_session.query(Item).filter_by(id=it).first()    
+                
                 item = Item(i.codigo, i.nombre, i.descripcion, 'V', i.complejidad, today, i.costo, 
                     session['user_id']  , i.version + 1 , i.id_fase , i.id_tipo_item , i.archivo)            
                 db_session.add(item)
@@ -843,32 +872,33 @@ def cambiar_estado(i, id_linea):
                                 if val.id_atributo == atr.id :                  
                                     ia= ItemAtributo(val.valor, item.id, atr.id)
                                     db_session.add(ia)
-                                    db_session.commit()  
+                                    db_session.commit()   
                 
                 #items padres y sus relaciones
                 list_item_padres = db_session.query(Item).from_statement(" select * from item where id in ( select r.id_item  from item i, relacion r "+
-                                                            " where i.id = r.id_item_duenho and r.id_item_duenho= "+str(i.id)+" and r.estado = 'A' ) ")
+                                                            " where i.id = r.id_item_duenho and r.id_item_duenho= "+str(i.id)+"  ) ")
 
                 list_relac_padres = db_session.query(Relacion).from_statement("select * from relacion where id in  ( select r.id  from item i, relacion r "+ 
-                                                               " where i.id = r.id_item_duenho and r.id_item_duenho=  "+str(i.id)+" and r.estado = 'A') ")
+                                                               " where i.id = r.id_item_duenho and r.id_item_duenho=  "+str(i.id)+"  ) ")
                 #item hijos y sus relaciones
                 list_item_hijos = db_session.query(Item).from_statement(" select * from item where id in ( select r.id_item_duenho   from item i, relacion r "+
-                                                            " where i.id = r.id_item and r.id_item = "+str(i.id)+" and r.estado = 'A' ) ")
+                                                            " where i.id = r.id_item and r.id_item = "+str(i.id)+"  ) ")
     
                 list_relac_hijos = db_session.query(Relacion).from_statement("select * from relacion where id in  ( select r.id  from item i, relacion r "+
-                                                                 " where i.id = r.id_item  and r.id_item= "+str(i.id)+" and r.estado = 'A') ")
+                                                                 " where i.id = r.id_item  and r.id_item= "+str(i.id)+" ) ")
+                
                 # cambios en items hijos
                 if list_item_hijos != None   :   
                     for hijo in list_item_hijos : 
                             lin= db_session.query(LbItem).join(LineaBase, LineaBase.id==LbItem.id_linea_base).filter(LbItem.id_item==hijo.id).filter(LineaBase.estado=='V').first()
                             if lin != None:
-                                #ilb=  db_session.query(Item).join(LbItem, Item.id== LbItem.id_item).filter(LbItem.id_linea_base== linea.id_linea_base ).filter(Item.estado=='B').all()   
                                 cambiar_estado(hijo, lin.id_linea_base)
                             else:    
                                 atri = db_session.query(Atributo).from_statement(" select at.* from tipo_item ti , titem_atributo ta, atributo at "+
                                                         " where ti.id = ta.id_tipo_item and at.id = ta.id_atributo and ti.id=  " +str(hijo.id_tipo_item) )
     
                                 valores_atr = db_session.query(ItemAtributo).from_statement(" select ia.* from item_atributo ia where ia.id_item= " +str(hijo.id) )
+                                
                                 item2 = Item(hijo.codigo, hijo.nombre, hijo.descripcion, 'V', hijo.complejidad, today, hijo.costo, 
                                          session['user_id']  , hijo.version +1 , hijo.id_fase , hijo.id_tipo_item , hijo.archivo)            
                                 db_session.add(item2)
@@ -885,20 +915,34 @@ def cambiar_estado(i, id_linea):
                                     rel_hijo.estado= 'E'
                                     db_session.merge(rel_hijo)
                                     db_session.commit() 
-                                    relacion= Relacion(rel_hijo.fecha_creacion, today, rel_hijo.id_tipo_relacion, item.id, item2.id, 'A')
-                                    db_session.add(relacion)
-                                    db_session.commit() 
+                                    rel_exis = db_session.query(Relacion).filter_by(id_item= item.id).filter_by(id_item_duenho= item2.id).first()
+                                    if rel_exis == None: 
+                                        relacion= Relacion(rel_hijo.fecha_creacion, today, rel_hijo.id_tipo_relacion, item.id, item2.id, 'A')
+                                        db_session.add(relacion)
+                                        db_session.commit() 
                           
                  
                 # cambios en items padres
                 if list_item_padres != None     :                     
-                        for rel_padre in list_relac_padres:
-                            rel_padre.estado= 'E'
-                            db_session.merge(rel_padre)
+                    for rel_padre in list_relac_padres:
+                            rel_padre.estado= 'E' 
+                            db_session.merge(rel_padre) 
                             db_session.commit() 
-                            relacion= Relacion(rel_padre.fecha_creacion, today, rel_padre.id_tipo_relacion, rel_padre.id_item, item.id, 'A')
-                            db_session.add(relacion)
-                            db_session.commit() 
+                            it_padre= db_session.query(Item).filter_by(id= rel_padre.id_item).first()                            
+                            padre_ult= db_session.query(Item).from_statement(" Select * from item it where  it.codigo = '"+str(it_padre.codigo)+"' AND it.version =  ( select max(i.version) from item i where i.codigo= '"+str(it_padre.codigo)+"'  )").first()
+                                                      
+                            si= 'S'
+                            if padre_ult.version != it_padre.version :
+                                relacion= Relacion(rel_padre.fecha_creacion, today, rel_padre.id_tipo_relacion, padre_ult.id, item.id, 'A')
+                                db_session.add(relacion)
+                                db_session.commit() 
+                                si='N'
+                                
+                            rel_exis = db_session.query(Relacion).filter_by(id_item= rel_padre.id_item).filter_by(id_item_duenho= item.id).first()
+                            if rel_exis == None and si=='S':     
+                                relacion= Relacion(rel_padre.fecha_creacion, today, rel_padre.id_tipo_relacion, rel_padre.id_item, item.id, 'A')
+                                db_session.add(relacion)
+                                db_session.commit() 
                             
                 lb = db_session.query(LineaBase).filter_by(id= id_linea).first()      
                 lb.estado='N'            

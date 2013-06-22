@@ -5,7 +5,7 @@
 <div style="text-align: right;">
 <a href="{{ url_for('index') }}">Salir</a>
 </div>		
-<h1>Reportes</h1>
+<h1>Diagrama del Sistema</h1>
 	{% with errors = get_flashed_messages(category_filter=["info"]) %} 
 			{% if errors %}
 			<div class="block-message">
@@ -18,13 +18,13 @@
 			</div>
 		{% endif %} 
 	{% endwith %}
-	{% if 'permiso_lider' in session %}
-		{% if( session['permiso_lider'].can() ) %}		
-		<ul><li><a href="{{ url_for('reportesol') }}" >Solicitudes de Cambio</a></li>
-		{% endif %}
-	{% endif %}
-		<li><a href="{{ url_for('reportelista') }}" >Lista de Ítems</a></li>
-		<li><a href="{{ url_for('reportehistorial') }}" >Historial de Ítem</a></li></ul>
+	<table border="0">
+	
+	<TR>
+		<TD class="c1"><a href="{{ url_for('diagramar') }}" >Graficar</a></TD>
+	</TR>
+	
+</table>
 </div>
 </div>
 {% endblock %}
