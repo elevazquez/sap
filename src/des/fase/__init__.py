@@ -278,7 +278,7 @@ def finalizarfase():
                         " and f.id_proyecto = "+str(session['pry'])+" and f.id ="+str(fase.id)+" group by codigo order by 1 ) s " +
                         " where it.codigo = cod and it.version= vermax order by it.codigo )")
     f='S'
-    if fase.estado!='P':
+    if fase.estado!='P' and fase.estado!='L':
         flash('La fase no puede ser finalizada, debe estar en estado En Progreso','info')
         return redirect('/fase/administrarfase')
     if i==None:
