@@ -119,8 +119,6 @@ class FaseTestCase(unittest.TestCase):
     def _get(self, url ='/fase/administrarfase'):
         """obtiene la pagina administrar fases """
         return self.app.get(url, follow_redirects=True)
-    
-
         
 if __name__ == '__main__':
     unittest.main()

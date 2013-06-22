@@ -4,6 +4,7 @@ from test_helper import login,_on_principal_init, logout, TEST_USER
 
 import unittest
 
+#falta asignar y eliminar permiso usuario
 
 class RolTestCase(unittest.TestCase):
     """Clase que implementa los test para el caso de uso Rol."""
@@ -42,7 +43,7 @@ class RolTestCase(unittest.TestCase):
         print '+++ Creacion de rol +++'
         request = self._crear_rol('rolprueba', 'este es un rol de prueba')
         print '*-- datos de prueba ::: codigo = rolprueba, descripcion = este es un rol de prueba --*'
-        self.assertNotIn('Sin permisos para agregar roles', request.data, 'No tiene permisos para ver los roles')
+        self.assertNotIn('Sin permisos para agregar roles', request.data, 'No tiene permisos para crear roles')
         self.assertIn('El rol ha sido registrado con exito', request.data, 'Error al crear el rol')
         print '*-- request result: ' + request._status + ' --*'
         self.assertIn('rolprueba', request.data, 'El rol creado no se encuentra en la tabla')
@@ -54,7 +55,7 @@ class RolTestCase(unittest.TestCase):
         print '+++ Creacion de rol con nombre repetido +++'
         request = self._crear_rol('rolprueba', 'este es un rol de prueba')
         print '*-- datos de prueba ::: codigo = rolprueba, descripcion = este es un rol de prueba --*'
-        self.assertNotIn('Sin permisos para agregar roles', request.data, 'No tiene permisos para ver los roles')
+        self.assertNotIn('Sin permisos para agregar roles', request.data, 'No tiene permisos para crear roles')
         self.assertIn('Clave unica violada por favor ingrese otro CODIGO de Rol', request.data, 'Rol creado, no existe el codigo de rol')
         print '*-- Verificacion completa, no se pueden crear dos roles con el mismo nombre --*'
         print '*---test 3 rol---*'
@@ -64,7 +65,7 @@ class RolTestCase(unittest.TestCase):
         print '+++ Buscar un rol existente por codigo +++'
         request = self._buscar_rol('rolprueba', 'codigo')
         print '*-- datos de prueba ::: patron = rolprueba, parametro = codigo --*'
-        self.assertNotIn('Sin permisos para buscar roles', request.data, 'No tiene permisos para ver los roles')
+        self.assertNotIn('Sin permisos para buscar roles', request.data, 'No tiene permisos para buscar roles')
         self.assertNotIn('Sin registro de roles', request.data, 'No se encontro roles con dicho parametro')
         self.assertIn('rolprueba', request.data, 'El rol no existe en la tabla')
         print '*-- Rol encontrado exitosamente --*'
@@ -75,7 +76,7 @@ class RolTestCase(unittest.TestCase):
         print '+++ Editar rol existente +++'
         request = self._editar_rol('rolprueba', 'este es un rol de prueba editado')
         print '*-- datos de prueba ::: codigo = rolprueba, descripcion = este es un rol de prueba editado --*'
-        self.assertNotIn('Sin permisos para editar roles', request.data, 'No tiene permisos para ver los roles')
+        self.assertNotIn('Sin permisos para editar roles', request.data, 'No tiene permisos para editar los roles')
         self.assertIn('El rol ha sido modificado con exito', request.data, 'Error al modificar rol')  
         self.assertIn('este es un rol de prueba editado',request.data,'El rol no se encuentra editado en la tabla')
         print '*-- Rol editado correctamente --*'
@@ -86,7 +87,7 @@ class RolTestCase(unittest.TestCase):
         print '+++ Eliminacion de rol existente +++'
         borrar_request = self._eliminar_rol('rolprueba')
         print '*-- datos de prueba ::: codigo = rolprueba --*'
-        self.assertNotIn('Sin permisos para eliminar roles', borrar_request.data, 'No tiene permisos para ver los roles')
+        self.assertNotIn('Sin permisos para eliminar roles', borrar_request.data, 'No tiene permisos para eliminar roles')
         self.assertIn('El rol ha sido eliminado con exito', borrar_request.data, 'Rol creado, no existe el codigo de rol')
         self.assertNotIn('rolprueba', borrar_request.data, 'El rol no ha sido borrado')
         print '*-- Verificacion completa, se elimino correctamente--*'
