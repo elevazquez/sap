@@ -1,0 +1,30 @@
+{% extends "principal.html" %} 
+{% block content %}
+<div class="primary">
+<div >
+<div style="text-align: right;">
+<a href="{{ url_for('index') }}">Salir</a>
+</div>		
+<h1>Diagrama del Sistema</h1>
+	{% with errors = get_flashed_messages(category_filter=["info"]) %} 
+			{% if errors %}
+			<div class="block-message">
+				<a class="close" href="#"
+					dir="rtl">×</a>
+					<ul>
+						{%- for msg in errors %}
+							<li>{{ msg }}</li> {% endfor -%}
+					</ul>
+			</div>
+		{% endif %} 
+	{% endwith %}
+	<table border="0">
+	
+	<TR>
+		<TD class="c1"><a href="{{ url_for('diagramar') }}" >Graficar</a></TD>
+	</TR>
+	
+</table>
+</div>
+</div>
+{% endblock %}
