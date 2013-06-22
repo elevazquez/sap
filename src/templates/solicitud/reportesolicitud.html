@@ -18,9 +18,37 @@
 		{% endif %} 
 	{% endwith %}
  	<form target="_blank" id=reporte method=post action="/solicitud/reportesol">
+<<<<<<< HEAD
+ 	<label>Seleccione un Usuario:</label>
+ 	<div style="height:250px;width:400px;overflow:auto;">
+<table border="1">
+	<TR>
+		<TH class="c1"></TH>
+		<TH class="c3">Usuario</TH>
+		<TH class="c3">Nombre</TH>
+		<TH class="c4">Apellido</TH>
+	</TR>
+	{% for usuario in usuarios %}
+	<TR>
+		<TD class="c1" width="100"><input type="checkbox" name="selectitem" value="{{ usuario.id }}"/></TD>
+		<TD class="c3"><SPAN>{{usuario.usuario|e}}</SPAN></TD>
+		<TD class="c3"><SPAN>{{usuario.nombre|e}}</SPAN></TD>
+		<TD class="c4"><SPAN>{{usuario.apellido|e}}</SPAN></TD>
+	</TR>
+	{% else %}
+  	<TR>
+		<em>Sin registro de usuarios</em>
+	</TR>
+	{% endfor %}
+</table>
+</div>
+		<p><input type=submit value=Imprimir onclick="document.location.reload();">
+    	<!--  <a target="_blank" href="../static/reportes/Solicitudes.pdf">descarga</a>-->
+=======
 		<label>Fecha</label><input type="date" name="fecha" value='{{ form.fecha.data }}' id="fecha" />
     	<p><input type=submit value=Imprimir onclick="document.location.reload();">
     	<a target="_blank" href="../static/reportes/Solicitudes.pdf">descarga</a>
+>>>>>>> refs/remotes/origin/master
     	<input type="button" value="Cancelar"  onClick="document.location.href='{{ url_for( 'administrarreportes' ) }}';"> 
 	</form>
 </div>

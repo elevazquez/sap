@@ -54,7 +54,11 @@ endobj
 % 'R6': class PDFInfo 
 6 0 obj
 << /Author ()
+<<<<<<< HEAD
+ /CreationDate (D:20130621194922+04'00')
+=======
  /CreationDate (D:20130621184306+04'00')
+>>>>>>> refs/remotes/origin/master
  /Creator (ReportLab PDF Library - www.reportlab.com)
  /Keywords ()
  /Producer (ReportLab PDF Library - www.reportlab.com)
@@ -97,7 +101,11 @@ xref
 trailer
 << /ID 
  % ReportLab generated PDF document -- digest (http://www.reportlab.com) 
+<<<<<<< HEAD
+ [(\205Y\210g^yg#\255\337\000\324\372\246G\005) (\205Y\210g^yg#\255\337\000\324\372\246G\005)] 
+=======
  [(A\376\315\024]\235\255\241\314\206\310\364Bs\232\346) (A\376\315\024]\235\255\241\314\206\310\364Bs\232\346)] 
+>>>>>>> refs/remotes/origin/master
 
  /Info 6 0 R
  /Root 5 0 R
