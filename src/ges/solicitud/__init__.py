@@ -466,7 +466,15 @@ def reportesol():
                 return redirect('/solicitud/administrarreportes')
             reporte = SolicitudReporte(queryset=sql.all())
             reporte.generate_by(PDFGenerator, filename=os.path.join(cur_dir, cur_dir + '/static/reportes/Solicitudes.pdf'))
-        return render_template('solicitud/solicitud.html')
+        filename=os.path.join(cur_dir, cur_dir + '/static/reportes/Solicitudes.pdf')
+        results = open(filename ,'rb').read()
+        generator = (cell for row in results
+                    for cell in row) 
+        return Response(generator,
+                       mimetype='application/pdf',
+                       headers={"Content-Disposition":
+                                    "attachment;filename={0}".format('ReporteSolicitud.pdf')}) 
+        #return render_template('solicitud/solicitud.html')
     else:
         flash_errors(form) 
     return render_template('solicitud/reportesolicitud.html', form=form, usuarios=usuarios)
@@ -501,7 +509,15 @@ def reportehistorial():
             return redirect('/solicitud/administrarreportes')
         reporte = HistorialReporte(queryset= sql)
         reporte.generate_by(PDFGenerator, filename=os.path.join(cur_dir, cur_dir + '/static/reportes/HistorialItem.pdf'))
-        return render_template('item/historial.html')
+        filename=os.path.join(cur_dir, cur_dir + '/static/reportes/HistorialItem.pdf')
+        results = open(filename ,'rb').read()
+        generator = (cell for row in results
+                    for cell in row) 
+        return Response(generator,
+                       mimetype='application/pdf',
+                       headers={"Content-Disposition":
+                                    "attachment;filename={0}".format('ReportehistorialItem.pdf')}) 
+        #return render_template('item/historial.html')
     else:
         flash_errors(form) 
     return render_template('item/reportehistorial.html', form=form, items=items)
@@ -543,7 +559,15 @@ def reportelista():
                 return redirect('/solicitud/administrarreportes')
             reporte = ListaReporte(queryset= sql)
             reporte.generate_by(PDFGenerator, filename=os.path.join(cur_dir, cur_dir + '/static/reportes/ListaItem.pdf'))
-        return render_template('item/ritem.html')
+        filename=os.path.join(cur_dir, cur_dir + '/static/reportes/ListaItem.pdf')
+        results = open(filename ,'rb').read()
+        generator = (cell for row in results
+                    for cell in row) 
+        return Response(generator,
+                       mimetype='application/pdf',
+                       headers={"Content-Disposition":
+                                    "attachment;filename={0}".format('ReporteListaItem.pdf')}) 
+        #return render_template('item/ritem.html')
     else:
         flash_errors(form) 
     return render_template('item/reporteitem.html', form=form, fases=fases)
