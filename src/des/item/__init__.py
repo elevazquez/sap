@@ -111,12 +111,6 @@ def nuevoitem():
             atributo = db_session.query(Atributo).join(TItemAtributo , TItemAtributo.id_atributo == Atributo.id).join(TipoItem, TipoItem.id == TItemAtributo.id_tipo_item).filter(TipoItem.id == id_tipog).all()
            
             uploaded_file = flask.request.files['archivo']
-            #pickle.dump("hola", escritorFile,2)
-            print uploaded_file   
-#            # f = file(uploaded_file, 'rb').read()
-            print  uploaded_file.filename  
-            print  uploaded_file.read()
-            print   uploaded_file.content_type 
             
             item = Item(form.codigo.data, form.nombre.data, form.descripcion.data,
                     form.estado.data, form.complejidad.data, form.fecha.data, form.costo.data,
@@ -129,18 +123,11 @@ def nuevoitem():
             file_data = uploaded_file.read()
             file_tipo = uploaded_file.content_type
       
-     
-            #gger.info(form.archivo.data)
-            #current_app.logger.info(file_data)
-            
-#            filename = secure_filename(uploaded_file.filename)
-#            file_data = form.archivo.data.read()
-#            file_tipo = form.archivo.data.mimetype
-            archivo= Archivo(item.id, filename,  uploaded_file.read() , file_tipo)            
-            db_session.add(archivo)
-            db_session.commit() 
-            print uploaded_file.read()
-             
+#            if filename != None:
+#                archivo= Archivo(item.id, filename,  uploaded_file.read() , file_tipo)            
+#                db_session.add(archivo)
+#                db_session.commit() 
+#             
             # cambia el estado de la fase si este es inicial
             fase = db_session.query(Fase).filter_by(id=item.id_fase).first()  
             if fase.estado == 'I':
