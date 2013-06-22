@@ -31,6 +31,7 @@ from ges.solicitudavotar import *
 from ges.calculoImpacto import *
 from ges.calculoCosto import *
 from adm.recurso import *
+from des.graficar import *
 
 
 #load the extension

@@ -256,6 +256,21 @@ def bajar_archivo():
                                     "attachment;filename={0}".format(a_bajar.nombre)})
  
 
+@app.route('/item/eliminar_archivo',methods=['GET', 'POST'])
+def eliminar_archivo():
+    """
+        @param archivo: id del arhivo que se desea eliminar
+    """
+    if verificarPermiso(request.args.get('fase'), "ARCHIVO ITEM") == False:
+            flash('No posee los permisos suficientes para realizar la Operacion', 'info')
+            return render_template('item/administraritem.html')
+    a_borrar = db_session.query(Archivo).filter_by(id_item =request.args.get('id') ).first()
+    nombre = a_borrar.nombre
+    db.session.delete(a_borrar)
+    db.session.commit()
+    flash('Eliminacion Correcta', 'info')
+ 
+ 
 
 @app.route('/item/editaritem', methods=['GET', 'POST'])
 def editaritem():  
@@ -394,7 +409,7 @@ def editaritem():
             
             db_session.add(item)
             db_session.commit()
-          
+            
             if atributo != None :
                 for atr in atributo:
                     valor = request.form.get(atr.nombre)                  
