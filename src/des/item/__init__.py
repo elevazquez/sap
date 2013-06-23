@@ -110,14 +110,23 @@ def nuevoitem():
         try:
             atributo = db_session.query(Atributo).join(TItemAtributo , TItemAtributo.id_atributo == Atributo.id).join(TipoItem, TipoItem.id == TItemAtributo.id_tipo_item).filter(TipoItem.id == id_tipog).all()
            
-            filename = form.archivo.name
+            filename = form.archivo.name 
+            print filename
             uploaded_file = flask.request.files[filename]
+            print uploaded_file
+            
             file_tipo = uploaded_file.content_type
             archivo_data= uploaded_file.read()
-            
-            item = Item(form.codigo.data, form.nombre.data, form.descripcion.data,
+            print archivo_data 
+            if archivo_data != None  and archivo_data != "" :             
+                item = Item(form.codigo.data, form.nombre.data, form.descripcion.data,
                     form.estado.data, form.complejidad.data, form.fecha.data, form.costo.data,
                     form.usuario.data , form.version.data, id_faseg , id_tipog, archivo_data,file_tipo)
+            else :  
+                item = Item(form.codigo.data, form.nombre.data, form.descripcion.data,
+                    form.estado.data, form.complejidad.data, form.fecha.data, form.costo.data,
+                    form.usuario.data , form.version.data, id_faseg , id_tipog, None, None)
+            
             
             db_session.add(item)
             db_session.commit()
