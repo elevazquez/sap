@@ -7,8 +7,8 @@ import datetime
 from test.test_helper import seleccionar_proyecto
 
 TODAY = datetime.date.today()
-PROYECTOID = 4
-nro_orden = 3
+PROYECTOID = 2
+nro_orden = 4
 nombre = 'TEST FASE 1 P4'
 descripcion = 'test fase 1 des'
 estado = 'I'

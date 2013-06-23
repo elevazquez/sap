@@ -8,7 +8,7 @@ import unittest
 NOMBRE = 'prytest'
 PARAM = 'nombre'
 PATRON = NOMBRE
-USERLIDER = 2
+USERLIDER = 7
 TODAY = datetime.date.today()
 FECHAINICIO = TODAY
 FECHAFIN = '2014-12-30'

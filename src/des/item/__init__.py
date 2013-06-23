@@ -25,12 +25,12 @@ from loginC import app
 from sqlalchemy.exc import DatabaseError
 from sqlalchemy.orm import scoped_session, sessionmaker
 from util.database import init_db, engine
-from werkzeug import secure_filename
 from binascii import *
 import datetime
 import flask.views
 import os
 import psycopg2
+import werkzeug
 
 estado_global = None;
 
@@ -110,28 +110,22 @@ def nuevoitem():
         try:
             atributo = db_session.query(Atributo).join(TItemAtributo , TItemAtributo.id_atributo == Atributo.id).join(TipoItem, TipoItem.id == TItemAtributo.id_tipo_item).filter(TipoItem.id == id_tipog).all()
            
-            uploaded_file = flask.request.files['archivo']
+            filename = form.archivo.name
+            uploaded_file = flask.request.files[filename]
+            file_tipo = uploaded_file.content_type
+            archivo_data= uploaded_file.read()
             
             item = Item(form.codigo.data, form.nombre.data, form.descripcion.data,
                     form.estado.data, form.complejidad.data, form.fecha.data, form.costo.data,
-                    form.usuario.data , form.version.data, id_faseg , id_tipog, None)
-            db_session.add(item)
-            db_session.commit() 
-            print"entro "
+                    form.usuario.data , form.version.data, id_faseg , id_tipog, archivo_data,file_tipo)
             
-            filename = uploaded_file.filename
-            file_data = uploaded_file.read()
-            file_tipo = uploaded_file.content_type
-      
-#            if filename != None:
-#                archivo= Archivo(item.id, filename,  uploaded_file.read() , file_tipo)            
-#                db_session.add(archivo)
-#                db_session.commit() 
-#             
+            db_session.add(item)
+            db_session.commit()
             # cambia el estado de la fase si este es inicial
             fase = db_session.query(Fase).filter_by(id=item.id_fase).first()  
             if fase.estado == 'I':
                 fase.estado = 'P'
+                
                 db_session.merge(fase)
                 db_session.commit()   
             
@@ -230,18 +224,16 @@ def bajar_archivo():
     if verificarPermiso(request.args.get('fase'), "ARCHIVO ITEM") == False:
             flash('No posee los permisos suficientes para realizar la Operacion', 'info')
             return render_template('item/administraritem.html')
-    a_bajar = db_session.query(Archivo).filter_by(id_item= request.args.get('id')).first() 
-    print a_bajar 
-    print a_bajar
-    results = a_bajar.archivo  
-    generator = (cell for row in results
+    a_bajar = db_session.query(Item).filter_by(id= request.args.get('id')).first() 
+    results = a_bajar.archivo
+    if results != None:
+        generator = (cell for row in results
                     for cell in row) 
-    #flash(u'Bajando archivo: {0}'.format(a_bajar.nombre))
-    return Response(generator,
+        #flash(u'Bajando archivo: {0}'.format(a_bajar.nombre))
+        return Response(generator,
                        mimetype=a_bajar.mime,
                        headers={"Content-Disposition":
                                     "attachment;filename={0}".format(a_bajar.nombre)})
- 
 
 @app.route('/item/eliminar_archivo',methods=['GET', 'POST'])
 def eliminar_archivo():
@@ -251,10 +243,10 @@ def eliminar_archivo():
     if verificarPermiso(request.args.get('fase'), "ARCHIVO ITEM") == False:
             flash('No posee los permisos suficientes para realizar la Operacion', 'info')
             return render_template('item/administraritem.html')
-    a_borrar = db_session.query(Archivo).filter_by(id_item =request.args.get('id') ).first()
-    nombre = a_borrar.nombre
-    db.session.delete(a_borrar)
-    db.session.commit()
+    a_borrar = db_session.query(Item).filter_by(id =request.args.get('id') ).first()
+    a_borrar.archivo = None
+    db_session.merge(a_borrar)
+    db_session.commit()
     flash('Eliminacion Correcta', 'info')
  
  

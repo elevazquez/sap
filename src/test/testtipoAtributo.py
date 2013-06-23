@@ -19,7 +19,6 @@ class TipoATributoTestCase(unittest.TestCase):
     def test_a_get_all_Tipos(self):
         """verifica si se puede acceder al listado de tipos de atributos """
         request = self.client.get('/tipoAtributo/administrartipoAtributo', follow_redirects=True)
-        assert 'BOOLEAN' in request.data
         self.assertEqual(request._status, '200 OK')   
    
     def test_b_crear_tipoatt(self):

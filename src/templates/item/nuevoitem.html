@@ -21,7 +21,7 @@
 			</div>
 		{% endif %} 
 	{% endwith %}
-	<form id=nuevoitem method=post action="/item/nuevoitem" enctype=multipart/form-data >
+	<form id=nuevoitem method="post" action="/item/nuevoitem" enctype="multipart/form-data" >
 		
 	
 			<input type="text" name="id_tipo_f" value="{{ form.id_tipo_f.data }}" id="id_tipo_f" hidden="true"/>
@@ -41,8 +41,7 @@
     	{% else %}
 			<p><em>El item no posee atributos</em>
     	{% endfor %}	
-    		 {{ form.csrf_token }}
-      		 {{ render_field(form.archivo, class="input text") }}
+    		 {{ form.archivo.label }}{{ form.archivo }}
     	<p><input type=submit value=Guardar>
   		<input type="button" value="Cancelar"  onClick="document.location.href='{{ url_for( 'administraritem' ) }}';"> 
 	</form>

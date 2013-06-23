@@ -17,7 +17,7 @@ from flask import session
 TEST_USER = 'admin'
 TEST_PASS = 'admin'
 
-TEST_USER_LIDER = 'lider'
+TEST_USER_LIDER = 'liderSicap'
 TEST_PASS_LIDER = 'lider'
 
 db_session = scoped_session(sessionmaker(autocommit=False,
@@ -60,7 +60,7 @@ def _on_principal_init(sender, identity):
                 identity.provides.add(ItemNeed(p.codigo, p.id_recurso , 'manage'))
                 
 def _on_principal_initL(sender, identity):
-        usuario = db_session.query(Usuario).filter_by(usuario='lider').first();
+        usuario = db_session.query(Usuario).filter_by(usuario='liderSicap').first();
         identity.provides.add(UserNeed(usuario.id))
         # Assuming the User model has a list of roles, update the
         # identity with the roles that the user provides
