@@ -47,8 +47,11 @@ def diagramar():
     """ Funcion que se encarga de construir el grafo"""   
     nodos_explorados=[]
     aristas_exploradas= []
-    
-    grafo = pydot.Dot(graph_type='digraph')
+    if cantidadFase() == 4 : 
+        grafo = pydot.Dot(graph_type='digraph', rankdir="LR", label= "GRAFICO DEL SISTEMA SAP /Blanco= Fase 1 /Azul= Fase 2 /Verde= Fase 3 /Amarillo= Fase 4")
+    else:
+        grafo = pydot.Dot(graph_type='digraph', rankdir="LR", label= "GRAFICO DEL SISTEMA SAP /Blanco= Fase 1 /Azul= Fase 2 /Verde= Fase 3 ")
+            
     
     fases= db_session.query(Fase).from_statement("select * from fase where id_proyecto = "+str(session['pry'])+" order by nro_orden").all()        
     for fase in fases:
@@ -57,7 +60,7 @@ def diagramar():
                         " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id " + 
                         " and f.id_proyecto = " + str(session['pry']) + "  group by codigo order by 1 ) s " + 
                         " where it.codigo = cod and it.version= vermax and it.estado != 'E' and it.id_fase= "+str(fase.id))
-    
+        
         for nodo in items_fase: 
                 print nodo
                 print nodo.itemfase.nro_orden
@@ -67,6 +70,8 @@ def diagramar():
                   
                 n = pydot.Node(nombre_nodo, style="filled", fillcolor = col)        
                 grafo.add_node(n)
+                #pydot.Cluster(nodo.itemfase.nombre,label=nodo.itemfase.nombre).add_node(n)
+               
                 #recorrer hijos
                 if obtenerItemsHijoSucesor(nodo.id) != None:
                     for arista in obtenerRelacionesHijoSucesor(nodo.id):
@@ -77,6 +82,7 @@ def diagramar():
                             n_a = pydot.Node(nombre_a, style="filled", fillcolor = col)
                             nodos_explorados.append(arista.relacionitem_duenho)
                             grafo.add_node(n_a)
+                            #pydot.Cluster(nodo.itemfase.nombre,label=nodo.itemfase.nombre).add_node(n_a)
                             grafo.add_edge(pydot.Edge(n,n_a))
             
                 #recorrer padres
@@ -89,12 +95,15 @@ def diagramar():
                             n_b = pydot.Node(nombre_b, style="filled", fillcolor = col)
                             nodos_explorados.append(aristaPadre.relacionitem)
                             grafo.add_node(n_b)
+                            #pydot.Cluster(nodo.itemfase.nombre,label=nodo.itemfase.nombre).add_node(n_b)
                             grafo.add_edge(pydot.Edge(n_b,n ))
     
     
 #    fases= db_session.query(Fase).from_statement("select * from fase where id_proyecto = "+str(session['pry'])+" order by nro_orden").all()        
 #    for fase in fases:
-#        grafo.add_subgraph(pydot.Cluster(fase.nombre))
+#        grafo.add_subgraph(pydot.Cluster(fase.nombre,label=fase.nombre))
+        
+        
     filename=os.path.join(cur_dir, cur_dir + '/static/graficos/grafo.png')
     grafo.write_png(filename)
     results = open(filename ,'rb').read()
