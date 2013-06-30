@@ -1,4 +1,4 @@
-from wtforms import Form, TextField, validators, IntegerField, SelectField, DateField,DecimalField
+from wtforms import Form, TextField, validators, IntegerField, SelectField, DateField,DecimalField,FileField
 from adm.mod.Usuario import  Usuario
 from des.mod.Fase import Fase
 from des.mod.TipoItem import TipoItem
@@ -27,4 +27,5 @@ class ItemModFormulario(Form):
     id_fase_f = IntegerField('Id_fase', [validators.Required()]) 
     tipo_item = TextField('Tipo Item',[validators.Required()]) 
     id_tipo_f = IntegerField('Id_tipo', [validators.Required()]) 
+    archivo=  FileField('Adjuntar Archivo')
     

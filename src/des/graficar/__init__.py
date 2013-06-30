@@ -98,8 +98,6 @@ def diagramarSistema():
                         " and f.id_proyecto = " + str(session['pry']) + "  group by codigo order by 1 ) s " + 
                         " where it.codigo = cod and it.version= vermax and it.estado != 'E' and it.id_fase= "+str(fase.id) )        
         for nodo in items_fase:              
-                print nodo
-                print nodo.itemfase.nro_orden
                 col= color(nodo.itemfase.nro_orden)              
                 nombre_nodo = nodo.codigo         
                 if nodo.itemfase.nro_orden== 1 :         
@@ -129,6 +127,7 @@ def diagramarSistema():
                                     "attachment;filename={0}".format('grafo.png')}) 
 
 
+
  
 @app.route('/graficar/hacer_grafo', methods=['GET', 'POST'])
 def hacer_grafo():     
@@ -143,6 +142,8 @@ def color(orden):
     colores = ["lightgrey", "pink", "green", "yellow", "orange", "purple", \
                "blue", "gray", "brown"]
     if cantidadFase() > len(colores):
+        return colores[0]
+    elif int(orden) < 0:
         return colores[0]
     else:
         return colores[int(orden) -1]    
