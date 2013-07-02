@@ -115,25 +115,20 @@ def nuevoitem():
             
             file_tipo = uploaded_file.content_type
             archivo_data= uploaded_file.read()
-            try:
-                if archivo_data != None  and archivo_data != "" :             
+            
+            if archivo_data != None  and archivo_data != "" :             
                     item = Item(form.codigo.data, form.nombre.data, form.descripcion.data,
                                 form.estado.data, form.complejidad.data, form.fecha.data, form.costo.data,
                                 form.usuario.data , form.version.data, id_faseg , id_tipog, archivo_data,file_tipo)
-                else :  
+            else :  
                     item = Item(form.codigo.data, form.nombre.data, form.descripcion.data,
                                 form.estado.data, form.complejidad.data, form.fecha.data, form.costo.data,
                                 form.usuario.data , form.version.data, id_faseg , id_tipog, None, None)
             
             
-                db_session.add(item)
-                db_session.commit()
-            except InvalidRequestError , e: 
-                if e.args[0].find('duplicate key value violates unique')!=-1:
-                    flash('Clave unica violada' ,'error')
-                else:
-                    flash('Error en la Base de Datos' + e.args[0], 'error')
-                return render_template('item/nuevoitem.html', form=form, att=atributo)                      
+            db_session.add(item)
+            db_session.commit()
+                           
                
             # cambia el estado de la fase si este es inicial
             fase = db_session.query(Fase).filter_by(id=item.id_fase).first()  
@@ -153,15 +148,12 @@ def nuevoitem():
                         
             flash('El Item ha sido registrada con Exito', 'info')
             return redirect('/item/administraritem') 
-        except InvalidRequestError , e: 
-                if e.args[0].find('duplicate key value violates unique')!=-1:
-                    flash('Clave unica violada' ,'error')
-                else:
-                    flash('Error en la Base de Datos' + e.args[0], 'error')
-                return render_template('item/nuevoitem.html', form=form, att=atributo)
         except DatabaseError, e:
+                db_session.rollback()
+                atributo = db_session.query(Atributo).join(TItemAtributo , TItemAtributo.id_atributo == Atributo.id).join(TipoItem, TipoItem.id == TItemAtributo.id_tipo_item).filter(TipoItem.id == id_tipog).all()
+           
                 if e.args[0].find('duplicate key value violates unique')!=-1:
-                    flash('Clave unica violada' ,'error')
+                    flash('Codigo del Item ya Existe..' ,'error')
                 else:
                     flash('Error en la Base de Datos' + e.args[0], 'error')
                 return render_template('item/nuevoitem.html', form=form, att=atributo)
@@ -490,6 +482,7 @@ def editaritem():
             flash('El Item ha sido modificado con Exito', 'info')
             return redirect('/item/administraritem')     
         except DatabaseError, e:
+            db_session.rollback()
             flash('Error en la Base de Datos' + e.args[0], 'error')
             return render_template('item/editaritem.html', form=form, att=atributo, vals=valoresatr, si_archivo=si_archivo,id_itemg= id_itemg, id_faseg=id_faseg)
     else:
@@ -663,6 +656,7 @@ def eliminaritem():
         flash('El Item se ha Eliminado con Exito', 'info')
         return redirect('/item/administraritem')   
     except DatabaseError, e:
+            db_session.rollback()
             flash('Error en la Base de Datos' + e.args[0], 'error')
             return render_template('item/administraritem.html')
      
@@ -848,6 +842,7 @@ def reversionaritem():
             flash('El Item ha sido Reversionado con Exito', 'info')
             return redirect('/item/administraritem')     
         except DatabaseError, e:
+            db_session.rollback()
             flash('Error en la Base de Datos' + e.args[0], 'error')
             return render_template('item/reversionaritem.html', form=form, att=atributo, vals=valoresatr, si_archivo=si_archivo, id_itemg= id_itemg, id_faseg= id_faseg)
     else:
@@ -1123,6 +1118,7 @@ def reviviritem():
             flash('El Item ha sido Revivido con Exito', 'info')
             return redirect('/item/administraritem')  
         except DatabaseError, e:
+            db_session.rollback()
             flash('Error en la Base de Datos' + e.args[0], 'error')
             return render_template('item/reviviritem.html', form=form, att=atributo, vals=valoresatr)
     else:
@@ -1134,7 +1130,6 @@ def reviviritem():
 @app.route('/item/administraritem')
 def administraritem():
     """Lista los items, su ultima version """
-    # #init_db(db_session)
     item = db_session.query(Item).from_statement("Select it.*  from item it, " + 
                         " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id " + 
                         " and f.id_proyecto = " + str(session['pry']) + "  group by codigo order by 1 ) s " + 
