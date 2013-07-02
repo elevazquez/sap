@@ -4,7 +4,7 @@ from flask_principal import identity_loaded
 from test_helper import login,_on_principal_init, logout, TEST_USER
 import unittest
 
-RECURSOID = 1
+RECURSOID = 10
 COD = 'testPermiso' 
 DES = 'test permiso des'
 PATRON = 'test'

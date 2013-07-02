@@ -37,7 +37,7 @@ def nuevafase():
     """ Funcion para agregar registros a la tabla Fase"""
     permission =UserPermission('LIDER PROYECTO', int(session['pry']))
     if permission.can()==False:
-        flash('No posee los permisos suficientes para realizar la operacion', 'info')
+        flash('No posee los permisos suficientes para realizar la operacion', 'permiso')
         return render_template('index.html') 
     form = FaseFormulario(request.form)
     ##init_db(db_session)
@@ -81,8 +81,8 @@ def editarfase():
     #init_db(db_session)
     permission =UserPermission('LIDER PROYECTO', int(session['pry']))
     if permission.can()==False:
-        flash('No posee los permisos suficientes para realizar la operacion', 'info')
-        return render_template('fase/administrarfase.html') 
+        flash('No posee los permisos suficientes para realizar la operacion', 'permiso')
+        return render_template('index.html') 
     pro = db_session.query(Proyecto).filter_by(id=session['pry']).first()
     f = db_session.query(Fase).filter_by(nro_orden=request.args.get('nro')).filter_by(id_proyecto=pro.id).first()  
     form = FaseFormulario(request.form,f)
@@ -134,8 +134,8 @@ def eliminarfase():
     #init_db(db_session)
     permission =UserPermission('LIDER PROYECTO', int(session['pry']))
     if permission.can()==False:
-        flash('No posee los permisos suficientes para realizar la operacion', 'info')
-        return render_template('fase/administrarfase.html') 
+        flash('No posee los permisos suficientes para realizar la operacion', 'permiso')
+        return render_template('index.html') 
     pro = db_session.query(Proyecto).filter_by(id=session['pry']).first()
     if pro.estado != 'N' :
         flash('No se pueden eliminar Fases del Proyecto','info')
@@ -200,13 +200,20 @@ def buscarfase2():
 @app.route('/fase/administrarfase')
 def administrarfase():
     """ Funcion para listar registros de la tabla Fase""" 
+    permission =UserPermission('LIDER PROYECTO', int(session['pry']))
+    if permission.can()==False:
+        flash('No posee los permisos suficientes para realizar la operacion', 'permiso')
+        return render_template('index.html') 
     fases = db_session.query(Fase).filter_by(id_proyecto=session['pry']).order_by(Fase.nro_orden)
     return render_template('fase/administrarfase.html', fases = fases)
 
 @app.route('/fase/listarfase')
 def listarfase():
-    """ Funcion para listar registros de la tabla Fase""" 
-    #init_db(db_session)
+    """ Funcion para listar registros de la tabla Fase para importar una fase existente"""
+    permission =UserPermission('LIDER PROYECTO', int(session['pry']))
+    if permission.can()==False:
+        flash('No posee los permisos suficientes para realizar la operacion', 'permiso')
+        return render_template('index.html')
     fases2 = db_session.query(Fase).order_by(Fase.id_proyecto, Fase.nro_orden)
     return render_template('fase/listarfase.html', fases2 = fases2)
 
@@ -216,8 +223,8 @@ def importarfase():
     #init_db(db_session)
     permission =UserPermission('LIDER PROYECTO', int(session['pry']))
     if permission.can()==False:
-        flash('No posee los permisos suficientes para realizar la operacion', 'info')
-        return render_template('fase/administrarfase.html') 
+        flash('No posee los permisos suficientes para realizar la operacion', 'permiso')
+        return render_template('index.html') 
     pro = db_session.query(Proyecto).filter_by(id=session['pry']).first()
     f = db_session.query(Fase).filter_by(nro_orden=request.args.get('nro')).filter_by(id_proyecto=request.args.get('py')).first()  
     form = FaseFormulario(request.form,f)
@@ -261,8 +268,8 @@ def finalizarfase():
     #init_db(db_session)
     permission =UserPermission('LIDER PROYECTO', int(session['pry']))
     if permission.can()==False:
-        flash('No posee los permisos suficientes para realizar la operacion', 'info')
-        return render_template('fase/administrarfase.html') 
+        flash('No posee los permisos suficientes para realizar la operacion', 'permiso')
+        return render_template('index.html') 
     nro = request.args.get('nro')
     fase = db_session.query(Fase).filter_by(nro_orden=nro).filter_by(id_proyecto=session['pry']).first()
     items = db_session.query(Item).from_statement("Select it.*  from item it, " + 

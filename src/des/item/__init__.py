@@ -22,7 +22,7 @@ from ges.mod.SolicitudItem import SolicitudItem
 from ges.mod.TipoRelacion import TipoRelacion
 from des.mod.Archivo import Archivo
 from loginC import app
-from sqlalchemy.exc import DatabaseError , InvalidRequestError
+from sqlalchemy.exc import DatabaseError
 from sqlalchemy.orm import scoped_session, sessionmaker
 from util.database import init_db, engine
 from binascii import *
@@ -110,11 +110,11 @@ def nuevoitem():
         try:
             atributo = db_session.query(Atributo).join(TItemAtributo , TItemAtributo.id_atributo == Atributo.id).join(TipoItem, TipoItem.id == TItemAtributo.id_tipo_item).filter(TipoItem.id == id_tipog).all()
            
-            filename = form.archivo.name 
+            filename = form.archivo.name
             uploaded_file = flask.request.files[filename]
-            
             file_tipo = uploaded_file.content_type
             archivo_data= uploaded_file.read()
+
             
             if archivo_data != None  and archivo_data != "" :             
                     item = Item(form.codigo.data, form.nombre.data, form.descripcion.data,
@@ -124,12 +124,19 @@ def nuevoitem():
                     item = Item(form.codigo.data, form.nombre.data, form.descripcion.data,
                                 form.estado.data, form.complejidad.data, form.fecha.data, form.costo.data,
                                 form.usuario.data , form.version.data, id_faseg , id_tipog, None, None)
+
             
+            item = Item(form.codigo.data, form.nombre.data, form.descripcion.data,
+                    form.estado.data, form.complejidad.data, form.fecha.data, form.costo.data,
+                    form.usuario.data , form.version.data, id_faseg , id_tipog, archivo_data,file_tipo)
             
             db_session.add(item)
             db_session.commit()
+<<<<<<< HEAD
                            
                
+=======
+>>>>>>> refs/remotes/origin/master
             # cambia el estado de la fase si este es inicial
             fase = db_session.query(Fase).filter_by(id=item.id_fase).first()  
             if fase.estado == 'I':
@@ -138,17 +145,25 @@ def nuevoitem():
                 db_session.merge(fase)
                 db_session.commit()   
             
-           
-            if atributo != None:
+            try:
+                if atributo != None:
                     for atr in atributo:
                         valor = request.form.get(atr.nombre)                                            
                         ia = ItemAtributo(valor, item.id, atr.id)
                         db_session.add(ia)
                         db_session.commit()
-                        
+            except DatabaseError, e:
+                if e.args[0].find('duplicate key value violates unique')!=-1:
+                    flash('Clave unica violada' ,'error')
+                else:
+                    flash('Error en la Base de Datos' + e.args[0], 'error')
+                return render_template('item/nuevoitem.html', form=form, att=atributo)                      
+            
+            # session.pop('tipo_global',None)
             flash('El Item ha sido registrada con Exito', 'info')
             return redirect('/item/administraritem') 
         except DatabaseError, e:
+<<<<<<< HEAD
                 db_session.rollback()
                 atributo = db_session.query(Atributo).join(TItemAtributo , TItemAtributo.id_atributo == Atributo.id).join(TipoItem, TipoItem.id == TItemAtributo.id_tipo_item).filter(TipoItem.id == id_tipog).all()
            
@@ -156,8 +171,10 @@ def nuevoitem():
                     flash('Codigo del Item ya Existe..' ,'error')
                 else:
                     flash('Error en la Base de Datos' + e.args[0], 'error')
+=======
+                flash('Error en la Base de Datos' + e.args[0], 'error')
+>>>>>>> refs/remotes/origin/master
                 return render_template('item/nuevoitem.html', form=form, att=atributo)
-        
     else:
         flash_errors(form) 
     return render_template('item/nuevoitem.html', form=form, att=atributo)
@@ -238,6 +255,7 @@ def bajar_archivo():
     if results != None:
         generator = (cell for row in results
                     for cell in row) 
+        #flash(u'Bajando archivo: {0}'.format(a_bajar.nombre))
         return Response(generator,
                        mimetype=a_bajar.mime,
                        headers={"Content-Disposition":
@@ -265,8 +283,7 @@ def editaritem():
     today = datetime.date.today()
     # #init_db(db_session)      
     i = db_session.query(Item).filter_by(codigo=request.args.get('codigo')).filter_by(id=request.args.get('id')).first() 
-      
-        
+       
     if  request.args.get('id') == None:
         id_itemg = request.form.get('id')
     else:
@@ -286,7 +303,7 @@ def editaritem():
     item = db_session.query(Item).filter_by(nombre=form.nombre.data).filter_by(id=id_itemg).first()  
     form.usuario.data = session['user_id']  
     form.fecha.data = today    
-    si_archivo= None
+   
     atributo = db_session.query(Atributo).from_statement(" select at.* from tipo_item ti , titem_atributo ta, atributo at " + 
                                                         " where ti.id = ta.id_tipo_item and at.id = ta.id_atributo and ti.id=  " + str(id_tipog))
     
@@ -312,12 +329,7 @@ def editaritem():
         elif form.estado.data =='Z':  
             form.estado.choices = [  ('Z', 'Rechazado') , ('R', 'Resuelto')]  
         elif form.estado.data== 'I':   
-            form.estado.choices = [ ('I', 'Abierto'),('P', 'En Progreso') ]   
-        
-        si_archivo= None
-        if i.mime != None:
-            si_archivo= 'S'    
-        form.archivo.data= None
+            form.estado.choices = [ ('I', 'Abierto'),('P', 'En Progreso') ]       
          
     # verificaciones
     if verificarPermiso(id_faseg, "MODIFICACION ITEM") == False:
@@ -349,18 +361,16 @@ def editaritem():
     if request.method == 'POST' and form.validate():
         # #init_db(db_session)
         try:     
-            item_viejo = db_session.query(Item).filter_by(id=id_itemg).first() 
-    
             # verifica permisos de modificacion
             if form.estado.data == 'P' or form.estado.data == 'R' :
                 if verificarPermiso(id_faseg, "MODIFICACION ITEM") == False:
                         flash('No posee los Permisos suficientes para realizar el cambio de estado', 'error')
-                        return render_template('item/editaritem.html', form=form, att=atributo, vals=valoresatr, si_archivo=si_archivo, id_itemg= id_itemg, id_faseg=id_faseg)
+                        return render_template('item/editaritem.html', form=form, att=atributo, vals=valoresatr)
                  
             if form.estado.data == 'A' or form.estado.data == 'Z':
                 if verificarPermiso(id_faseg, "APROBAR ITEM") == False:
                         flash('No posee los Permisos suficientes para realizar el cambio de estado', 'error')
-                        return render_template('item/editaritem.html', form=form, att=atributo, vals=valoresatr,si_archivo=si_archivo,id_itemg= id_itemg, id_faseg=id_faseg)
+                        return render_template('item/editaritem.html', form=form, att=atributo, vals=valoresatr)
             
            
             # --------------------------------------------------------------------------------------------------
@@ -396,21 +406,11 @@ def editaritem():
                         flash('El Item no posee un padre/ansestro..', 'info')
                         return redirect('/item/administraritem')  
                    
-            filename = form.archivo.name 
-            uploaded_file = flask.request.files[filename]
+                              
             
-            file_tipo = uploaded_file.content_type
-            archivo_data= uploaded_file.read()             
-            
-            if archivo_data != None  and archivo_data != "" :             
-                    item = Item(form.codigo.data, form.nombre.data, form.descripcion.data,
-                                form.estado.data, form.complejidad.data, form.fecha.data, form.costo.data,
-                                form.usuario.data , form.version.data, id_faseg , id_tipog, archivo_data,file_tipo)
-            else :  
-                    item = Item(form.codigo.data, form.nombre.data, form.descripcion.data,
-                                form.estado.data, form.complejidad.data, form.fecha.data, form.costo.data,
-                                form.usuario.data , form.version.data, id_faseg , id_tipog, item_viejo.archivo, item_viejo.mime)
-            
+            item = Item(form.codigo.data, form.nombre.data, form.descripcion.data,
+                    form.estado.data, form.complejidad.data, form.fecha.data, form.costo.data,
+                    form.usuario.data , form.version.data, id_faseg , id_tipog , None)
             
             db_session.add(item)
             db_session.commit()
@@ -433,7 +433,7 @@ def editaritem():
                     valores_atr = db_session.query(ItemAtributo).from_statement(" select ia.* from item_atributo ia where ia.id_item= " + str(hijo.id))
                     
                     item2 = Item(hijo.codigo, hijo.nombre, hijo.descripcion, 'V', hijo.complejidad, today, hijo.costo,
-                    session['user_id']  , hijo.version + 1 , hijo.id_fase , hijo.id_tipo_item , hijo.archivo, hijo.mime)            
+                    session['user_id']  , hijo.version + 1 , hijo.id_fase , hijo.id_tipo_item , hijo.archivo)            
                     db_session.add(item2)
                     db_session.commit()  
                     # se actualizan los atributos del item si es que tienen
@@ -484,10 +484,10 @@ def editaritem():
         except DatabaseError, e:
             db_session.rollback()
             flash('Error en la Base de Datos' + e.args[0], 'error')
-            return render_template('item/editaritem.html', form=form, att=atributo, vals=valoresatr, si_archivo=si_archivo,id_itemg= id_itemg, id_faseg=id_faseg)
+            return render_template('item/editaritem.html', form=form, att=atributo, vals=valoresatr)
     else:
         flash_errors(form)
-    return render_template('item/editaritem.html', form=form, att=atributo , vals=valoresatr, si_archivo=si_archivo,id_itemg= id_itemg, id_faseg=id_faseg)
+    return render_template('item/editaritem.html', form=form, att=atributo , vals=valoresatr)
 
 
 
@@ -548,7 +548,7 @@ def eliminaritem():
         if item.estado == 'A' :
             items = Item(item.codigo, item.nombre, item.descripcion,
                      'P' , item.complejidad, today, item.costo,
-                    session['user_id']  , item.version + 1 , item.id_fase , item.id_tipo_item, item.archivo,item.mime)       
+                    session['user_id']  , item.version + 1 , item.id_fase , item.id_tipo_item, None)       
             # #init_db(db_session)
             db_session.add(items)
             db_session.commit()
@@ -568,7 +568,7 @@ def eliminaritem():
     
                     valores_atr = db_session.query(ItemAtributo).from_statement(" select ia.* from item_atributo ia where ia.id_item= " + str(hijo.id))
                     item2 = Item(hijo.codigo, hijo.nombre, hijo.descripcion, 'V', hijo.complejidad, today, hijo.costo,
-                    session['user_id']  , hijo.version + 1 , hijo.id_fase , hijo.id_tipo_item , hijo.archivo, hijo.mime)            
+                    session['user_id']  , hijo.version + 1 , hijo.id_fase , hijo.id_tipo_item , hijo.archivo)            
                     db_session.add(item2)
                     db_session.commit()  
                     # se actualizan los atributos del item si es que tienen
@@ -603,7 +603,7 @@ def eliminaritem():
             
         items = Item(item.codigo, item.nombre, item.descripcion,
                     'E', item.complejidad, today, item.costo,
-                    session['user_id']  , item.version + 1 , item.id_fase , item.id_tipo_item , item.archivo,item.mime)
+                    session['user_id']  , item.version + 1 , item.id_fase , item.id_tipo_item , None)
         
         # init_db(db_session)
         db_session.add(items)
@@ -623,7 +623,7 @@ def eliminaritem():
     
                     valores_atr = db_session.query(ItemAtributo).from_statement(" select ia.* from item_atributo ia where ia.id_item= " + str(hijo.id))
                     item2 = Item(hijo.codigo, hijo.nombre, hijo.descripcion, 'V', hijo.complejidad, today, hijo.costo,
-                    session['user_id']  , hijo.version + 1 , hijo.id_fase , hijo.id_tipo_item , hijo.archivo, hijo.mime)            
+                    session['user_id']  , hijo.version + 1 , hijo.id_fase , hijo.id_tipo_item , hijo.archivo)            
                     db_session.add(item2)
                     db_session.commit()  
                     # se actualizan los atributos del item si es que tienen
@@ -692,8 +692,7 @@ def reversionaritem():
         id_faseg = request.form.get('id_fase_f')
     else:
         id_faseg = request.args.get('fase')
-    si_archivo= None
-       
+        
     if verificarPermiso(id_faseg, "MODIFICACION ITEM") == False:
             flash('No posee los Permisos suficientes para realizar esta Operacion', 'error')
             return redirect('/item/administraritem')   
@@ -744,9 +743,6 @@ def reversionaritem():
             form.estado.data = 'Revision'
         elif estado == 'B':
             form.estado.data = 'Bloqueado'
-        si_archivo= None
-        if i.mime != None:
-            si_archivo= 'S'    
         
     atributo = db_session.query(Atributo).from_statement(" select at.* from tipo_item ti , titem_atributo ta, atributo at " + 
                                                         " where ti.id = ta.id_tipo_item and at.id = ta.id_atributo and ti.id=  " + str(id_tipog))
@@ -763,7 +759,7 @@ def reversionaritem():
             
             item_aux = Item(form.codigo.data, form.nombre.data, form.descripcion.data,
                     'V', form.complejidad.data, today, form.costo.data,
-                     session['user_id']  , maxversionitem.version + 1 , id_faseg , id_tipog, item.archivo,item.mime)            
+                     session['user_id']  , maxversionitem.version + 1 , id_faseg , id_tipog, item.archivo)            
             db_session.add(item_aux)
             db_session.commit()
             if atributo != None:
@@ -800,7 +796,7 @@ def reversionaritem():
     
                     valores_atr = db_session.query(ItemAtributo).from_statement(" select ia.* from item_atributo ia where ia.id_item= " + str(hijo.id))
                     item2 = Item(hijo.codigo, hijo.nombre, hijo.descripcion, 'V', hijo.complejidad, today, hijo.costo,
-                    session['user_id']  , hijo.version + 1 , hijo.id_fase , hijo.id_tipo_item , hijo.archivo, hijo.mime)            
+                    session['user_id']  , hijo.version + 1 , hijo.id_fase , hijo.id_tipo_item , hijo.archivo)            
                     db_session.add(item2)
                     db_session.commit()  
                     # se actualizan los atributos del item si es que tienen
@@ -844,10 +840,10 @@ def reversionaritem():
         except DatabaseError, e:
             db_session.rollback()
             flash('Error en la Base de Datos' + e.args[0], 'error')
-            return render_template('item/reversionaritem.html', form=form, att=atributo, vals=valoresatr, si_archivo=si_archivo, id_itemg= id_itemg, id_faseg= id_faseg)
+            return render_template('item/reversionaritem.html', form=form, att=atributo, vals=valoresatr)
     else:
         flash_errors(form)
-    return render_template('item/reversionaritem.html', form=form, att=atributo, vals=valoresatr, si_archivo=si_archivo, id_itemg= id_itemg, id_faseg= id_faseg)
+    return render_template('item/reversionaritem.html', form=form, att=atributo, vals=valoresatr)
     
 
 @app.route('/item/historialitem', methods=['GET', 'POST'])
@@ -872,7 +868,7 @@ def historialitem():
     else:
         id_faseg = request.args.get('fase')
      
-    si_archivo= None
+
     if verificarPermiso(id_faseg, "MODIFICACION ITEM") == False:
             flash('No posee los Permisos suficientes para realizar esta Operacion', 'error')
             return redirect('/item/administraritem')   
@@ -905,9 +901,6 @@ def historialitem():
             form.estado.data = 'Revision'
         elif estado == 'B':
             form.estado.data = 'Bloqueado'
-        si_archivo= None
-        if i.mime != None:
-            si_archivo= 'S'
         
     atributo = db_session.query(Atributo).from_statement(" select at.* from tipo_item ti , titem_atributo ta, atributo at " + 
                                                         " where ti.id = ta.id_tipo_item and at.id = ta.id_atributo and ti.id=  " + str(id_tipog))
@@ -916,7 +909,7 @@ def historialitem():
                       
         
     
-    return render_template('item/historialitem.html', form=form, att=atributo, vals=valoresatr, si_archivo=si_archivo, id_itemg= id_itemg, id_faseg= id_faseg)
+    return render_template('item/historialitem.html', form=form, att=atributo, vals=valoresatr)
     
 
 
@@ -1019,7 +1012,7 @@ def reviviritem():
             # se cambia el estado del item a Revision y re reversiona el item
             item2 = Item(item_aux.codigo, item_aux.nombre, item_aux.descripcion,
                     'V', item_aux.complejidad, today, item_aux.costo,
-                     session['user_id']  , maxversionitem.version + 1 , id_faseg , id_tipog, item_aux.archivo, item_aux.mime)
+                     session['user_id']  , maxversionitem.version + 1 , id_faseg , id_tipog, item_aux.archivo)
             db_session.add(item2)
             db_session.commit()
             if atributo != None:
@@ -1065,7 +1058,7 @@ def reviviritem():
     
                         valores_atr = db_session.query(ItemAtributo).from_statement(" select ia.* from item_atributo ia where ia.id_item= " + str(hijo.id))
                         item1 = Item(hijo.codigo, hijo.nombre, hijo.descripcion, 'V', hijo.complejidad, today, hijo.costo,
-                                session['user_id']  , hijo.version + 1 , hijo.id_fase , hijo.id_tipo_item , hijo.archivo, hijo.mime)            
+                                session['user_id']  , hijo.version + 1 , hijo.id_fase , hijo.id_tipo_item , hijo.archivo)            
                         db_session.add(item1)
                         db_session.commit()  
                         # se actualizan los atributos del item si es que tienen

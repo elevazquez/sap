@@ -24,16 +24,16 @@ class TipoATributoTestCase(unittest.TestCase):
     def test_b_crear_tipoatt(self):
         """  crea el proyecto y verifica si el tipo de atri. fue creado     """        
         print "Probando crear un tipo de att"
-        request = self._crear_tipoatt('test', 'testdesc' )     
+        request = self._crear_tipoatt('testprueba', 'testdesc' )     
         print "Respuesta satisfactoria, verificando si creo el tipo de att"
-        assert 'test' in request.data
+        assert 'testprueba' in request.data
         print "tipo att creado correctamente"
 
 
     def test_c_crear_tipoatt_duplicado(self): 
         """prueba si se pueden crear tipo att duplicados    """
         print "Creacion de tipo att con nombre repetido"
-        request = self._crear_tipoatt('test', 'testdesc' )    
+        request = self._crear_tipoatt('testprueba', 'testdesc' )    
         print "Respuesta satisfactoria, verificando si dejo crear el tipo att"
         assert 'Clave unica violada por favor ingrese otro CODIGO para el Tipo de Atributo' in request.data
         print "Clave unica violada por favor ingrese otro CODIGO para el Tipo de Atributo"
@@ -42,7 +42,7 @@ class TipoATributoTestCase(unittest.TestCase):
     def test_e_editar_tipoatt(self):
         """  edita un tipo att    """        
         print "Probando editar tipoatt"
-        request = self._editar_tipoatt('test', 'testdescedit')   
+        request = self._editar_tipoatt('testprueba', 'testdescedit')   
         print "Respuesta satisfactoria, verificando si se edito el tipo att"
         assert 'testdescedit' in request.data
         print "tipoatt editado correctamente"
@@ -50,25 +50,25 @@ class TipoATributoTestCase(unittest.TestCase):
     def test_d_eliminar_tipoatt(self):
         """verifica si se puede eliminar un atributo  """
         print "Eliminando atributo"
-        borrar_request = self._eliminar_tipoatt('test')
+        borrar_request = self._eliminar_tipoatt('testprueba')
         print "verificar si se elimino"
-        assert 'test' not in  borrar_request.data
+        assert 'testprueba' not in  borrar_request.data
         self.assertEqual(borrar_request._status, '200 OK')
         print "verificacion completa, se elimino"
             
-    def _crear_tipoatt(self,nombre='test', descripcion='testdesc'):     
+    def _crear_tipoatt(self,nombre='testprueba', descripcion='testdesc'):     
         request = self.client.post('/tipoAtributo/nuevotipoAtributo', data=dict(
             nombre = nombre,
             descripcion = descripcion), follow_redirects=True)
         return request
     
-    def _editar_tipoatt(self, nombre='test', descripcion='testdesc'):     
+    def _editar_tipoatt(self, nombre='testprueba', descripcion='testdesc'):     
         request = self.client.post('/tipoAtributo/editartipoAtributo', data=dict(
             cnombre = nombre,
             descripcion = descripcion), follow_redirects=True)
         return request
 
-    def _eliminar_tipoatt(self, codigo='test'):     
+    def _eliminar_tipoatt(self, codigo='testprueba'):     
         request = self.client.post('/tipoAtributo/eliminartipoAtributo?nombre=' + codigo, follow_redirects=True)
         return request
     

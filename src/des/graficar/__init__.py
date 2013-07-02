@@ -42,42 +42,47 @@ def flash_errors(form):
                 error
             ), 'error')
 
-
-@app.route('/diagramarSistema', methods=['GET', 'POST'])
-def diagramarSistema():
+@app.route('/diagramar', methods=['GET', 'POST'])
+def diagramar():
     """ Funcion que se encarga de construir el grafo"""   
     nodos_explorados=[]
-    aristas_exploradas= []    
-    grafo = pydot.Dot(graph_type='digraph', rankdir="LR", label= "GRAFICO DEL SISTEMA SAP ")
-    
-    cluster_f1=pydot.Cluster('Fase_1',label='Fase_1', fillcolor= color(1))
-    cluster_f2= pydot.Cluster('Fase_2',label='Fase_2',fillcolor= color(2))
-    cluster_f3= pydot.Cluster('Fase_3',label='Fase_3',fillcolor= color(3))
-    cluster_f4= pydot.Cluster('Fase_4',label='Fase_4',fillcolor= color(4)) 
-    fases= db_session.query(Fase).from_statement("select * from fase where id_proyecto = "+str(session['pry'])+" order by nro_orden").all()        
-    
-    nodos_explorados=[]
     aristas_exploradas= []
-    for fase in fases:        
+    if cantidadFase() == 4 : 
+        grafo = pydot.Dot(graph_type='digraph', rankdir="LR", label= "GRAFICO DEL SISTEMA SAP /Blanco= Fase 1 /Azul= Fase 2 /Verde= Fase 3 /Amarillo= Fase 4")
+    else:
+        grafo = pydot.Dot(graph_type='digraph', rankdir="LR", label= "GRAFICO DEL SISTEMA SAP /Blanco= Fase 1 /Azul= Fase 2 /Verde= Fase 3 ")
+            
+    
+    fases= db_session.query(Fase).from_statement("select * from fase where id_proyecto = "+str(session['pry'])+" order by nro_orden").all()        
+    for fase in fases:
+        
         items_fase = db_session.query(Item).from_statement("Select it.*  from item it, " + 
                         " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id " + 
                         " and f.id_proyecto = " + str(session['pry']) + "  group by codigo order by 1 ) s " + 
                         " where it.codigo = cod and it.version= vermax and it.estado != 'E' and it.id_fase= "+str(fase.id))
         
-        for nodo in items_fase:                
-                nodos_explorados.append(nodo) 
-                nombre_nodo = nodo.codigo    
-                col= color(nodo.itemfase.nro_orden)               
-                n = pydot.Node(nombre_nodo, style="filled", fillcolor = col)   
+        for nodo in items_fase: 
+                print nodo
+                print nodo.itemfase.nro_orden
+                col= color(nodo.itemfase.nro_orden) 
+                nodos_explorados.append(nodo)
+                nombre_nodo = nodo.codigo  
+                  
+                n = pydot.Node(nombre_nodo, style="filled", fillcolor = col)        
+                grafo.add_node(n)
+                #pydot.Cluster(nodo.itemfase.nombre,label=nodo.itemfase.nombre).add_node(n)
+               
                 #recorrer hijos
                 if obtenerItemsHijoSucesor(nodo.id) != None:
                     for arista in obtenerRelacionesHijoSucesor(nodo.id):
-                        if arista not in aristas_exploradas:                            
+                        if arista not in aristas_exploradas:
                             aristas_exploradas.append(arista)
                             nombre_a = arista.relacionitem_duenho.codigo 
-                            col = color(arista.relacionitem_duenho.itemfase.nro_orden)                                        
+                            col = color(arista.relacionitem_duenho.itemfase.nro_orden)            
                             n_a = pydot.Node(nombre_a, style="filled", fillcolor = col)
                             nodos_explorados.append(arista.relacionitem_duenho)
+                            grafo.add_node(n_a)
+                            #pydot.Cluster(nodo.itemfase.nombre,label=nodo.itemfase.nombre).add_node(n_a)
                             grafo.add_edge(pydot.Edge(n,n_a))
             
                 #recorrer padres
@@ -89,46 +94,28 @@ def diagramarSistema():
                             col = color(aristaPadre.relacionitem.itemfase.nro_orden)            
                             n_b = pydot.Node(nombre_b, style="filled", fillcolor = col)
                             nodos_explorados.append(aristaPadre.relacionitem)
+                            grafo.add_node(n_b)
+                            #pydot.Cluster(nodo.itemfase.nombre,label=nodo.itemfase.nombre).add_node(n_b)
                             grafo.add_edge(pydot.Edge(n_b,n ))
     
     
-    for fase in fases:        
-        items_fase = db_session.query(Item).from_statement("Select it.*  from item it, " + 
-                        " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id " + 
-                        " and f.id_proyecto = " + str(session['pry']) + "  group by codigo order by 1 ) s " + 
-                        " where it.codigo = cod and it.version= vermax and it.estado != 'E' and it.id_fase= "+str(fase.id) )        
-        for nodo in items_fase:              
-                col= color(nodo.itemfase.nro_orden)              
-                nombre_nodo = nodo.codigo         
-                if nodo.itemfase.nro_orden== 1 :         
-                    cluster_f1.add_node(pydot.Node(nombre_nodo, style="filled", fillcolor = col))
-                elif  nodo.itemfase.nro_orden== 2 :   
-                    cluster_f2.add_node(pydot.Node(nombre_nodo, style="filled", fillcolor = col))
-                elif nodo.itemfase.nro_orden == 3:
-                    cluster_f3.add_node(pydot.Node(nombre_nodo, style="filled", fillcolor = col))
-                else:   
-                    cluster_f4.add_node(pydot.Node(nombre_nodo, style="filled", fillcolor = col))    
-                    
-
-    grafo.add_subgraph(cluster_f1)
-    grafo.add_subgraph(cluster_f2)
-    grafo.add_subgraph(cluster_f3)
-    grafo.add_subgraph(cluster_f4)
-  
+#    fases= db_session.query(Fase).from_statement("select * from fase where id_proyecto = "+str(session['pry'])+" order by nro_orden").all()        
+#    for fase in fases:
+#        grafo.add_subgraph(pydot.Cluster(fase.nombre,label=fase.nombre))
+        
+        
     filename=os.path.join(cur_dir, cur_dir + '/static/graficos/grafo.png')
     grafo.write_png(filename)
     results = open(filename ,'rb').read()
     generator = (cell for row in results
                     for cell in row) 
-    
     return Response(generator,
                        mimetype='image/png',
                        headers={"Content-Disposition":
                                     "attachment;filename={0}".format('grafo.png')}) 
+    #return render_template('/graficar/hacer_grafo.html')
 
 
-
- 
 @app.route('/graficar/hacer_grafo', methods=['GET', 'POST'])
 def hacer_grafo():     
     return render_template('/graficar/hacer_grafo.html')
@@ -139,11 +126,9 @@ def color(orden):
     Determina el color que debe tener un item para la representacion grafica
     del costo de impacto basado en el orden de la fase a la que pertenece.
     """
-    colores = ["lightgrey", "pink", "green", "yellow", "orange", "purple", \
-               "blue", "gray", "brown"]
+    colores = ["white", "blue", "green", "yellow", "orange", "purple", \
+               "pink", "gray", "brown"]
     if cantidadFase() > len(colores):
-        return colores[0]
-    elif int(orden) < 0:
         return colores[0]
     else:
         return colores[int(orden) -1]    

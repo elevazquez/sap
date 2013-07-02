@@ -42,9 +42,6 @@
     	{% else %}
 			<em>El item no posee atributos</em>
     	{% endfor %}	
-    	{% if si_archivo !=None %}
-    		<p><a href="{{ url_for('bajar_archivo', id=id_itemg , fase=id_faseg ) }}">Ver Archivo</a>
-    	{% endif %} 
   			<p><input type=submit value=Reversionar>
   		<input type="button" value="Cancelar"  onClick="document.location.href='{{ url_for( 'administraritem' ) }}';"> 
 	</form>

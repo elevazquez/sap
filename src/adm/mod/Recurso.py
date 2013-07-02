@@ -10,9 +10,9 @@ class Recurso (Base):
     __table_args__ = {'extend_existing': True}
     id = Column('id', Integer, Sequence('recurso_id_seq'), primary_key=True)
     nombre = Column('nombre', String(100))
-    id_proyecto = Column(Integer, ForeignKey('proyecto.id'))
+    id_proyecto = Column('id_proyecto',Integer, ForeignKey('proyecto.id'))
     recursoproyecto = relationship(Proyecto, backref=backref('recursoproyectos', lazy='dynamic'))
-    id_fase = Column(Integer, ForeignKey('fase.id'))
+    id_fase = Column('id_fase',Integer, ForeignKey('fase.id'))
     recursofase = relationship(Fase, backref=backref('recursofases', lazy='dynamic'))
     
     def __init__(self, nombre=None, id_proyecto=None, id_fase=None):
@@ -21,5 +21,5 @@ class Recurso (Base):
         self.id_fase = id_fase
  
     def __repr__(self):
-        return '<Recurso %s %d %d>' % (self.nombre, self.id_proyecto, self.id_fase)
+        return '<Recurso %s %s %s>' % (self.nombre, self.id_proyecto, self.id_fase)
     
