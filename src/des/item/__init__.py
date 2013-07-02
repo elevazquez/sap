@@ -132,11 +132,7 @@ def nuevoitem():
             
             db_session.add(item)
             db_session.commit()
-<<<<<<< HEAD
-                           
-               
-=======
->>>>>>> refs/remotes/origin/master
+            
             # cambia el estado de la fase si este es inicial
             fase = db_session.query(Fase).filter_by(id=item.id_fase).first()  
             if fase.estado == 'I':
@@ -163,7 +159,6 @@ def nuevoitem():
             flash('El Item ha sido registrada con Exito', 'info')
             return redirect('/item/administraritem') 
         except DatabaseError, e:
-<<<<<<< HEAD
                 db_session.rollback()
                 atributo = db_session.query(Atributo).join(TItemAtributo , TItemAtributo.id_atributo == Atributo.id).join(TipoItem, TipoItem.id == TItemAtributo.id_tipo_item).filter(TipoItem.id == id_tipog).all()
            
@@ -171,9 +166,6 @@ def nuevoitem():
                     flash('Codigo del Item ya Existe..' ,'error')
                 else:
                     flash('Error en la Base de Datos' + e.args[0], 'error')
-=======
-                flash('Error en la Base de Datos' + e.args[0], 'error')
->>>>>>> refs/remotes/origin/master
                 return render_template('item/nuevoitem.html', form=form, att=atributo)
     else:
         flash_errors(form) 
