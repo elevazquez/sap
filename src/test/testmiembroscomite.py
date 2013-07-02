@@ -1,54 +1,54 @@
 from loginC import app
 from flask_principal import identity_loaded
-from test_helper import login,_on_principal_init, logout, TEST_USER
+from test_helper import login,_on_principal_initL, logout, TEST_USER_LIDER, seleccionar_proyecto
 
 import unittest
+PROYECTOID=23
+USU='testdesa'
 
-
-class RolTestCase(unittest.TestCase):
-    """Clase que implementa los test para el caso de uso Rol."""
+class MiembrosComiteTestCase(unittest.TestCase):
+    """Clase que implementa los test para el caso de uso Miembros Comite."""
    
-        
     def setUp(self):
         """se llama al metodo antes de iniciar el test"""        
         self.client = app.test_client()
         self.acceso = login(self.client)
-        identity_loaded.connect(_on_principal_init)
+        identity_loaded.connect(_on_principal_initL)
+        self.proyse= seleccionar_proyecto(self.client, PROYECTOID)
+        with app.test_client() as c:
+            with c.session_transaction() as sess:
+                sess['pry'] = PROYECTOID
 
     def tearDown(self):
         """ se llama al metodo al terminar el test"""
         self.client = app.test_client()
         self.salir = logout(self.client)
-    #===========================================================================
-    # def test_get_all_roles(self):
-    #    """verifica si se puede acceder al listado de roles """
-    #    request = self.client.get('/administrarrol', follow_redirects=True)
-    #    print "preueba "+request.data
-    #    assert 'sin permisos' in request.data
-    #    print "No posee permisos"
-    #===========================================================================
-        
-    def test_get_all_roles(self):
-        """verifica si se puede acceder al listado de roles"""
-        print '+++ Obtener todos los roles +++'
-        request = self.client.get('/administrarrol', follow_redirects=True)
-        self.assertNotIn('sin permisos', request.data, 'No tiene permisos para ver los roles')
-        self.assertEqual(request._status, '200 OK', 'Error al obtener roles como '+ TEST_USER)
-        print '*-- Obtiene todos los roles -- request result: ' + request._status + ' --*'
-        print'*---test 1 rol---*'
+    
+    def test_a_get_all_miembrosComite(self):
+        """Prueba que verifica si se puede acceder al listado de proyectos"""
+        print '##----++++ PRUEBA UNITARIA MIEMBROSCOMITE ++++----##'
+        print '+++ Obtener todos los miembrosComite +++'
+        request = self.client.get('/miembrosComite/administrarmiembrosComite', follow_redirects=True)
+        self.assertNotIn('Sin permisos para administrar miembros Comite', request.data, 'No tiene permisos para ver los miembros del comite')
+        self.assertEqual(request._status, '200 OK', 'Error al obtener los miembros del comite como '+ TEST_USER_LIDER)
+        print '*-- Obtiene todos los miembros del comite -- request result: ' + request._status + ' --*'
+        print'*---test 1 miembrosComite---*'
    
-    def test_crear_rol(self):
-        """  crea el rol y verifica si el rol fue creado"""
-        print '+++ Creacion de rol +++'
-        request = self._crear_rol('rolprueba', 'este es un rol de prueba')
-        print '*-- datos de prueba ::: codigo = rolprueba, descripcion = este es un rol de prueba --*'
-        self.assertIn('El rol ha sido registrado con exito', request.data, 'Error al crear el rol')
+    def test_b_crear_miembrosComite(self):     
+        """ Prueba de creacion de un miembrosComite y verifica si miembrosComite fue creado"""
+        print '+++ Creacion de miembrosComite +++'
+        request = self._crear_miembrosComite(USU)
+        print '*-- datos de prueba ::: ' + USU +' --*'
+        self.assertNotIn('Sin permisos para agregar usuarios', request.data, 'No tiene permisos para crear usuarios')
+        self.assertNotIn('Las contrasenhas deben coincidir', request.data, 'Las contrasenhas no coinciden')
+        self.assertNotIn('Error', request.data, 'Tiene errores el form')
+        self.assertIn('El Usuario ha sido registrado con exito', request.data, 'Error al crear usuario')
         print '*-- request result: ' + request._status + ' --*'
-        self.assertIn('rolprueba', request.data, 'El rol creado no se encuentra en la tabla')
-        print '*-- Rol creado correctamente, aparece en la tabla de roles --*'
-        print '*---test 2 rol---*'
+        self.assertIn(USU, request.data, 'El usuario creado no se encuentra en la tabla')
+        print '*-- '+ USU +' creado correctamente, aparece en la tabla de usuarios--*'
+        print '*---test 2 usuario---*'
 
-    def test_crear_rol_duplicado(self):
+    def test_crear_miembrosComite_duplicado(self):
         """prueba si se pueden crear roles duplicados"""
         print '+++ Creacion de rol con nombre repetido +++'
         request = self._crear_rol('rolprueba', 'este es un rol de prueba')
@@ -57,7 +57,7 @@ class RolTestCase(unittest.TestCase):
         print '*-- Verificacion completa, no se pueden crear dos roles con el mismo nombre --*'
         print '*---test 3 rol---*'
         
-    def test_editar_rol(self):
+    def test_editar_miembrosComite(self):
         """  edita un rol    """        
         print '+++ Editar rol existente +++'
         request = self._editar_rol('rolprueba', 'este es un rol de prueba editado')   
@@ -67,7 +67,7 @@ class RolTestCase(unittest.TestCase):
         print 'Rol editado correctamente'
         print '*---test 4 rol---*'
 
-    def test_eliminar_rol(self):
+    def test_eliminar_miembrosComite(self):
         """verifica si se puede eliminar un rol   """
         print '+++ Eliminacion de rol existente +++'
         borrar_request = self._eliminar_rol('rolprueba')
@@ -77,19 +77,19 @@ class RolTestCase(unittest.TestCase):
         print '*-- Verificacion completa, se elimino correctamente--*'
         print '*---test 5 rol---*'
            
-    def _crear_rol(self, codigo='rolprueba', descripcion='este es un rol de prueba'):     
+    def _crear_miembrosComite(self, codigo='rolprueba', descripcion='este es un rol de prueba'):     
         request = self.client.post('/add', data=dict(
            codigo=codigo,
            descripcion=descripcion), follow_redirects=True)
         return request
    
-    def _editar_rol(self, codigo='rolprueba', descripcion='este es un rol de prueba editado'):     
+    def _editar_miembrosComite(self, codigo='rolprueba', descripcion='este es un rol de prueba editado'):     
         request = self.client.post('/editar', data=dict(
            codigo=codigo,
            descripcion=descripcion), follow_redirects=True)
         return request
 
-    def _eliminar_rol(self, codigo='rolprueba'):     
+    def _eliminar_miembrosComite(self, codigo='rolprueba'):     
         request = self.client.post('/eliminar?cod='+codigo, follow_redirects=True)
         return request
    

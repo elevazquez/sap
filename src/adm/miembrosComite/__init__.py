@@ -11,6 +11,7 @@ from adm.mod.Permiso import Permiso
 from adm.mod.Rol import Rol
 from adm.mod.RolPermiso import RolPermiso
 from adm.mod.UsuarioRol import UsuarioRol
+from UserPermission import UserPermission
 
 from adm.mod.MiembrosComite import MiembrosComite
 from adm.miembrosComite.MiembrosComiteFormulario import MiembrosComiteFormulario
@@ -51,7 +52,6 @@ def nuevomiembrosComite():
         flash('No se pueden asignar Miembros al Comite de Cambios, numero maximo de miembros alcanzado','info')
         return render_template('miembrosComite/administrarmiembrosComite.html')  
     if request.method == 'POST' and form.validate():
-        #init_db(db_session)
         try:
             miembrosComite = MiembrosComite(pro.id, usuario.id)
             db_session.add(miembrosComite)
@@ -123,10 +123,16 @@ def buscarmiembrosComite2():
 
 @app.route('/miembrosComite/administrarmiembrosComite')
 def administrarmiembrosComite():
-    """ Funcion para listar registros de la tabla MiembrosComite""" 
-    #init_db(db_session)
-    miembrosComites = db_session.query(MiembrosComite).filter_by(id_proyecto=session['pry']).order_by(MiembrosComite.id_usuario)
-    return render_template('miembrosComite/administrarmiembrosComite.html', miembrosComites = miembrosComites)
+    """ Funcion para listar registros de la tabla MiembrosComite
+    @precondition: El usuario debe haber seleccionado el proyecto que administrara
+    @author: Lila Pamela Perez Miranda""" 
+    permission =UserPermission('LIDER PROYECTO', int(session['pry']))
+    if permission.can():
+        miembrosComites = db_session.query(MiembrosComite).filter_by(id_proyecto=session['pry']).order_by(MiembrosComite.id_usuario)
+        return render_template('miembrosComite/administrarmiembrosComite.html', miembrosComites = miembrosComites)
+    else:
+        flash('Sin permisos para administrar miembros Comite', 'permiso')
+        return render_template('index.html')
 
 @app.route('/miembrosComite/listarusuarios')
 def listarusuarios():

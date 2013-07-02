@@ -2,23 +2,21 @@ from adm.mod.Permiso import Permiso
 from adm.mod.RolPermiso import RolPermiso
 from adm.mod.Usuario import Usuario
 from adm.mod.UsuarioRol import UsuarioRol
+from adm.mod.Recurso import Recurso
 from flask_principal import RoleNeed, UserNeed, ItemNeed, identity_changed, AnonymousIdentity, current_app
 from util.database import engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from flask import session
-#import re
-#import xml.etree.ElementTree as ET
-#from flask import  session
-#from UserPermission import UserRol
 
-#from BeautifulSoup import BeautifulSoup
+#cambiar estos usuarios segun la base de datos
+TEST_USER = 'testadmin'
+TEST_PASS = 'test'
 
+TEST_USER_LIDER = 'testlider'
+TEST_PASS_LIDER = 'test'
 
-TEST_USER = 'admin'
-TEST_PASS = 'admin'
-
-TEST_USER_LIDER = 'liderSicap'
-TEST_PASS_LIDER = 'lider'
+TEST_USER_DESA = 'testdesa'
+TEST_PASS_DESA = 'test'
 
 db_session = scoped_session(sessionmaker(autocommit=False,
                                          autoflush=False,
@@ -45,7 +43,7 @@ def logout(app):
     return out
 
 def _on_principal_init(sender, identity):
-        usuario = db_session.query(Usuario).filter_by(usuario='admin').first();
+        usuario = db_session.query(Usuario).filter_by(usuario=TEST_USER).first();
         identity.provides.add(UserNeed(usuario.id))
         # Assuming the User model has a list of roles, update the
         # identity with the roles that the user provides
@@ -60,7 +58,7 @@ def _on_principal_init(sender, identity):
                 identity.provides.add(ItemNeed(p.codigo, p.id_recurso , 'manage'))
                 
 def _on_principal_initL(sender, identity):
-        usuario = db_session.query(Usuario).filter_by(usuario='liderSicap').first();
+        usuario = db_session.query(Usuario).filter_by(usuario=TEST_USER_LIDER).first();
         identity.provides.add(UserNeed(usuario.id))
         # Assuming the User model has a list of roles, update the
         # identity with the roles that the user provides
@@ -82,6 +80,8 @@ def _on_principal_final():
             identity=AnonymousIdentity())
 
 def seleccionar_proyecto(app,idpro):
-    print 'entra'
     request = app.get('/proyectoActual?pyo='+str(idpro), follow_redirects=True)
     return request
+
+def getRecursoByNombre(nombre=None):
+    return db_session.query(Recurso).filter_by(nombre=nombre).first()
