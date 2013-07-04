@@ -64,7 +64,7 @@ class UsuarioTestCase(unittest.TestCase):
         print '*-- Verificacion completa, no se pueden crear dos usuarios con el mismo usuario --*'
         print '*---test 3 usuario---*'
  
-    def test_d_buscar_proyecto(self):
+    def test_d_buscar_usuario(self):
         """Prueba de busqueda de un usuario"""
         print '+++ Buscar un usuario existente por usuario+++'
         request = self._buscar_usuario(PATRON, PARAM)
@@ -92,7 +92,7 @@ class UsuarioTestCase(unittest.TestCase):
         borrar_request = self._eliminar_usuario(USU)
         print '*-- datos de prueba ::: usuario = ' + USU +' --*'
         self.assertNotIn('Sin permisos para eliminar usuarios', borrar_request.data, 'No tiene permisos eliminar usuarios')
-        self.assertIn('El usuario ha sido eliminado con exito', borrar_request.data, 'Usuario creado, no existe el usuario(nick) del usuario')
+        self.assertIn('El usuario ha sido eliminado con exito', borrar_request.data, 'No existe el usuario(nick) del usuario')
         self.assertNotIn(USU, borrar_request.data, 'El usuario no ha sido borrado')
         print '*-- Verificacion completa, se elimino correctamente--*'
         print '*---test 6 usuario---*'

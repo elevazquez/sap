@@ -11,6 +11,7 @@ from adm.mod.Permiso import Permiso
 from adm.mod.Rol import Rol
 from adm.mod.RolPermiso import RolPermiso
 from adm.mod.UsuarioRol import UsuarioRol
+from UserPermission import UserPermission
 
 from adm.mod.MiembrosComite import MiembrosComite
 from adm.miembrosComite.MiembrosComiteFormulario import MiembrosComiteFormulario
@@ -36,8 +37,11 @@ def flash_errors(form):
 
 @app.route('/miembrosComite/nuevomiembrosComite', methods=['GET', 'POST'])
 def nuevomiembrosComite():
-    """ Funcion para agregar registros a la tabla MiembrosComite""" 
-    #init_db(db_session)
+    """ Funcion para agregar registros a la tabla MiembrosComite"""
+    permission =UserPermission('LIDER PROYECTO', int(session['pry']))
+    if permission.can()==False:
+        flash('No posee los permisos suficientes para realizar la operacion', 'permiso')
+        return render_template('index.html')
     pro = db_session.query(Proyecto).filter_by(id=session['pry']).first()
     u = db_session.query(Usuario).filter_by(usuario=request.args.get('usu')).first()  
     form = MiembrosComiteFormulario(request.form,u)
@@ -51,7 +55,6 @@ def nuevomiembrosComite():
         flash('No se pueden asignar Miembros al Comite de Cambios, numero maximo de miembros alcanzado','info')
         return render_template('miembrosComite/administrarmiembrosComite.html')  
     if request.method == 'POST' and form.validate():
-        #init_db(db_session)
         try:
             miembrosComite = MiembrosComite(pro.id, usuario.id)
             db_session.add(miembrosComite)
@@ -59,7 +62,7 @@ def nuevomiembrosComite():
             ur = UsuarioRol(r.id, usuario.id, pro.id)
             db_session.add(ur)
             db_session.commit()
-            flash('Se ha asignado el usario al Comite de Cambios','info')
+            flash('Se ha asignado el usuario al Comite de Cambios','info')
             return redirect('/miembrosComite/administrarmiembrosComite')
         except DatabaseError, e:
             flash('Error en la Base de Datos' + e.args[0],'error')
@@ -123,10 +126,16 @@ def buscarmiembrosComite2():
 
 @app.route('/miembrosComite/administrarmiembrosComite')
 def administrarmiembrosComite():
-    """ Funcion para listar registros de la tabla MiembrosComite""" 
-    #init_db(db_session)
-    miembrosComites = db_session.query(MiembrosComite).filter_by(id_proyecto=session['pry']).order_by(MiembrosComite.id_usuario)
-    return render_template('miembrosComite/administrarmiembrosComite.html', miembrosComites = miembrosComites)
+    """ Funcion para listar registros de la tabla MiembrosComite
+    @precondition: El usuario debe haber seleccionado el proyecto que administrara
+    @author: Lila Pamela Perez Miranda""" 
+    permission =UserPermission('LIDER PROYECTO', int(session['pry']))
+    if permission.can():
+        miembrosComites = db_session.query(MiembrosComite).filter_by(id_proyecto=session['pry']).order_by(MiembrosComite.id_usuario)
+        return render_template('miembrosComite/administrarmiembrosComite.html', miembrosComites = miembrosComites)
+    else:
+        flash('Sin permisos para administrar miembros Comite', 'permiso')
+        return render_template('index.html')
 
 @app.route('/miembrosComite/listarusuarios')
 def listarusuarios():

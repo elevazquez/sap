@@ -1,5 +1,5 @@
 """ Modelo de la tabla Item"""
-from sqlalchemy import Column, Integer, Sequence, String, Date, Numeric, LargeBinary, ForeignKey
+from sqlalchemy import Column, Integer, Sequence, String, Date, Numeric, Binary, ForeignKey
 from sqlalchemy.orm import relationship, backref
 from util.database import Base
 from adm.mod.Usuario import Usuario
@@ -17,9 +17,8 @@ class Item (Base):
     complejidad = Column('complejidad', Integer)  
     fecha = Column('fecha', Date)
     costo = Column('costo', Numeric(10,2))
-    archivo= Column('archivo', LargeBinary)
-    #archivo = Column('archivo', BYTEA)
-    # mime = Column('mime', String(15), unique=True)
+    archivo= Column('archivo', Binary)
+    mime = Column('mime', String(15))
     version = Column('version', Integer)
     id_usuario = Column(Integer, ForeignKey('usuario.id'))
     itemusuario = relationship(Usuario, backref=backref('itemusuarios', lazy='dynamic'))
@@ -30,7 +29,7 @@ class Item (Base):
     
     def __init__(self, codigo=None, nombre=None, descripcion=None, estado=None, complejidad=None, 
                  fecha=None, costo=None , id_usuario=None, version=None,
-                 id_fase=None, id_tipo_item=None, archivo=None):
+                 id_fase=None, id_tipo_item=None, archivo=None, mime=None):
         self.codigo = codigo
         self.nombre = nombre
         self.descripcion = descripcion
@@ -38,7 +37,7 @@ class Item (Base):
         self.complejidad = complejidad
         self.fecha = fecha
         self.costo = costo
-        #self.mime = mime
+        self.mime = mime
         self.id_usuario = id_usuario
         self.version = version
         self.id_fase = id_fase
