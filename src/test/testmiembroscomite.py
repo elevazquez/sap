@@ -39,14 +39,15 @@ class MiembrosComiteTestCase(unittest.TestCase):
         print '+++ Creacion de miembrosComite +++'
         request = self._crear_miembrosComite(USU)
         print '*-- datos de prueba ::: ' + USU +' --*'
-        self.assertNotIn('Sin permisos para agregar usuarios', request.data, 'No tiene permisos para crear usuarios')
-        self.assertNotIn('Las contrasenhas deben coincidir', request.data, 'Las contrasenhas no coinciden')
-        self.assertNotIn('Error', request.data, 'Tiene errores el form')
-        self.assertIn('El Usuario ha sido registrado con exito', request.data, 'Error al crear usuario')
+        self.assertNotIn('No posee los permisos suficientes para realizar la operacion', request.data, 'No tiene permisos para crear un miembro Comite')
+        self.assertNotIn('No se pueden asignar Miembros al Comite de Cambios', request.data, 'Solo se puede asignar miembros cuando el proyecto tiene el estado Nuevo')
+        self.assertNotIn('No se pueden asignar Miembros al Comite de Cambios, numero maximo de miembros alcanzado', request.data, 'El número máximo de miembros del comite ya fue alcanzado')
+        self.assertNotIn('en la Base de Datos', request.data, 'Error al tratar de insertar en la base de datos')
+        self.assertIn('Se ha asignado el usuario al Comite de Cambios', request.data, 'Error al asignar usuario como miembro del comite')
         print '*-- request result: ' + request._status + ' --*'
-        self.assertIn(USU, request.data, 'El usuario creado no se encuentra en la tabla')
-        print '*-- '+ USU +' creado correctamente, aparece en la tabla de usuarios--*'
-        print '*---test 2 usuario---*'
+        self.assertIn(USU, request.data, 'El usuario como miembro no se encuentra en la tabla')
+        print '*-- '+ USU +' creado correctamente, aparece en la tabla de miembros del comite--*'
+        print '*---test 2 miembrosComite---*'
 
     def test_crear_miembrosComite_duplicado(self):
         """prueba si se pueden crear roles duplicados"""
@@ -58,7 +59,7 @@ class MiembrosComiteTestCase(unittest.TestCase):
         print '*---test 3 rol---*'
         
     def test_editar_miembrosComite(self):
-        """  edita un rol    """        
+        """  edita un rol    """
         print '+++ Editar rol existente +++'
         request = self._editar_rol('rolprueba', 'este es un rol de prueba editado')   
         print '*-- datos de prueba ::: codigo = rolprueba, descripcion = este es un rol de prueba editado --*'
@@ -77,10 +78,8 @@ class MiembrosComiteTestCase(unittest.TestCase):
         print '*-- Verificacion completa, se elimino correctamente--*'
         print '*---test 5 rol---*'
            
-    def _crear_miembrosComite(self, codigo='rolprueba', descripcion='este es un rol de prueba'):     
-        request = self.client.post('/add', data=dict(
-           codigo=codigo,
-           descripcion=descripcion), follow_redirects=True)
+    def _crear_miembrosComite(self, usuario=USU):     
+        request = self.client.post('/miembrosComite/nuevomiembrosComite?usu='+usuario, follow_redirects=True)
         return request
    
     def _editar_miembrosComite(self, codigo='rolprueba', descripcion='este es un rol de prueba editado'):     
