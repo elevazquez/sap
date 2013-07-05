@@ -18,7 +18,7 @@
 		{% endif %} 
 	{% endwith %}
 	<form id=historialitem method=post action="/item/historialitem">
-	
+
 			<label>Fase</label> <input type="text" name="fase" value="{{ form.fase.data }} " id="fase" readonly="true"/> 
     		<label>Tipo Item</label> <input type="text" name="tipo_item" value="{{ form.tipo_item.data }} " id="tipo_item" readonly="true"/> 
     		<input type="text" name="id" value="{{ form.id.data }}" id="id" hidden="true"/>
@@ -42,8 +42,10 @@
     	{% else %}
 			<em>El item no posee atributos</em>
     	{% endfor %}	
-  		<input type="button" value="Salir"  onClick="document.location.href='{{ url_for( 'administraritem' ) }}';"> 
+    	{% if si_archivo !=None %}
+    		<p><a href="{{ url_for('bajar_archivo', id=id_itemg , fase=id_faseg ) }}">Ver Archivo</a>
+    	{% endif %} 
+  		<p><input type="button" value="Salir"  onClick="document.location.href='{{ url_for( 'administraritem' ) }}';"> 
 	</form>
 </div>
 {% endblock %}
-
