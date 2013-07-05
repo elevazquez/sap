@@ -150,7 +150,6 @@ def administraratributo():
     atributos = db_session.query(Atributo).order_by(Atributo.nombre)
     return render_template('atributo/administraratributo.html', atributos = atributos)
 
-
 @app.errorhandler(404)
 def page_not_found(error):
     """Lanza un mensaje de error en caso de que la pagina solicitada no exista"""

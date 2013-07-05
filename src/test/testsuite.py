@@ -6,6 +6,7 @@ from test.testpermiso import PermisoTestCase
 from test.testfase import FaseTestCase
 from test.testmiembroscomite import MiembrosComiteTestCase
 from test.testrecurso import RecursoTestCase
+from test.testatributo import AtributoTestCase
 import unittest
 
 def suite_2():
@@ -18,6 +19,7 @@ def suite_2():
     suite.addTest(FaseTestCase)
     suite.addTest(MiembrosComiteTestCase)
     suite.addTest(RecursoTestCase)
+    suite.addTest(AtributoTestCase)
     return suite
 
 if __name__ == '__main__':

@@ -4,11 +4,13 @@ from util.database import init_db, engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.exc import DatabaseError
 from sqlalchemy import func, Integer
-from flask import Flask, render_template, request, redirect, url_for, flash, session 
+from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask_login import current_user
 from adm.mod.Proyecto import Proyecto
 from des.mod.TipoAtributo import TipoAtributo
 from des.mod.Atributo import Atributo
 from des.tipoAtributo.TipoAtributoFormulario import TipoAtributoFormulario
+from UserPermission import UserPermission
 import flask, flask.views
 import os
 import datetime
@@ -28,10 +30,16 @@ def flash_errors(form):
                 error
             ),'error')
 
-
 @app.route('/tipoAtributo/nuevotipoAtributo', methods=['GET', 'POST'])
 def nuevotipoAtributo():
     """ Funcion para agregar registros a la tabla TipoAtributo""" 
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+
+    permission =UserPermission('LIDER PROYECTO',int(session['pry']))
+    if permission.can()==False:
+        flash('No posee los permisos suficientes para realizar la operacion', 'permiso')
     
     form = TipoAtributoFormulario(request.form)
     ##init_db(db_session)
@@ -56,7 +64,13 @@ def nuevotipoAtributo():
 @app.route('/tipoAtributo/editartipoAtributo', methods=['GET', 'POST'])
 def editartipoAtributo():
     """funcion que permite editar un Tipo de Atributo"""
-    ##init_db(db_session)
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+
+    permission =UserPermission('LIDER PROYECTO',int(session['pry']))
+    if permission.can()==False:
+        flash('No posee los permisos suficientes para realizar la operacion', 'permiso')
     f = db_session.query(TipoAtributo).filter_by(nombre=request.args.get('nombre')).first()  
     form = TipoAtributoFormulario(request.form,f)
     tipoAtributo = db_session.query(TipoAtributo).filter_by(nombre=form.nombre.data).first()  
@@ -76,7 +90,13 @@ def editartipoAtributo():
 @app.route('/tipoAtributo/eliminartipoAtributo', methods=['GET', 'POST'])
 def eliminartipoAtributo():
     """funcion que permite eliminar un tipo atributo"""
-    ##init_db(db_session)
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+
+    permission =UserPermission('LIDER PROYECTO',int(session['pry']))
+    if permission.can()==False:
+        flash('No posee los permisos suficientes para realizar la operacion', 'permiso')
     ta = db_session.query(TipoAtributo).filter_by(nombre=request.args.get('nombre')).first()  
     a = db_session.query(Atributo).filter_by(id_tipo_atributo=ta.id).first()
     if a != None :
@@ -97,6 +117,13 @@ def eliminartipoAtributo():
 @app.route('/tipoAtributo/buscartipoAtributo', methods=['GET', 'POST'])
 def buscartipoAtributo():
     """funcion que permite buscar tipo de atributos"""
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+
+    permission =UserPermission('LIDER PROYECTO',int(session['pry']))
+    if permission.can()==False:
+        flash('No posee los permisos suficientes para realizar la operacion', 'permiso')
     valor = request.args['patron']
     parametro = request.args['parametro']
     ##init_db(db_session)
@@ -108,16 +135,20 @@ def buscartipoAtributo():
 
 @app.route('/tipoAtributo/administrartipoAtributo')
 def administrartipoAtributo():
-    ##init_db(db_session)
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+
+    permission =UserPermission('LIDER PROYECTO',int(session['pry']))
+    if permission.can()==False:
+        flash('No posee los permisos suficientes para realizar la operacion', 'permiso')
     tipoAtributos = db_session.query(TipoAtributo).order_by(TipoAtributo.nombre)
     return render_template('tipoAtributo/administrartipoAtributo.html', tipoAtributos = tipoAtributos)
-
 
 @app.errorhandler(404)
 def page_not_found(error):
     """Lanza un mensaje de error en caso de que la pagina solicitada no exista"""
     return 'Esta Pagina no existe', 404
-
 
 @app.after_request
 def shutdown_session(response):
