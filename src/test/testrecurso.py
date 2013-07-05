@@ -9,7 +9,7 @@ FASE = '8'
 PATRON = NOMBRE
 PARAM = 'nombre'
 
-class ProyectoTestCase(unittest.TestCase):
+class RecursoTestCase(unittest.TestCase):
     """Clase que implementa los test para el caso de uso Recurso."""
     
     def setUp(self):

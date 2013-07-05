@@ -1,13 +1,13 @@
 """ Modelo de la tabla Miembros Comite """
-from sqlalchemy import *
-from sqlalchemy.orm import *
+from sqlalchemy import Integer, Sequence, Column, ForeignKey
+from sqlalchemy.orm import relationship, backref
 from util.database import Base
 from adm.mod.Proyecto import Proyecto
 from adm.mod.Usuario import Usuario
 
 class MiembrosComite (Base):
     __tablename__ = 'miembros_comite'
-    __table_args__ = {'extend_existing': True}
+    __table_args__ = ({'extend_existing': True})
     id = Column('id', Integer, Sequence('miembros_comite_id_seq'), primary_key=True)
     id_proyecto = Column(Integer, ForeignKey('proyecto.id'))
     miembrosproyecto = relationship(Proyecto, backref=backref('miembrosproyectos', lazy='dynamic'))

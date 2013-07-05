@@ -55,7 +55,7 @@ class UsuarioTestCase(unittest.TestCase):
         print '*---test 2 usuario---*'
  
     def test_c_crear_usuario_duplicado(self):
-        """Prueba si se pueden crear usuarios duplicados"""
+        """ Prueba si se pueden crear usuarios duplicados """
         print '+++ Creacion de usuario con usuario(nick) repetido +++'
         request = self._crear_usuario(USU, NOM, APE, PASS, PASS, MAIL, DOMICI, TEL, FECHNAC)
         print '*-- datos de prueba ::: ' + USU + ', ' + NOM + ', ' + APE + ', ' + PASS + ', ' + MAIL +', '+ DOMICI +', '+ TEL +', '+str(FECHNAC)+' --*'

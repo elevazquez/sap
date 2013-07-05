@@ -65,7 +65,10 @@ def nuevomiembrosComite():
             flash('Se ha asignado el usuario al Comite de Cambios','info')
             return redirect('/miembrosComite/administrarmiembrosComite')
         except DatabaseError, e:
-            flash('Error en la Base de Datos' + e.args[0],'error')
+            if e.args[0].find('duplicate key value violates unique')!=-1:
+                flash('Clave unica violada por favor ingrese otro usuario' ,'error')
+            else:
+                flash('Error en la Base de Datos' + e.args[0],'error')
             return render_template('miembrosComite/nuevomiembrosComite.html', form=form)
     else:
         flash_errors(form)  
@@ -74,7 +77,6 @@ def nuevomiembrosComite():
 @app.route('/miembrosComite/eliminarmiembrosComite', methods=['GET', 'POST'])
 def eliminarmiembrosComite():
     """ Funcion para eliminar registros de la tabla MiembrosComite""" 
-    #init_db(db_session)
     r = db_session.query(Rol).filter_by(codigo='COMITE CAMBIOS').first()  
     pro = db_session.query(Proyecto).filter_by(id=session['pry']).first()
     if pro.estado != 'N' :
@@ -84,17 +86,16 @@ def eliminarmiembrosComite():
         flash('No se pueden desasignar al Lider de Proyecto del Comite de Cambios','info')
         return render_template('miembrosComite/administrarmiembrosComite.html')   
     try:
-        #init_db(db_session)
+        print request.args.get('id_mc')
         mc = db_session.query(MiembrosComite).filter_by(id=request.args.get('id_mc')).first()  
         ur = db_session.query(UsuarioRol).filter_by(id_rol=r.id).filter_by(id_usuario=mc.id_usuario).filter_by(id_proyecto=pro.id).first()  
-        #init_db(db_session)
         db_session.delete(ur)
         db_session.commit()
         
         miembrosComite = db_session.query(MiembrosComite).filter_by(id=request.args.get('id_mc')).first()  
-        #init_db(db_session)
         db_session.delete(miembrosComite)
         db_session.commit()
+        flash('El Miembro ha sido eliminado con exito','info')
         return redirect('/miembrosComite/administrarmiembrosComite')
     except DatabaseError, e:
             flash('Error en la Base de Datos' + e.args[0],'info')
@@ -102,10 +103,14 @@ def eliminarmiembrosComite():
     
 @app.route('/miembrosComite/buscarmiembrosComite', methods=['GET', 'POST'])
 def buscarmiembrosComite():
-    """ Funcion para buscar registros en la tabla MiembrosComite""" 
+    """ Funcion para buscar registros en la tabla MiembrosComite"""
+    permission =UserPermission('LIDER PROYECTO', int(session['pry']))
+    if permission.can()==False:
+        flash('No posee los permisos suficientes para realizar la operacion', 'permiso')
+        return render_template('index.html')
+    
     valor = request.args['patron']
     parametro = request.args['parametro']
-    #init_db(db_session)
     if valor == "" : 
         p = db_session.query(MiembrosComite).filter_by(id_proyecto=session['pry'])
     else :
@@ -115,9 +120,13 @@ def buscarmiembrosComite():
 @app.route('/miembrosComite/buscarmiembrosComite2', methods=['GET', 'POST'])
 def buscarmiembrosComite2():
     """ Funcion para buscar registros en la tabla MiembrosComite""" 
+    permission =UserPermission('LIDER PROYECTO', int(session['pry']))
+    if permission.can()==False:
+        flash('No posee los permisos suficientes para realizar la operacion', 'permiso')
+        return render_template('index.html')
+    
     valor = request.args['patron']
     parametro = request.args['parametro']
-    #init_db(db_session)
     if valor == "" : 
         p = db_session.query(Usuario).from_statement("select * from usuario where id not in (select id_usuario from miembros_comite where id_proyecto='"+session['pry']+"')").all()
     else :
@@ -140,9 +149,13 @@ def administrarmiembrosComite():
 @app.route('/miembrosComite/listarusuarios')
 def listarusuarios():
     """ Funcion para listar registros de la tabla Usuarios""" 
-    #init_db(db_session)
-    usuarios = db_session.query(Usuario).from_statement("select * from usuario where id not in (select id_usuario from miembros_comite where id_proyecto='"+session['pry']+"')").all()
-    return render_template('miembrosComite/listarusuarios.html', usuarios = usuarios)
+    permission =UserPermission('LIDER PROYECTO', int(session['pry']))
+    if permission.can():
+        usuarios = db_session.query(Usuario).from_statement("select * from usuario where id not in (select id_usuario from miembros_comite where id_proyecto='"+session['pry']+"')").all()
+        return render_template('miembrosComite/listarusuarios.html', usuarios = usuarios)
+    else:
+        flash('No posee los permisos suficientes para realizar la operacion', 'permiso')
+        return render_template('index.html')
     
 @app.errorhandler(404)
 def page_not_found(error):

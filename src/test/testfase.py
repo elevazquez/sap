@@ -59,7 +59,7 @@ class FaseTestCase(unittest.TestCase):
         print '*---test 2 fase---*'
 
     def test_c_crear_fase_duplicado(self):
-        """prueba si se pueden crear fase duplicados"""
+        """Prueba si se pueden crear fase duplicados"""
         print '+++ Creacion de fase con mismo numero orden duplicado +++'
         request = self._crear_fase(nro_orden, nombre, descripcion, estado, fecha_inicio, fecha_fin, id_proyecto)
         print '*-- datos de prueba ::: ' + str(nro_orden) + ', '+ nombre+', '+  descripcion+', ' +estado + ', ' + str(fecha_inicio) +', '+ str(fecha_fin) +', '+ str(id_proyecto) +' --*'
@@ -82,13 +82,13 @@ class FaseTestCase(unittest.TestCase):
         print '*---test 4 fase---*'
 
     def test_e_editar_fase(self):
-        """  edita una fase    """        
+        """ Prueba para editar una fase    """        
         print '+++ Edicion de fase +++'
         request = self._editar_fase(nro_orden, nombre, 'decrip editada', estado, fecha_inicio, fecha_fin, id_proyecto)
         print '*-- datos de prueba ::: ' + str(nro_orden) + ', '+ nombre+', '+ 'decrip editada'+', ' +estado + ', ' + str(fecha_inicio) +', '+ str(fecha_fin) +', '+ str(id_proyecto) +' --*'
         self.assertNotIn('No posee los permisos suficientes para realizar la operacion', request.data, 'No tiene permisos para editar fases')
         self.assertNotIn('Error', request.data, 'Tiene errores el form')
-        self.assertIn('La fase ha sido editada con exito', request.data, 'Error al crear la fase')
+        self.assertIn('La fase ha sido editada con exito', request.data, 'Error al editar la fase')
         print '*-- request result: ' + request._status + ' --*'
         self.assertIn(nombre, request.data, 'La fase creada no se encuentra en la tabla')
         print '*-- '+nombre+' creada correctamente, aparece en la tabla de fases--*'

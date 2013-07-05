@@ -4,6 +4,8 @@ from test.testusuario import UsuarioTestCase
 from test.testtipoAtributo import TipoATributoTestCase
 from test.testpermiso import PermisoTestCase
 from test.testfase import FaseTestCase
+from test.testmiembroscomite import MiembrosComiteTestCase
+from test.testrecurso import RecursoTestCase
 import unittest
 
 def suite_2():
@@ -13,6 +15,9 @@ def suite_2():
     suite.addTest(UsuarioTestCase())
     suite.addTest(TipoATributoTestCase())
     suite.addTest(PermisoTestCase)
+    suite.addTest(FaseTestCase)
+    suite.addTest(MiembrosComiteTestCase)
+    suite.addTest(RecursoTestCase)
     return suite
 
 if __name__ == '__main__':

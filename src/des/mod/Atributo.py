@@ -1,6 +1,6 @@
 """ Modelo de la tabla Atributo"""
-from sqlalchemy import *
-from sqlalchemy.orm import *
+from sqlalchemy import Integer, Sequence, String, Column, ForeignKey
+from sqlalchemy.orm import relationship, backref
 from util.database import Base
 from des.mod.TipoAtributo import TipoAtributo
 

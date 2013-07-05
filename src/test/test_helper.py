@@ -3,6 +3,7 @@ from adm.mod.RolPermiso import RolPermiso
 from adm.mod.Usuario import Usuario
 from adm.mod.UsuarioRol import UsuarioRol
 from adm.mod.Recurso import Recurso
+from adm.mod.MiembrosComite import MiembrosComite
 from flask_principal import RoleNeed, UserNeed, ItemNeed, identity_changed, AnonymousIdentity, current_app
 from util.database import engine
 from sqlalchemy.orm import scoped_session, sessionmaker
@@ -85,3 +86,11 @@ def seleccionar_proyecto(app,idpro):
 
 def getRecursoByNombre(nombre=None):
     return db_session.query(Recurso).filter_by(nombre=nombre).first()
+
+def getIdUsuario(usua=None):
+    usu=db_session.query(Usuario).filter_by(usuario=usua).first()
+    print str(usu.id)
+    return usu.id
+
+def getMiembroComite(id_proyecto=None, usua=None):
+    return db_session.query(MiembrosComite).filter_by(id_proyecto=id_proyecto, id_usuario=usua).first()
