@@ -226,20 +226,16 @@ def eliminarproyecto():
             re = db_session.query(Recurso).filter_by(id_proyecto=proyecto.id).filter_by(nombre=proyecto.nombre).first()  
             per = db_session.query(Permiso).filter_by(id_recurso=re.id).filter_by(codigo='CONSULTAR PROYECTO').first()
             rp = db_session.query(RolPermiso).filter_by(id_rol=r.id).filter_by(id_permiso=per.id).first()
-        
-            #init_db(db_session)
+
             db_session.delete(rp)
             db_session.commit()
         
-            #init_db(db_session)
             db_session.delete(per)
             db_session.commit()
         
-            #init_db(db_session)
             db_session.delete(re)
             db_session.commit()
         
-            #init_db(db_session)
             db_session.delete(proyecto)
             db_session.commit()
             flash('El proyecto ha sido eliminado con exito', 'info')
@@ -262,7 +258,6 @@ def buscarproyecto():
     if permission.can():
         valor = request.args['patron']
         parametro = request.args['parametro']
-        #init_db(db_session)
         if valor == "" : 
             administrarproyecto()
         if parametro == 'cant_miembros' :
@@ -283,7 +278,6 @@ def buscarproyecto():
         if permiss.can():
             valor = request.args['patron']
             parametro = request.args['parametro']
-            #init_db(db_session)
             if valor == "" : 
                 administrarproyecto()
             if parametro == 'cant_miembros' :
@@ -311,7 +305,6 @@ def administrarproyecto():
         idproy = session['pry']
     permission = UserRol('ADMINISTRADOR')
     if permission.can():
-        #init_db(db_session)
         if idproy != None :  
             proyectos = db_session.query(Proyecto).filter(Proyecto.id == idproy).all()
         else :
@@ -339,6 +332,10 @@ def shutdown_session(response):
 @app.route('/inicioproyecto')
 def getProyectoByUsuario():
     """Funcion que obtiene la lista de los proyectos de un usuario"""
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     usuario = request.args['id_usuario']
     p = db_session.query(Proyecto).join(UsuarioRol, Proyecto.id == UsuarioRol.id_proyecto).filter(UsuarioRol.id_usuario == usuario).group_by(Proyecto.id).all()
     
@@ -376,12 +373,8 @@ def proyectoActual():
     #===========================================================================
 
 def is_solicitud(userid): 
-    
-#            res = db_session.query(ResolucionMiembros).from_statement("select rm.* from miembros_comite mc, resolucion_miembros rm, solicitud_cambio sc " +
-#                                                                      " where mc.id_usuario= "+str(userid)+" and mc.id_proyecto = "+str(session['pry'])+" and sc.id= rm.id_solicitud_cambio " +
-#                                                                      " and sc.estado='E' and mc.id_usuario= rm.id_usuario").first()
-           
-           
+    """Funcion que verifica si es miembro de un comite y si tiene solicitud pendiente a votar
+    @param userid:Id del usuario que se verifica """
     es_comite = db_session.query(MiembrosComite).filter_by(id_usuario= userid).first()
     if es_comite != None:
         solicitudes= db_session.query(SolicitudCambio).filter_by(estado ='E').filter_by(id_proyecto=session['pry']).all()
@@ -400,6 +393,11 @@ def iniciarproyecto():
     """Funcion para iniciar el Proyecto"""
     if not current_user.is_authenticated():
         flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
+    permission =UserPermission('LIDER PROYECTO', int(session['pry']))
+    if permission.can()==False:
+        flash('No posee los permisos suficientes para realizar la operacion', 'permiso')
         return render_template('index.html')
     
     nom = request.args.get('nom')
@@ -431,6 +429,11 @@ def finalizarproyecto():
     """ Funcion para finalizar registros de la tabla Proyecto""" 
     if not current_user.is_authenticated():
         flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+
+    permission =UserPermission('LIDER PROYECTO', int(session['pry']))
+    if permission.can()==False:
+        flash('No posee los permisos suficientes para realizar la operacion', 'permiso')
         return render_template('index.html')
 
     nom = request.args.get('nom')

@@ -28,9 +28,9 @@ def flash_errors(form):
                 error
             ),'error')
 
-""" Funcion para agregar registros a la tabla Permiso""" 
 @app.route('/permiso/nuevopermiso', methods=['GET', 'POST'])
 def nuevopermiso():
+    """ Funcion para agregar registros a la tabla Permiso""" 
     if not current_user.is_authenticated():
         flash('Debe loguearse primeramente!!!!', 'loggin')
         return render_template('index.html')
@@ -59,6 +59,7 @@ def nuevopermiso():
 
 @app.route('/permiso/editarpermiso', methods=['GET', 'POST'])
 def editarpermiso():
+    """ Funcion para editar registros a la tabla Permiso"""
     if not current_user.is_authenticated():
         flash('Debe loguearse primeramente!!!!', 'loggin')
         return render_template('index.html')
@@ -86,6 +87,7 @@ def editarpermiso():
     
 @app.route('/permiso/eliminarpermiso', methods=['GET', 'POST'])
 def eliminarpermiso():
+    """ Funcion para eliminar registros a la tabla Permiso"""
     if not current_user.is_authenticated():
         flash('Debe loguearse primeramente!!!!', 'loggin')
         return render_template('index.html')
@@ -93,7 +95,6 @@ def eliminarpermiso():
     permission = UserRol('ADMINISTRADOR')
     if permission.can():
         cod = request.args.get('codigo')
-        #init_db(db_session)
         rol = db_session.query(Permiso).filter_by(codigo=cod).first()
         db_session.delete(rol)
         db_session.commit()
@@ -105,6 +106,7 @@ def eliminarpermiso():
 
 @app.route('/permiso/buscarpermiso', methods=['GET', 'POST'])
 def buscarpermiso():
+    """ Funcion para buscar registros en la tabla Permiso"""
     if not current_user.is_authenticated():
         flash('Debe loguearse primeramente!!!!', 'loggin')
         return render_template('index.html')
@@ -137,6 +139,7 @@ def buscarpermiso():
 
 @app.route('/permiso/administrarpermiso')
 def administrarpermiso():
+    """ Funcion para ver registros a la tabla Permiso"""
     if not current_user.is_authenticated():
         flash('Debe loguearse primeramente!!!!', 'loggin')
         return render_template('index.html')
@@ -171,6 +174,9 @@ def shutdown_session(response):
     return response
 
 def getPermisosByRol(idrol):
+    """ Funcion obtener los permisos asociados a un rol
+    @param idrol: id del rol del que se obtendra sus permisos
+    @return: retorna una lista de permisos """
     yourPermisos = db_session.query(Permiso).join(RolPermiso, RolPermiso.id_permiso == Permiso.id).filter(RolPermiso.id_rol == idrol).all()
     return yourPermisos
 

@@ -38,7 +38,8 @@ def nuevoatributo():
     permission =UserPermission('LIDER PROYECTO',int(session['pry']))
     if permission.can()==False:
         flash('No posee los permisos suficientes para realizar la operacion', 'permiso')
-        return render_template('index.html') 
+        return render_template('index.html')
+    
     form = AtributoFormulario(request.form)
     form.id_tipo_atributo.choices= [(t.id, t.nombre) for t in db_session.query(TipoAtributo).order_by(TipoAtributo.nombre).all()]
     if request.method == 'POST' and form.validate():
@@ -111,8 +112,8 @@ def eliminaratributo():
         flash('El atributo ha sido eliminado con exito','info')
         return redirect('/atributo/administraratributo')
     except DatabaseError, e:
-            flash('Error en la Base de Datos' + e.args[0],'error')
-            return render_template('atributo/eliminaratributo.html')
+        flash('Error en la Base de Datos' + e.args[0],'error')
+        return render_template('atributo/eliminaratributo.html')
     
 @app.route('/atributo/buscaratributo', methods=['GET', 'POST'])
 def buscaratributo():
@@ -146,7 +147,8 @@ def administraratributo():
     permission =UserPermission('LIDER PROYECTO', int(session['pry']))
     if permission.can()==False:
         flash('No posee los permisos suficientes para realizar la operacion', 'permiso')
-        return render_template('index.html') 
+        return render_template('index.html')
+    
     atributos = db_session.query(Atributo).order_by(Atributo.nombre)
     return render_template('atributo/administraratributo.html', atributos = atributos)
 

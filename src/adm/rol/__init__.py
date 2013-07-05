@@ -74,7 +74,6 @@ def editar():
      
     permission = UserRol('ADMINISTRADOR')
     if permission.can():
-        # init_db(db_session)
         r = db_session.query(Rol).filter_by(codigo=request.args.get('cod')).first()  
         form = RolFormulario(request.form, r)
         rol = db_session.query(Rol).filter_by(codigo=form.codigo.data).first()  
@@ -106,9 +105,7 @@ def eliminar():
     if permission.can():
         try:
             cod = request.args.get('cod')
-            # init_db(db_session)
             rol = db_session.query(Rol).filter_by(codigo=cod).first()  
-            # init_db(db_session)
             db_session.delete(rol)
             db_session.commit()
             flash('El rol ha sido eliminado con exito', 'info')
@@ -131,13 +128,11 @@ def buscar():
     if permission.can():
         valor = request.args['patron']
         parametro = request.args['parametro']
-        # init_db(db_session)
         if valor == "" : 
             administrarrol()
         p = db_session.query(Rol).from_statement("SELECT * FROM rol where " + parametro + " ilike '%" + valor + "%'").all()
         return render_template('rol/administrarrol.html', roles=p)
         valor = request.args['patron']
-        # init_db(db_session)
         r = db_session.query(Rol).filter_by(codigo=valor)
         if r == None:
             return 'no existe concordancia'
@@ -155,7 +150,6 @@ def administrarrol():
     
     permission = UserRol('ADMINISTRADOR')
     if permission.can():
-        # init_db(db_session)
         roles = db_session.query(Rol).order_by(Rol.codigo)
         return render_template('rol/administrarrol.html', roles=roles)
     else:
@@ -214,11 +208,12 @@ def asignarpermiso():
             permisos = getPermisosByProyecto(idproyecto)
             return render_template('rol/asignarpermisos.html', permisos = permisos, idrol = idrol, idproyecto = idproyecto)
     else:
-        return 'sin permisos'
+        flash('Sin permisos para asignar permisos al rol', 'permiso')
+        return render_template('index.html')
 
 @app.route('/rol/buscarpermisoSinasignar', methods=['GET', 'POST'])
 def buscarpermisoSinasignar():
-    
+    """ Funcion para buscar permisos que no pertenecen al rol """
     if not current_user.is_authenticated():
         flash('Debe loguearse primeramente!!!!', 'loggin')
         return render_template('index.html')
@@ -252,10 +247,12 @@ def buscarpermisoSinasignar():
             return 'no existe concordancia'
         return render_template('rol/administrarrol.html', roles=r)
     else:
-        return 'sin permisos'
+        flash('Sin permisos para buscar permisos no asignados', 'permiso')
+        return render_template('index.html')
 
 @app.route('/rol/desasignarpermiso', methods=['GET', 'POST'])
 def desasignarpermiso():
+    """ Funcion para desasignar los permisos de un rol """
     if not current_user.is_authenticated():
         flash('Debe loguearse primeramente!!!!', 'loggin')
         return render_template('index.html')
@@ -299,11 +296,13 @@ def shutdown_session(response):
     return response
 
 def getRolesByUsuario(idusuario):
+    """ Funcion para obtener los roles segun un usuario
+    @param idusuario: id de un usuario """
     yourRoles = db_session.query(Rol).join(UsuarioRol, UsuarioRol.id_rol == Rol.id).filter(UsuarioRol.id_usuario == idusuario).all()
     return yourRoles
 
 def getPermisosByProyecto(idproyecto):
-    """Obtiene todos los permisos pertenecientes a un proyecto, mediante el id de la fase"""
+    """ Obtiene todos los permisos pertenecientes a un proyecto, mediante el id de la fase """
     #yourPermisos = db_session.query(Permiso).join(Recurso, Recurso.id == Permiso.id_recurso).join(Proyecto, Proyecto.id == Recurso.id_proyecto).join(Fase, Fase.id == Recurso.id_fase).filter(or_(Proyecto.id == idproyecto, Permiso.id.in_(db_session.query(Permiso.id).join(Recurso, Recurso.id == Permiso.id_recurso).join(Fase, Fase.id == Recurso.id_fase).join(Proyecto, Proyecto.id == Fase.id_proyecto).filter(Proyecto.id == idproyecto)))).all()
     yourPermisos = db_session.query(Permiso).from_statement('SELECT p.id FROM permiso p' +
     ' JOIN recurso r ON r.id = p.id_recurso JOIN ('+
@@ -320,6 +319,9 @@ def getPermisosByProyecto(idproyecto):
     return yourPermisos
 
 def listadoPermisosNoAsignados(idproyecto, idrol):
+    """ Obtiene los permisos no asignados a un rol
+    @param idproyecto: id del proyecto
+    @param idrol: id del rol"""
     #permisos = db_session.query(Permiso).join(Recurso, Recurso.id == Permiso.id_recurso).join(Proyecto, Proyecto.id == Recurso.id_proyecto).filter(Proyecto.id == idproyecto).filter(~Permiso.id.in_(db_session.query(Permiso.id).join(RolPermiso, RolPermiso.id_permiso == Permiso.id).filter(RolPermiso.id_rol == idrol))).all()
     permisos = db_session.query(Permiso).from_statement('SELECT p.id FROM permiso p' +
     ' JOIN recurso r ON r.id = p.id_recurso JOIN ('+
@@ -339,6 +341,7 @@ def listadoPermisosNoAsignados(idproyecto, idrol):
     return permisos
 
 def getProyectoByPermiso(permisos):
+    """ Obtiene el proyecto segun los permisos """
     bandera = False
     pry = None
     for p in permisos:

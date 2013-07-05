@@ -80,7 +80,7 @@ class MiembrosComiteTestCase(unittest.TestCase):
         print str(miem_com.id)
         borrar_request = self._eliminar_miembrosComite(miem_com.id, idusu)
         print '*-- datos de prueba ::: usuario = ' + USU +' --*'
-        self.assertNotIn('Sin permisos para eliminar usuarios', borrar_request.data, 'No tiene permisos eliminar usuarios')
+        self.assertNotIn('No posee los permisos suficientes para realizar la operacion', borrar_request.data, 'No tiene permisos eliminar usuarios')
         self.assertNotIn('Error en la Base de Datos', borrar_request.data, 'Error al eliminar miembro')
         self.assertIn('El Miembro ha sido eliminado con exito', borrar_request.data, 'No existe el miembro del comite')
         self.assertNotIn(USU, borrar_request.data, 'El usuario no ha sido borrado')

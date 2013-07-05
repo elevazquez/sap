@@ -53,7 +53,6 @@ def nuevousuario():
         """ Se un objeto md5 para encriptar la contrasenha del usuario """    
         con = md5.new()  
         if request.method == 'POST' and form.validate():
-            #init_db(db_session)
             if form.fecha_nac.data > today :
                 flash('Ingrese una fecha de nacimiento valida','error')
                 return render_template('usuario/nuevousuario.html', form=form)  
@@ -87,13 +86,16 @@ def nuevousuario():
 def editarusuario():
     """ Funcion para editar registros de la tabla Usuario""" 
     """ Se obtiene la fecha actual para almacenar la fecha de ultima actualizacion """
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     permission = UserRol('ADMINISTRADOR')
     if permission.can():
         today = datetime.date.today()
         """ Se un objeto md5 para encriptar la contrasenha del usuario """    
         con = md5.new()
-        conf = md5.new()    
-        #init_db(db_session)
+        conf = md5.new()
         p = db_session.query(Usuario).filter_by(usuario=request.args.get('usu')).first()  
         form = UsuarioFormulario(request.form,p)
         usuario = db_session.query(Usuario).filter_by(usuario=form.usuario.data).first()  
@@ -138,9 +140,7 @@ def eliminarusuario():
     if permission.can():
         try:
             usu = request.args.get('usu')
-            #init_db(db_session)
             usuario = db_session.query(Usuario).filter_by(usuario=usu).first()  
-            #init_db(db_session)
             db_session.delete(usuario)
             db_session.commit()
             flash('El usuario ha sido eliminado con exito','info')
@@ -163,7 +163,6 @@ def buscarusuario():
     if permission.can():
         valor = request.args['patron']
         parametro = request.args['parametro']
-        #init_db(db_session)
         if valor == "" : 
             administrarusuario()
         if parametro == 'fecha_nac':
@@ -172,7 +171,6 @@ def buscarusuario():
             p = db_session.query(Usuario).from_statement("SELECT * FROM usuario where "+parametro+" ilike '%"+valor+"%'").all()
         return render_template('usuario/administrarusuario.html', usuarios = p)   
         valor = request.args['patron']
-        #init_db(db_session)
         r = db_session.query(Usuario).filter_by(usuario=valor)
         return render_template('usuario/administrarusuario.html', usuarios = r)
     else:
@@ -181,7 +179,7 @@ def buscarusuario():
 
 @app.route('/usuario/administrarusuario')
 def administrarusuario():
-    """ Funcion para listar registros de la tabla Usuario""" 
+    """ Funcion para listar registros de la tabla Usuario """ 
     if not current_user.is_authenticated():
         flash('Debe loguearse primeramente!!!!', 'loggin')
         return render_template('index.html')
@@ -194,39 +192,48 @@ def administrarusuario():
         flash('Sin permisos para administrar usuarios', 'permiso')
         return render_template('index.html')
 
-@app.route('/usuario/asignarrol')    
-def asignarrol():
-    if not current_user.is_authenticated():
-        flash('Debe loguearse primeramente!!!!', 'loggin')
-        return render_template('index.html')
-    
-    permission = UserRol('ADMINISTRADOR')
-    if permission.can():
-        idusuario = request.args.get('usu')
-        asignados= db_session.query(UsuarioRol).filter_by(id_usuario = idusuario).all()
-        if request.method == 'POST':
-            idusuario = request.form.get('usu')
-            
-            rolesmarcados=request.form.getlist('roles')
-            #===================================================================
-            # Inserta los roles permisos seleccionados, si no existe realiza el merge y confirma los cambios
-            #===================================================================
-            for r in rolesmarcados :
-                rolusu = UsuarioRol(idusuario, r, 1)
-                exits = db_session.query(UsuarioRol).filter_by(id_usuario=idusuario, id_rol=r).first()
-                if not exits:
-                    db_session.merge(rolusu)
-                    db_session.commit()
-            return redirect('/administrarusuario')
-        return redirect(url_for('asignarrol', idusuario = idusuario, asignados = asignados))
-    else:
-        return 'sin permisos'
+#===============================================================================
+# @app.route('/usuario/asignarrol')    
+# def asignarrol():
+#    """ Funcion para asignar roles a un usuario """ 
+#    if not current_user.is_authenticated():
+#        flash('Debe loguearse primeramente!!!!', 'loggin')
+#        return render_template('index.html')
+#    
+#    permission = UserRol('ADMINISTRADOR')
+#    if permission.can():
+#        idusuario = request.args.get('usu')
+#        asignados= db_session.query(UsuarioRol).filter_by(id_usuario = idusuario).all()
+#        if request.method == 'POST':
+#            idusuario = request.form.get('usu')
+#            
+#            rolesmarcados=request.form.getlist('roles')
+#            #===================================================================
+#            # Inserta los roles permisos seleccionados, si no existe realiza el merge y confirma los cambios
+#            #===================================================================
+#            for r in rolesmarcados :
+#                rolusu = UsuarioRol(idusuario, r, 1)
+#                exits = db_session.query(UsuarioRol).filter_by(id_usuario=idusuario, id_rol=r).first()
+#                if not exits:
+#                    db_session.merge(rolusu)
+#                    db_session.commit()
+#            return redirect('/administrarusuario')
+#        return redirect(url_for('asignarrol', idusuario = idusuario, asignados = asignados))
+#    else:
+#        flash('Sin permisos para asignar roles a los usuarios', 'permiso')
+#        return render_template('index.html')
+#===============================================================================
     
 @app.route('/usuario/agregarrolusu', methods=['GET', 'POST'])
 def agregarrolusu():
     """ Funcion para asignar Roles a un Usuario""" 
     if not current_user.is_authenticated():
         flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
+    permission =UserRol('ADMINISTRADOR')
+    if permission.can()==False:
+        flash('No posee los permisos suficientes para realizar la operacion', 'permiso')
         return render_template('index.html')
   
     if  request.args.get('usu') == None:
@@ -295,6 +302,11 @@ def quitarrolusu():
         flash('Debe loguearse primeramente!!!!', 'loggin')
         return render_template('index.html')
  
+    permission =UserRol('ADMINISTRADOR')
+    if permission.can()==False:
+        flash('No posee los permisos suficientes para realizar la operacion', 'permiso')
+        return render_template('index.html')
+ 
     if  request.args.get('usu') == None:
         id_usu= request.form.get('id')
     else:
@@ -335,7 +347,12 @@ def verrolusu():
     if not current_user.is_authenticated():
         flash('Debe loguearse primeramente!!!!', 'loggin')
         return render_template('index.html')
-
+    
+    permission =UserRol('ADMINISTRADOR')
+    if permission.can()==False:
+        flash('No posee los permisos suficientes para realizar la operacion', 'permiso')
+        return render_template('index.html')
+    
     id_usu = request.args.get('usu') 
     usu = db_session.query(Usuario).filter_by(id=id_usu).first()
     rolesv=  db_session.query(Rol).from_statement("select * from rol where id in (select id_rol from usuario_rol where id_usuario="+str(usu.id)+")").all()

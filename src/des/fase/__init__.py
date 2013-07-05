@@ -90,7 +90,8 @@ def editarfase():
     permission =UserPermission('LIDER PROYECTO', int(session['pry']))
     if permission.can()==False:
         flash('No posee los permisos suficientes para realizar la operacion', 'permiso')
-        return render_template('index.html') 
+        return render_template('index.html')
+    
     pro = db_session.query(Proyecto).filter_by(id=session['pry']).first()
     f = db_session.query(Fase).filter_by(nro_orden=request.args.get('nro')).filter_by(id_proyecto=pro.id).first()  
     form = FaseFormulario(request.form,f)
@@ -146,7 +147,8 @@ def eliminarfase():
     permission =UserPermission('LIDER PROYECTO', int(session['pry']))
     if permission.can()==False:
         flash('No posee los permisos suficientes para realizar la operacion', 'permiso')
-        return render_template('index.html') 
+        return render_template('index.html')
+    
     pro = db_session.query(Proyecto).filter_by(id=session['pry']).first()
     if pro.estado != 'N' :
         flash('No se pueden eliminar Fases del Proyecto','info')
@@ -236,7 +238,8 @@ def administrarfase():
     permission =UserPermission('LIDER PROYECTO', int(session['pry']))
     if permission.can()==False:
         flash('No posee los permisos suficientes para realizar la operacion', 'permiso')
-        return render_template('index.html') 
+        return render_template('index.html')
+    
     fases = db_session.query(Fase).filter_by(id_proyecto=session['pry']).order_by(Fase.nro_orden)
     return render_template('fase/administrarfase.html', fases = fases)
 
@@ -251,6 +254,7 @@ def listarfase():
     if permission.can()==False:
         flash('No posee los permisos suficientes para realizar la operacion', 'permiso')
         return render_template('index.html')
+    
     fases2 = db_session.query(Fase).order_by(Fase.id_proyecto, Fase.nro_orden)
     return render_template('fase/listarfase.html', fases2 = fases2)
 
@@ -264,7 +268,8 @@ def importarfase():
     permission =UserPermission('LIDER PROYECTO', int(session['pry']))
     if permission.can()==False:
         flash('No posee los permisos suficientes para realizar la operacion', 'permiso')
-        return render_template('index.html') 
+        return render_template('index.html')
+    
     pro = db_session.query(Proyecto).filter_by(id=session['pry']).first()
     f = db_session.query(Fase).filter_by(nro_orden=request.args.get('nro')).filter_by(id_proyecto=request.args.get('py')).first()  
     form = FaseFormulario(request.form,f)
@@ -280,7 +285,6 @@ def importarfase():
         flash('No se pueden importar Fases al Proyecto','info')
         return render_template('fase/administrarfase.html') 
     if request.method == 'POST' and form.validate():
-        #init_db(db_session)
         if form.fecha_inicio.data > form.fecha_fin.data :
             flash('La fecha de inicio no puede ser mayor que la fecha de finalizacion','error')
             return render_template('fase/importarfase.html', form=form) 
@@ -312,7 +316,8 @@ def finalizarfase():
     permission =UserPermission('LIDER PROYECTO', int(session['pry']))
     if permission.can()==False:
         flash('No posee los permisos suficientes para realizar la operacion', 'permiso')
-        return render_template('index.html') 
+        return render_template('index.html')
+    
     nro = request.args.get('nro')
     fase = db_session.query(Fase).filter_by(nro_orden=nro).filter_by(id_proyecto=session['pry']).first()
     items = db_session.query(Item).from_statement("Select it.*  from item it, " + 

@@ -86,6 +86,11 @@ def eliminarmiembrosComite():
         flash('Debe loguearse primeramente!!!!', 'loggin')
         return render_template('index.html')
     
+    permission =UserPermission('LIDER PROYECTO', int(session['pry']))
+    if permission.can()==False:
+        flash('No posee los permisos suficientes para realizar la operacion', 'permiso')
+        return render_template('index.html')
+    
     r = db_session.query(Rol).filter_by(codigo='COMITE CAMBIOS').first()  
     pro = db_session.query(Proyecto).filter_by(id=session['pry']).first()
     if pro.estado != 'N' :
