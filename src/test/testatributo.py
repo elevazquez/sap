@@ -62,7 +62,6 @@ class AtributoTestCase(unittest.TestCase):
         self.assertNotIn('Debe loguearse primeramente!!!!', request.data, 'No se ha logueado correctamente')
         self.assertNotIn('No posee los permisos suficientes para realizar la operacion', request.data, 'No tiene permisos para crear atributos')
         self.assertNotIn('Error', request.data, 'Tiene errores el form')
-        print request.data
         self.assertIn('Clave unica violada por favor ingrese otro NOMBRE de Atributo', request.data, 'Atributo creado porque no existe el nombre para el nuevo')
         self.assertIn(nombre, request.data, 'El atributo creado no se encuentra en la tabla')
         print '*-- Verificacion completa, no se pueden crear dos atributos con el mismo NOMBRE --*'
