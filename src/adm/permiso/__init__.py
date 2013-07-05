@@ -10,6 +10,7 @@ from sqlalchemy.exc import DatabaseError
 from adm.permiso.PermisoFormulario import PermisoFormulario
 import flask, flask.views
 from UserPermission import UserPermission, UserRol
+from flask_login import current_user
 import os
 
 db_session = scoped_session(sessionmaker(autocommit=False,
@@ -30,6 +31,10 @@ def flash_errors(form):
 """ Funcion para agregar registros a la tabla Permiso""" 
 @app.route('/permiso/nuevopermiso', methods=['GET', 'POST'])
 def nuevopermiso():
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     permission = UserRol('ADMINISTRADOR')
     if permission.can():
         form = PermisoFormulario(request.form)
@@ -54,7 +59,10 @@ def nuevopermiso():
 
 @app.route('/permiso/editarpermiso', methods=['GET', 'POST'])
 def editarpermiso():
-    #init_db(db_session)
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+
     permission = UserRol('ADMINISTRADOR')
     if permission.can():
         p = db_session.query(Permiso).filter_by(codigo=request.args.get('codigo')).first()
@@ -78,6 +86,10 @@ def editarpermiso():
     
 @app.route('/permiso/eliminarpermiso', methods=['GET', 'POST'])
 def eliminarpermiso():
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     permission = UserRol('ADMINISTRADOR')
     if permission.can():
         cod = request.args.get('codigo')
@@ -93,6 +105,10 @@ def eliminarpermiso():
 
 @app.route('/permiso/buscarpermiso', methods=['GET', 'POST'])
 def buscarpermiso():
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     permission = UserRol('ADMINISTRADOR')
     if permission.can():
         valor = request.args['patron']
@@ -121,6 +137,10 @@ def buscarpermiso():
 
 @app.route('/permiso/administrarpermiso')
 def administrarpermiso():
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     permission = UserRol('ADMINISTRADOR')
     if permission.can():
         isAdmin = request.args.get('value')
@@ -139,14 +159,14 @@ def administrarpermiso():
         flash('Sin permisos para administrar proyectos', 'permiso')
         return render_template('index.html')
 
-"""Lanza un mensaje de error en caso de que la pagina solicitada no exista"""
 @app.errorhandler(404)
 def page_not_found(error):
+    """Lanza un mensaje de error en caso de que la pagina solicitada no exista"""
     return 'Esta Pagina no existe', 404
 
-"""Cierra la sesion de la conexion con la base de datos"""
 @app.after_request
 def shutdown_session(response):
+    """Cierra la sesion de la conexion con la base de datos"""
     db_session.remove()
     return response
 

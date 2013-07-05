@@ -7,6 +7,7 @@ from ges.mod.Relacion import Relacion
 from des.mod.Fase import Fase
 from adm.mod.Proyecto import Proyecto
 from des.mod.Item import Item
+from flask_login import current_user
 from ges.relacion.RelacionFormulario import RelacionFormulario
 from ges.mod.TipoRelacion import TipoRelacion
 import flask, flask.views
@@ -32,6 +33,9 @@ def flash_errors(form):
 @app.route('/relacion/nuevarelacion', methods=['GET', 'POST'])
 def nuevarelacion():
     """ Funcion para agregar registros a la tabla relacion"""
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
     #===========================================================================
     # permission = UserPermission('administrador')
     # if permission.can():
@@ -87,7 +91,10 @@ def nuevarelacion():
 
 @app.route('/relacion/editarrelacion', methods=['GET', 'POST'])
 def editarrelacion():
-    #init_db(db_session)
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+
     p = db_session.query(Relacion).filter_by(codigo=request.args.get('cod')).first()
     form = RelacionFormulario(request.form,p)
     relacion = db_session.query(Relacion).filter_by(id=form.id.data).first()
@@ -102,8 +109,11 @@ def editarrelacion():
 
 @app.route('/relacion/eliminarrelacion', methods=['GET', 'POST'])
 def eliminarrelacion():
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     cod = request.args.get('codigo')
-    #init_db(db_session)
     relacion = db_session.query(Relacion).filter_by(id=cod).first()
     relacion.estado='E'
     db_session.merge(relacion)
@@ -113,6 +123,10 @@ def eliminarrelacion():
 
 @app.route('/relacion/buscarrelacion', methods=['GET', 'POST'])
 def buscarrelacion():
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     valor = request.args['patron']
     parametro = request.args['parametro']
     #init_db(db_session)
@@ -140,7 +154,10 @@ def buscarrelacion():
 
 @app.route('/relacion/administrarrelacion')
 def administrarrelacion():
-    #init_db(db_session)
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     relaciones = getRelUltiVerEnProg()
     return render_template('relacion/administrarrelacion.html', relaciones = relaciones)
 

@@ -17,7 +17,7 @@ from util.database import init_db, engine
 import flask
 import flask.views
 import os
-
+from flask_login import current_user
 db_session = scoped_session(sessionmaker(autocommit=False,
                                          autoflush=False,
                                          bind=engine))
@@ -37,6 +37,10 @@ def flash_errors(form):
 @app.route('/add', methods=['GET', 'POST'])
 def add():
     """ Funcion para agregar registros a la tabla Rol"""
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     permission = UserRol('ADMINISTRADOR')
     if permission.can():
         form = RolFormulario(request.form)
@@ -63,7 +67,11 @@ def add():
 
 @app.route('/editar', methods=['GET', 'POST'])
 def editar():
-    """ Funcion para editar registros de la tabla Rol""" 
+    """ Funcion para editar registros de la tabla Rol"""
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+     
     permission = UserRol('ADMINISTRADOR')
     if permission.can():
         # init_db(db_session)
@@ -90,6 +98,10 @@ def editar():
 @app.route('/eliminar', methods=['GET', 'POST'])
 def eliminar():
     """ Funcion para eliminar registros de la tabla Rol""" 
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     permission = UserRol('ADMINISTRADOR')
     if permission.can():
         try:
@@ -111,6 +123,10 @@ def eliminar():
 @app.route('/buscar', methods=['GET', 'POST'])
 def buscar():
     """ Funcion para buscar registros de la tabla Rol""" 
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     permission = UserRol('ADMINISTRADOR')
     if permission.can():
         valor = request.args['patron']
@@ -132,7 +148,11 @@ def buscar():
 
 @app.route('/administrarrol', methods=['GET', 'POST'])
 def administrarrol():
-    """ Funcion para listar registros de la tabla Rol""" 
+    """ Funcion para listar registros de la tabla Rol"""
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     permission = UserRol('ADMINISTRADOR')
     if permission.can():
         # init_db(db_session)
@@ -145,6 +165,10 @@ def administrarrol():
 @app.route('/rol/asignarpermiso', methods=['GET', 'POST'])
 def asignarpermiso():
     """ Funcion para asignar Permisos a cada Rol"""
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     permission = UserRol('ADMINISTRADOR')
     if permission.can(): 
         #=======================================================================
@@ -194,6 +218,11 @@ def asignarpermiso():
 
 @app.route('/rol/buscarpermisoSinasignar', methods=['GET', 'POST'])
 def buscarpermisoSinasignar():
+    
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     permission = UserRol('ADMINISTRADOR')
     if permission.can():
         idrol = request.args.get('idrol')
@@ -227,6 +256,10 @@ def buscarpermisoSinasignar():
 
 @app.route('/rol/desasignarpermiso', methods=['GET', 'POST'])
 def desasignarpermiso():
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     permission = UserRol('ADMINISTRADOR')
     if permission.can():
         idrol = request.args.get('idrol')

@@ -10,7 +10,7 @@ from adm.mod.Recurso import Recurso
 from adm.mod.Permiso import Permiso
 from adm.recurso.RecursoFormulario import RecursoFormulario
 from UserPermission import UserRol
-
+from flask_login import current_user
 import flask, flask.views
 import os
 
@@ -31,7 +31,11 @@ def flash_errors(form):
 
 @app.route('/recurso/seleccionrecurso', methods=['GET', 'POST'])
 def seleccionrecurso():
-    """ Funcion para seleccionar tipo de recurso a crear""" 
+    """ Funcion para seleccionar tipo de recurso a crear"""
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     permission = UserRol('ADMINISTRADOR')
     if permission.can():
         parametro = request.args['parametro']
@@ -53,7 +57,11 @@ def seleccionrecurso():
     
 @app.route('/recurso/nuevorecurso', methods=['GET', 'POST'])
 def nuevorecurso():
-    """ Funcion para agregar registros a la tabla recursos""" 
+    """ Funcion para agregar registros a la tabla recursos"""
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     permission = UserRol('ADMINISTRADOR')
     if permission.can():
         form = RecursoFormulario(request.form)
@@ -115,6 +123,10 @@ def eliminarrecurso():
     @bug: Error de base de datos al tratar de eliminar el recurso.
     @precondition: No debe existir permisos con el recurso para que se elimine con exito.
     @attention: Requiere que se tenga el rol de administrador para realizar la opcion."""
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     permission = UserRol('ADMINISTRADOR')
     if permission.can():
         try:
@@ -152,6 +164,10 @@ def eliminarrecurso():
 @app.route('/recurso/buscarrecurso', methods=['GET', 'POST'])
 def buscarrecurso():
     """funcion que permite buscar un recurso"""
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     permission = UserRol('ADMINISTRADOR')
     if permission.can():
         valor = request.args['patron']
@@ -168,6 +184,10 @@ def buscarrecurso():
 @app.route('/recurso/administrarrecurso')
 def administrarrecurso():
     """funcion que lista todos los recursos"""
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     permission = UserRol('ADMINISTRADOR')
     if permission.can():
         recursos = db_session.query(Recurso).order_by(Recurso.nombre)

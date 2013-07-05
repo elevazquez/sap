@@ -31,6 +31,7 @@ import flask.views
 import os
 import psycopg2
 import werkzeug
+from flask_login import current_user
 
 estado_global = None;
 
@@ -49,16 +50,18 @@ def flash_errors(form):
                 getattr(form, field).label.text,
                 error
             ), 'error')
- 
- 
+  
  
 @app.route('/item/listafase', methods=['GET', 'POST'])
 def listafase(): 
-    """ Funcion que lista las fases en la cual se creara el item"""   
+    """ Funcion que lista las fases en la cual se creara el item"""
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     fases = db_session.query(Fase).from_statement(" select * from fase where id_proyecto = " + str(session['pry']) + " and estado != 'A' order by nro_orden ")
     return render_template('item/listafase.html', fases=fases)  
     
- 
     
 def verificarPermiso ( id_fase, permiso):
     recurso = db_session.query(Recurso).filter_by(id_fase=id_fase).first()
@@ -74,7 +77,11 @@ def verificarPermiso ( id_fase, permiso):
         
 @app.route('/item/listatipoitem', methods=['GET', 'POST'])
 def listatipoitem():   
-    """ Funcion que lista los tipo de items posibles del item a crear""" 
+    """ Funcion que lista los tipo de items posibles del item a crear"""
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     idfase = request.args.get('id_fase')
     if verificarPermiso(idfase, "INSERTAR ITEM") == False:
         flash('No Posee los permisos suficientes para Agregar un Item', 'info')
@@ -87,10 +94,10 @@ def listatipoitem():
 @app.route('/item/nuevoitem', methods=['GET', 'POST'])
 def nuevoitem():
     """ Funcion para agregar registros a la tabla de Item"""
-    today = datetime.date.today()  
-    atributo = db_session.query(Atributo).join(TItemAtributo , TItemAtributo.id_atributo == Atributo.id).join(TipoItem, TipoItem.id == TItemAtributo.id_tipo_item).filter(TipoItem.id == request.args.get('id_tipo')).all()
-    form = ItemFormulario(request.form)
-    form.usuario.data = session['user_id']     
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     if  request.args.get('id_tipo') == None:
         id_tipog = request.form.get('id_tipo_f')
     else:
@@ -100,6 +107,15 @@ def nuevoitem():
         id_faseg = request.form.get('id_fase_f')
     else:
         id_faseg = request.args.get('fase')
+    
+    if verificarPermiso(id_faseg, "INSERTAR ITEM") == False:
+        flash('No Posee los permisos suficientes para Agregar un Item', 'info')
+        return redirect('/item/administraritem')
+    
+    today = datetime.date.today()  
+    atributo = db_session.query(Atributo).join(TItemAtributo , TItemAtributo.id_atributo == Atributo.id).join(TipoItem, TipoItem.id == TItemAtributo.id_tipo_item).filter(TipoItem.id == request.args.get('id_tipo')).all()
+    form = ItemFormulario(request.form)
+    form.usuario.data = session['user_id']
         
     form.version.data = 1    
     form.fecha.data = today 
@@ -176,6 +192,10 @@ def nuevoitem():
 @app.route('/item/buscarItem', methods=['GET', 'POST'])
 def buscarItem():
     """Funcion que permite realizar busqueda de items"""
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     valor = request.args['patron'] 
     parametro = request.args['parametro']
     # #init_db(db_session)
@@ -239,6 +259,10 @@ def bajar_archivo():
     """
         @param archivo: id del arhivo que se desea descargar
     """
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     if verificarPermiso(request.args.get('fase'), "ARCHIVO ITEM") == False:
             flash('No posee los permisos suficientes para realizar la Operacion', 'info')
             return render_template('item/administraritem.html')
@@ -258,6 +282,10 @@ def eliminar_archivo():
     """
         @param archivo: id del arhivo que se desea eliminar
     """
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     if verificarPermiso(request.args.get('fase'), "ARCHIVO ITEM") == False:
             flash('No posee los permisos suficientes para realizar la Operacion', 'info')
             return render_template('item/administraritem.html')
@@ -272,6 +300,10 @@ def eliminar_archivo():
 @app.route('/item/editaritem', methods=['GET', 'POST'])
 def editaritem():  
     """Funcion que permite editar un item""" 
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     today = datetime.date.today()
     # #init_db(db_session)      
     i = db_session.query(Item).filter_by(codigo=request.args.get('codigo')).filter_by(id=request.args.get('id')).first() 
@@ -486,6 +518,10 @@ def editaritem():
 @app.route('/item/eliminaritem', methods=['GET', 'POST'])
 def eliminaritem():
     """funcion que permite eliminar items"""
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     today = datetime.date.today()
  
     try:
@@ -657,7 +693,10 @@ def eliminaritem():
 @app.route('/item/listarreversionitem', methods=['GET', 'POST'])
 def listarreversionitem():   
     """funcion que lista los item a escoger para la reversion"""  
-    # #init_db(db_session)
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+
     item2 = db_session.query(Item).from_statement(" select * from item where codigo = '" + str(request.args.get('cod')) + "' and id != " + str(request.args.get('id')) + " order by version ")
     return render_template('item/listarreversionitem.html', items2=item2)  
     
@@ -666,6 +705,10 @@ def listarreversionitem():
 @app.route('/item/reversionaritem', methods=['GET', 'POST'])
 def reversionaritem():  
     """funcion que permite la reversion de items"""  
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     today = datetime.date.today()
     # #init_db(db_session)      
    
@@ -841,8 +884,11 @@ def reversionaritem():
 @app.route('/item/historialitem', methods=['GET', 'POST'])
 def historialitem():  
     """funcion que permite la historial de items"""  
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     today = datetime.date.today()
-    # #init_db(db_session)      
    
     i = db_session.query(Item).filter_by(codigo=request.args.get('cod')).filter_by(id=request.args.get('id')).first() 
     if  request.args.get('id') == None:
@@ -858,13 +904,11 @@ def historialitem():
     if  request.args.get('fase') == None:
         id_faseg = request.form.get('id_fase_f')
     else:
-        id_faseg = request.args.get('fase')
-     
+        id_faseg = request.args.get('fase') 
 
     if verificarPermiso(id_faseg, "MODIFICACION ITEM") == False:
             flash('No posee los Permisos suficientes para realizar esta Operacion', 'error')
             return redirect('/item/administraritem')   
-       
                    
     form = ItemEditarFormulario(request.form, i)             
     item = db_session.query(Item).filter_by(nombre=form.nombre.data).filter_by(id=id_itemg).first()  
@@ -908,7 +952,10 @@ def historialitem():
 @app.route('/item/listahistorialitem', methods=['GET', 'POST'])
 def listahistorialitem():   
     """funcion que lista el historial del Item"""
-    # #init_db(db_session)
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+
     item2 = db_session.query(Item).from_statement(" select * from item where codigo = '" + str(request.args.get('cod')) + "' and id != " + str(request.args.get('id')) + " order by version ")
     return render_template('item/listahistorialitem.html', items2=item2)  
     
@@ -916,7 +963,10 @@ def listahistorialitem():
 @app.route('/item/listarreviviritem', methods=['GET', 'POST'])
 def listarreviviritem():   
     """funcion que lista los items a ser revividos"""
-    # #init_db(db_session)
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     item2 = db_session.query(Item).from_statement(" select i.* from item i, fase f where i.estado = 'E' and f.id = i.id_fase and f.id_proyecto="+ str(session['pry'])+" and version = (Select max(i2.version) from item i2 where i2.codigo = i.codigo ) order by i.codigo ")
     return render_template('item/listarreviviritem.html', items2=item2)  
     
@@ -924,8 +974,11 @@ def listarreviviritem():
 @app.route('/item/reviviritem', methods=['GET', 'POST'])
 def reviviritem():   
     """funcion que permite revivir un item"""
-    today = datetime.date.today()
-    # #init_db(db_session)      
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
+    today = datetime.date.today()     
                      
     i = db_session.query(Item).filter_by(codigo=request.args.get('cod')).filter_by(id=request.args.get('id')).first() 
     if  request.args.get('id') == None:
@@ -942,7 +995,6 @@ def reviviritem():
         id_faseg = request.form.get('id_fase_f')
     else:
         id_faseg = request.args.get('fase')
-        
     
     if verificarPermiso(id_faseg, "MODIFICACION ITEM") == False:
             flash('No posee los Permisos suficientes para realizar esta Operacion', 'info')
@@ -1115,6 +1167,10 @@ def reviviritem():
 @app.route('/item/administraritem')
 def administraritem():
     """Lista los items, su ultima version """
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     item = db_session.query(Item).from_statement("Select it.*  from item it, " + 
                         " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id " + 
                         " and f.id_proyecto = " + str(session['pry']) + "  group by codigo order by 1 ) s " + 

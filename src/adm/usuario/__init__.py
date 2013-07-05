@@ -20,6 +20,7 @@ from adm.mod.UsuarioRol import UsuarioRol
 from adm.mod.Rol import Rol
 from adm.mod.Recurso import Recurso
 from adm.mod.Proyecto import Proyecto
+from flask_login import current_user
     
 db_session = scoped_session(sessionmaker(autocommit=False,
                                          autoflush=False,
@@ -36,18 +37,15 @@ def flash_errors(form):
                 getattr(form, field).label.text,
                 error
             ),'error')
-
-#    texto = md5.new()
-#    variable = "hola"
-#    texto.update(variable)
-#    print texto.digest()
-#    print texto.hexdigest()
-#    print texto.hexdigest()
                 
 @app.route('/usuario/nuevousuario', methods=['GET', 'POST'])
 def nuevousuario():
     """ Funcion para agregar registros a la tabla Usuario""" 
     """ Se obtiene la fecha actual para verificar la fecha de nacimiento """
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     permission = UserRol('ADMINISTRADOR')
     if permission.can():
         today = datetime.date.today()
@@ -132,6 +130,10 @@ def editarusuario():
 @app.route('/usuario/eliminarusuario', methods=['GET', 'POST'])
 def eliminarusuario():
     """ Funcion para eliminar registros de la tabla Usuario""" 
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     permission = UserRol('ADMINISTRADOR')
     if permission.can():
         try:
@@ -153,6 +155,10 @@ def eliminarusuario():
 @app.route('/usuario/buscarusuario', methods=['GET', 'POST'])
 def buscarusuario():
     """ Funcion para buscar registros de la tabla Usuario""" 
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     permission = UserRol('ADMINISTRADOR')
     if permission.can():
         valor = request.args['patron']
@@ -176,6 +182,10 @@ def buscarusuario():
 @app.route('/usuario/administrarusuario')
 def administrarusuario():
     """ Funcion para listar registros de la tabla Usuario""" 
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     permission = UserRol('ADMINISTRADOR')
     if permission.can():
         usuarios = db_session.query(Usuario).order_by(Usuario.nombre)
@@ -186,6 +196,10 @@ def administrarusuario():
 
 @app.route('/usuario/asignarrol')    
 def asignarrol():
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     permission = UserRol('ADMINISTRADOR')
     if permission.can():
         idusuario = request.args.get('usu')
@@ -211,7 +225,10 @@ def asignarrol():
 @app.route('/usuario/agregarrolusu', methods=['GET', 'POST'])
 def agregarrolusu():
     """ Funcion para asignar Roles a un Usuario""" 
-    #init_db(db_session)   
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+  
     if  request.args.get('usu') == None:
         id_usu= request.form.get('id')
     else:
@@ -274,7 +291,10 @@ def agregarrolusu():
 @app.route('/usuario/quitarrolusu', methods=['GET', 'POST'])
 def quitarrolusu():
     """ Funcion para quitar Roles al Usuario""" 
-    #init_db(db_session)   
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+ 
     if  request.args.get('usu') == None:
         id_usu= request.form.get('id')
     else:
@@ -312,7 +332,10 @@ def quitarrolusu():
 @app.route('/usuario/verrolusu')
 def verrolusu():
     """ Funcion para listar Roles de un Usuario""" 
-    #init_db(db_session)   
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+
     id_usu = request.args.get('usu') 
     usu = db_session.query(Usuario).filter_by(id=id_usu).first()
     rolesv=  db_session.query(Rol).from_statement("select * from rol where id in (select id_rol from usuario_rol where id_usuario="+str(usu.id)+")").all()

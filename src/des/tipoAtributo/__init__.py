@@ -40,11 +40,10 @@ def nuevotipoAtributo():
     permission =UserPermission('LIDER PROYECTO',int(session['pry']))
     if permission.can()==False:
         flash('No posee los permisos suficientes para realizar la operacion', 'permiso')
-    
+        return render_template('index.html')
+        
     form = TipoAtributoFormulario(request.form)
-    ##init_db(db_session)
     if request.method == 'POST' and form.validate():
-        ##init_db(db_session)
         try:
             tipoAtributo = TipoAtributo( form.nombre.data, form.descripcion.data)
             db_session.add(tipoAtributo)
@@ -71,6 +70,8 @@ def editartipoAtributo():
     permission =UserPermission('LIDER PROYECTO',int(session['pry']))
     if permission.can()==False:
         flash('No posee los permisos suficientes para realizar la operacion', 'permiso')
+        return render_template('index.html')
+        
     f = db_session.query(TipoAtributo).filter_by(nombre=request.args.get('nombre')).first()  
     form = TipoAtributoFormulario(request.form,f)
     tipoAtributo = db_session.query(TipoAtributo).filter_by(nombre=form.nombre.data).first()  
@@ -97,6 +98,8 @@ def eliminartipoAtributo():
     permission =UserPermission('LIDER PROYECTO',int(session['pry']))
     if permission.can()==False:
         flash('No posee los permisos suficientes para realizar la operacion', 'permiso')
+        return render_template('index.html')
+    
     ta = db_session.query(TipoAtributo).filter_by(nombre=request.args.get('nombre')).first()  
     a = db_session.query(Atributo).filter_by(id_tipo_atributo=ta.id).first()
     if a != None :
@@ -104,9 +107,7 @@ def eliminartipoAtributo():
         return render_template('tipoAtributo/administrartipoAtributo.html')  
     try:
         cod = request.args.get('nombre')
-        ##init_db(db_session)
         tipoAtributo = db_session.query(TipoAtributo).filter_by(nombre=cod).first()  
-        ##init_db(db_session)
         db_session.delete(tipoAtributo)
         db_session.commit()
         return redirect('/tipoAtributo/administrartipoAtributo')
@@ -124,9 +125,10 @@ def buscartipoAtributo():
     permission =UserPermission('LIDER PROYECTO',int(session['pry']))
     if permission.can()==False:
         flash('No posee los permisos suficientes para realizar la operacion', 'permiso')
+        return render_template('index.html')
+        
     valor = request.args['patron']
     parametro = request.args['parametro']
-    ##init_db(db_session)
     if valor == "" : 
         p = db_session.query(TipoAtributo).order_by(TipoAtributo.nombre)
     else:
@@ -142,6 +144,8 @@ def administrartipoAtributo():
     permission =UserPermission('LIDER PROYECTO',int(session['pry']))
     if permission.can()==False:
         flash('No posee los permisos suficientes para realizar la operacion', 'permiso')
+        return render_template('index.html')
+        
     tipoAtributos = db_session.query(TipoAtributo).order_by(TipoAtributo.nombre)
     return render_template('tipoAtributo/administrartipoAtributo.html', tipoAtributos = tipoAtributos)
 

@@ -7,9 +7,10 @@ from test.testfase import FaseTestCase
 from test.testmiembroscomite import MiembrosComiteTestCase
 from test.testrecurso import RecursoTestCase
 from test.testatributo import AtributoTestCase
+from test.testtipoitem import TipoItemTestCase
 import unittest
 
-def suite_2():
+def suite():
     suite = unittest.TestSuite()
     suite.addTest(ProyectoTestCase())
     suite.addTest(RolTestCase())
@@ -20,9 +21,10 @@ def suite_2():
     suite.addTest(MiembrosComiteTestCase)
     suite.addTest(RecursoTestCase)
     suite.addTest(AtributoTestCase)
+    suite.addTest(TipoItemTestCase)
     return suite
 
 if __name__ == '__main__':
     runner = unittest.TextTestRunner()
-    test_suite = suite_2()
+    test_suite = suite()
     runner.run (test_suite)

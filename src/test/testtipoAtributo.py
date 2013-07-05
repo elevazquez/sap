@@ -1,7 +1,11 @@
 from loginC import app
 
-from test_helper import login,logout
+from flask_principal import identity_loaded
+from test_helper import login,_on_principal_initL, logout, TEST_USER_LIDER, TEST_PASS_LIDER
 import unittest
+from test.test_helper import seleccionar_proyecto
+
+PROYECTOID = 23
 
 class TipoATributoTestCase(unittest.TestCase):
     """Clase que implementa los test para el caso de uso Tipo Atributo."""
@@ -9,7 +13,12 @@ class TipoATributoTestCase(unittest.TestCase):
     def setUp(self):
         """se llama al metodo antes de iniciar el test"""        
         self.client = app.test_client()
-        self.acceso = login(self.client)
+        self.acceso = login(self.client, TEST_USER_LIDER, TEST_PASS_LIDER)
+        identity_loaded.connect(_on_principal_initL)
+        self.proyse= seleccionar_proyecto(self.client, PROYECTOID)
+        with app.test_client() as c:
+            with c.session_transaction() as sess:
+                sess['pry'] = PROYECTOID
 
     def tearDown(self):
         """ se llama al metodo al terminar el test"""
@@ -75,8 +84,6 @@ class TipoATributoTestCase(unittest.TestCase):
     def _get(self, url ='/tipoAtributo/administrartipoAtributo'):
         """obtiene la pagina administrar tipo att """
         return self.client.get(url, follow_redirects=True)
-    
-
         
 if __name__ == '__main__':
     unittest.main()

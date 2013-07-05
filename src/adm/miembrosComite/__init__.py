@@ -12,6 +12,7 @@ from adm.mod.Rol import Rol
 from adm.mod.RolPermiso import RolPermiso
 from adm.mod.UsuarioRol import UsuarioRol
 from UserPermission import UserPermission
+from flask_login import current_user
 
 from adm.mod.MiembrosComite import MiembrosComite
 from adm.miembrosComite.MiembrosComiteFormulario import MiembrosComiteFormulario
@@ -38,6 +39,10 @@ def flash_errors(form):
 @app.route('/miembrosComite/nuevomiembrosComite', methods=['GET', 'POST'])
 def nuevomiembrosComite():
     """ Funcion para agregar registros a la tabla MiembrosComite"""
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     permission =UserPermission('LIDER PROYECTO', int(session['pry']))
     if permission.can()==False:
         flash('No posee los permisos suficientes para realizar la operacion', 'permiso')
@@ -77,6 +82,10 @@ def nuevomiembrosComite():
 @app.route('/miembrosComite/eliminarmiembrosComite', methods=['GET', 'POST'])
 def eliminarmiembrosComite():
     """ Funcion para eliminar registros de la tabla MiembrosComite""" 
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     r = db_session.query(Rol).filter_by(codigo='COMITE CAMBIOS').first()  
     pro = db_session.query(Proyecto).filter_by(id=session['pry']).first()
     if pro.estado != 'N' :
@@ -104,6 +113,10 @@ def eliminarmiembrosComite():
 @app.route('/miembrosComite/buscarmiembrosComite', methods=['GET', 'POST'])
 def buscarmiembrosComite():
     """ Funcion para buscar registros en la tabla MiembrosComite"""
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     permission =UserPermission('LIDER PROYECTO', int(session['pry']))
     if permission.can()==False:
         flash('No posee los permisos suficientes para realizar la operacion', 'permiso')
@@ -120,6 +133,10 @@ def buscarmiembrosComite():
 @app.route('/miembrosComite/buscarmiembrosComite2', methods=['GET', 'POST'])
 def buscarmiembrosComite2():
     """ Funcion para buscar registros en la tabla MiembrosComite""" 
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     permission =UserPermission('LIDER PROYECTO', int(session['pry']))
     if permission.can()==False:
         flash('No posee los permisos suficientes para realizar la operacion', 'permiso')
@@ -138,6 +155,10 @@ def administrarmiembrosComite():
     """ Funcion para listar registros de la tabla MiembrosComite
     @precondition: El usuario debe haber seleccionado el proyecto que administrara
     @author: Lila Pamela Perez Miranda""" 
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     permission =UserPermission('LIDER PROYECTO', int(session['pry']))
     if permission.can():
         miembrosComites = db_session.query(MiembrosComite).filter_by(id_proyecto=session['pry']).order_by(MiembrosComite.id_usuario)
@@ -149,6 +170,10 @@ def administrarmiembrosComite():
 @app.route('/miembrosComite/listarusuarios')
 def listarusuarios():
     """ Funcion para listar registros de la tabla Usuarios""" 
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     permission =UserPermission('LIDER PROYECTO', int(session['pry']))
     if permission.can():
         usuarios = db_session.query(Usuario).from_statement("select * from usuario where id not in (select id_usuario from miembros_comite where id_proyecto='"+session['pry']+"')").all()

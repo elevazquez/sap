@@ -20,6 +20,7 @@ from UserPermission import UserPermission, UserRol
 import flask, flask.views
 import os
 import datetime
+from flask_login import current_user
 
 db_session = scoped_session(sessionmaker(autocommit=False,
                                          autoflush=False,
@@ -41,6 +42,10 @@ def flash_errors(form):
 def nuevoproyecto():
     """ Funcion para agregar registros a la tabla Proyecto""" 
     """ Se obtiene la fecha actual para almacenar la fecha de ultima actualizacion """
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     permission = UserRol('ADMINISTRADOR')
     if permission.can():
         today = datetime.date.today() 
@@ -112,6 +117,10 @@ def nuevoproyecto():
 @app.route('/proyecto/editarproyecto', methods=['GET', 'POST'])
 def editarproyecto():
     """ Se obtiene la fecha actual para almacenar la fecha de ultima actualizacion """
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     permission = UserRol('ADMINISTRADOR')
     if permission.can():
         today = datetime.date.today()
@@ -183,7 +192,11 @@ def editarproyecto():
 
 @app.route('/proyecto/eliminarproyecto', methods=['GET', 'POST'])
 def eliminarproyecto():
-    """ Funcion para eliminar registros de la tabla Proyecto""" 
+    """ Funcion para eliminar registros de la tabla Proyecto"""
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     permission = UserRol('ADMINISTRADOR')
     if permission.can():
         try:
@@ -240,7 +253,11 @@ def eliminarproyecto():
     
 @app.route('/proyecto/buscarproyecto', methods=['GET', 'POST'])
 def buscarproyecto():
-    """ Funcion para buscar registros en la tabla Proyecto""" 
+    """ Funcion para buscar registros en la tabla Proyecto"""
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     permission = UserRol('ADMINISTRADOR')
     if permission.can():
         valor = request.args['patron']
@@ -285,6 +302,10 @@ def buscarproyecto():
 @app.route('/proyecto/administrarproyecto')
 def administrarproyecto():
     """ Funcion para listar registros de la tabla Proyecto""" 
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     idproy = None
     if 'pry' in session:
         idproy = session['pry']
@@ -328,6 +349,9 @@ def getProyectoByUsuario():
 @app.route('/proyectoActual',methods=['GET', 'POST'])
 def proyectoActual():
     """Funcion que obtiene el Proyecto Actual"""
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
     #===========================================================================
     # permission = UserRol('ADMINISTRADOR')
     # if not permission.can():
@@ -374,7 +398,10 @@ def is_solicitud(userid):
 @app.route('/proyecto/iniciarproyecto')
 def iniciarproyecto():
     """Funcion para iniciar el Proyecto"""
-    #init_db(db_session)
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     nom = request.args.get('nom')
     pro = db_session.query(Proyecto).filter_by(nombre=nom).first()  
     fase = db_session.query(Fase).from_statement("SELECT * FROM fase WHERE id_proyecto='"+str(pro.id)+"' and nro_orden=(SELECT min(nro_orden) FROM fase WHERE id_proyecto='"+str(pro.id)+"')").first()
@@ -390,10 +417,6 @@ def iniciarproyecto():
             pro.estado = 'P'
             db_session.merge(pro)
             db_session.commit()
-            
-#            fase.estado = 'P'
-#            db_session.merge(fase)
-#            db_session.commit()
             flash('El Proyecto se ha iniciado con exito','info')
             return redirect('/proyecto/administrarproyecto')
         except DatabaseError, e:
@@ -406,7 +429,10 @@ def iniciarproyecto():
 @app.route('/proyecto/finalizarproyecto')
 def finalizarproyecto():
     """ Funcion para finalizar registros de la tabla Proyecto""" 
-    #init_db(db_session)
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+
     nom = request.args.get('nom')
     pry = db_session.query(Proyecto).filter_by(nombre=nom).first()
     fases = db_session.query(Fase).filter_by(id_proyecto=pry.id).all()

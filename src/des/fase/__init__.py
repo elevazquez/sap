@@ -15,6 +15,7 @@ import flask, flask.views
 import os
 import datetime
 from UserPermission import UserPermission, UserRol
+from flask_login import current_user
 
 db_session = scoped_session(sessionmaker(autocommit=False,
                                          autoflush=False,
@@ -35,6 +36,10 @@ def flash_errors(form):
 @app.route('/fase/nuevafase', methods=['GET', 'POST'])
 def nuevafase():
     """ Funcion para agregar registros a la tabla Fase"""
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     permission =UserPermission('LIDER PROYECTO', int(session['pry']))
     if permission.can()==False:
         flash('No posee los permisos suficientes para realizar la operacion', 'permiso')
@@ -78,7 +83,10 @@ def nuevafase():
 @app.route('/fase/editarfase', methods=['GET', 'POST'])
 def editarfase():
     """ Funcion para editar registros de la tabla Fase""" 
-    #init_db(db_session)
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+
     permission =UserPermission('LIDER PROYECTO', int(session['pry']))
     if permission.can()==False:
         flash('No posee los permisos suficientes para realizar la operacion', 'permiso')
@@ -131,7 +139,10 @@ def editarfase():
 @app.route('/fase/eliminarfase', methods=['GET', 'POST'])
 def eliminarfase():
     """ Funcion para eliminar registros de la tabla Fase""" 
-    #init_db(db_session)
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     permission =UserPermission('LIDER PROYECTO', int(session['pry']))
     if permission.can()==False:
         flash('No posee los permisos suficientes para realizar la operacion', 'permiso')
@@ -164,6 +175,15 @@ def eliminarfase():
 @app.route('/fase/buscarfase', methods=['GET', 'POST'])
 def buscarfase():
     """ Funcion para buscar registros de la tabla Fase""" 
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
+    permission =UserPermission('LIDER PROYECTO', int(session['pry']))
+    if permission.can()==False:
+        flash('No posee los permisos suficientes para realizar la operacion', 'permiso')
+        return render_template('index.html') 
+    
     valor = request.args['patron']
     parametro = request.args['parametro']
     #init_db(db_session)
@@ -182,6 +202,15 @@ def buscarfase():
 @app.route('/fase/buscarfase2', methods=['GET', 'POST'])
 def buscarfase2():
     """ Funcion para buscar registros de la tabla Fase""" 
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
+    permission =UserPermission('LIDER PROYECTO', int(session['pry']))
+    if permission.can()==False:
+        flash('No posee los permisos suficientes para realizar la operacion', 'permiso')
+        return render_template('index.html') 
+    
     valor = request.args['patron']
     parametro = request.args['parametro']
     #init_db(db_session)
@@ -200,6 +229,10 @@ def buscarfase2():
 @app.route('/fase/administrarfase')
 def administrarfase():
     """ Funcion para listar registros de la tabla Fase""" 
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     permission =UserPermission('LIDER PROYECTO', int(session['pry']))
     if permission.can()==False:
         flash('No posee los permisos suficientes para realizar la operacion', 'permiso')
@@ -210,6 +243,10 @@ def administrarfase():
 @app.route('/fase/listarfase')
 def listarfase():
     """ Funcion para listar registros de la tabla Fase para importar una fase existente"""
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     permission =UserPermission('LIDER PROYECTO', int(session['pry']))
     if permission.can()==False:
         flash('No posee los permisos suficientes para realizar la operacion', 'permiso')
@@ -220,7 +257,10 @@ def listarfase():
 @app.route('/fase/importarfase', methods=['GET', 'POST'])
 def importarfase():
     """ Funcion para importar registros a la tabla Fase""" 
-    #init_db(db_session)
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+
     permission =UserPermission('LIDER PROYECTO', int(session['pry']))
     if permission.can()==False:
         flash('No posee los permisos suficientes para realizar la operacion', 'permiso')
@@ -265,7 +305,10 @@ def importarfase():
 @app.route('/fase/finalizarfase')
 def finalizarfase():
     """ Funcion para finalizar registros de la tabla Fase""" 
-    #init_db(db_session)
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+
     permission =UserPermission('LIDER PROYECTO', int(session['pry']))
     if permission.can()==False:
         flash('No posee los permisos suficientes para realizar la operacion', 'permiso')
