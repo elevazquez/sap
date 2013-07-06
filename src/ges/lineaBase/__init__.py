@@ -1151,6 +1151,3 @@ def shutdown_session(response):
     """Cierra la sesion de la conexion con la base de datos"""
     db_session.remove()
     return response
-
-
-    
