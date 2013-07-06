@@ -1139,8 +1139,7 @@ def administrarlineabase():
         flash('Debe loguearse primeramente!!!!', 'loggin')
         return render_template('index.html')
     
-    permi= UserPermission('COMITE CAMBIOS', int(session['pry']))
-    if verificarPermisoPro(session['pry'], "VER LINEA BASE") == False or permi.can()==False:
+    if verificarPermisoPro(session['pry'], "VER LINEA BASE") == False or verificarPermisoPro(session['pry'],'COMITE CAMBIOS')==False:
             flash('No posee los Permisos suficientes para realizar esta Operacion','info')
             return render_template('index.html')
     
