@@ -46,7 +46,11 @@ def flash_errors(form):
 
 @app.route('/solicitud/nuevasolicitud', methods=['GET', 'POST'])
 def nuevasolicitud():
-    """ Funcion para agregar registros a la tabla Solicitud""" 
+    """ Funcion para agregar registros a la tabla Solicitud"""
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     today = datetime.date.today()
     form = SolicitudFormulario(request.form)
 #    init_db(db_session)
@@ -108,7 +112,10 @@ def nuevasolicitud():
 @app.route('/solicitud/editarsolicitud', methods=['GET', 'POST'])
 def editarsolicitud():
     """ Funcion para editar registros de la tabla Solicitud""" 
-#    init_db(db_session)
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+
     today = datetime.date.today()
     pro = db_session.query(Proyecto).filter_by(id=session['pry']).first()
     if  request.args.get('id') == None:
@@ -172,7 +179,10 @@ def enviarsolicitud():
 @app.route('/solicitud/eliminarsolicitud', methods=['GET', 'POST'])
 def eliminarsolicitud():
     """ Funcion para eliminar registros de la tabla Solicitud""" 
-#    init_db(db_session)
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     if  request.args.get('id') == None:
         id_sol= request.form.get('id')
     else:
@@ -211,6 +221,10 @@ def eliminarsolicitud():
 @app.route('/solicitud/buscarsolicitud', methods=['GET', 'POST'])
 def buscarsolicitud():
     """ Funcion para buscar registros de la tabla Solicitud""" 
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     valor = request.args['patron']
     parametro = request.args['parametro']
 #    init_db(db_session)
@@ -224,14 +238,21 @@ def buscarsolicitud():
 
 @app.route('/solicitud/administrarsolicitud')
 def administrarsolicitud():
-    """ Funcion para listar registros de la tabla Solicitud""" 
-#    init_db(db_session)
+    """ Funcion para listar registros de la tabla Solicitud"""
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     solicituds = db_session.query(SolicitudCambio).filter_by(id_proyecto=session['pry']).filter_by(id_usuario=current_user.id).order_by(SolicitudCambio.descripcion)
     return render_template('solicitud/administrarsolicitud.html', solicituds = solicituds)
 
 @app.route('/solicitud/buscarfase', methods=['GET', 'POST'])
 def buscarfase():
     """ Funcion para buscar registros de la tabla Fase""" 
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     valor = request.args['patron']
     parametro = request.args['parametro']
 #    init_db(db_session)
@@ -250,6 +271,10 @@ def buscarfase():
 @app.route('/solicitud/buscaritem', methods=['GET', 'POST'])
 def buscaritem():
     """Funcion que permite realizar busqueda de items"""
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     valor = request.args['patron']
     parametro = request.args['parametro']
     #init_db(db_session)
@@ -278,7 +303,10 @@ def buscaritem():
 @app.route('/solicitud/listaritem')
 def listaritem():
     """Lista los items, su ultima version """
-    #init_db(db_session)
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     item = db_session.query(Item).from_statement("Select it.*  from item it, "+ 
                         " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id "+
                         " and f.id_proyecto = "+str(session['pry'])+ " group by codigo order by 1 ) s "+
@@ -290,7 +318,10 @@ def listaritem():
 @app.route('/solicitud/agregaritemssol', methods=['GET', 'POST'])
 def agregaritemssol():   
     """ Funcion que agrega a una lista los items seleccionados """ 
-    #init_db(db_session)
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+
     selecteditem=  request.args.get('id_item')    
     items = db_session.query(Item).from_statement("Select it.*  from item it, "+ 
                         " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id "+
@@ -303,7 +334,10 @@ def agregaritemssol():
 @app.route('/solicitud/agregaritemsol', methods=['GET', 'POST'])
 def agregaritemsol():
     """ Funcion para asignar Items a una solicitud""" 
-    #init_db(db_session)   
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     if  request.args.get('id_sol') == None:
         id_sol= request.form.get('id')
     else:
@@ -353,7 +387,10 @@ def agregaritemsol():
 @app.route('/solicitud/quitaritemsol', methods=['GET', 'POST'])
 def quitaritemsol():
     """ Funcion para quitar Items de una sol""" 
-    #init_db(db_session)   
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+   
     if  request.args.get('id_sol') == None:
         id_sol= request.form.get('id')
     else:
@@ -400,7 +437,10 @@ def quitaritemsol():
 @app.route('/solicitud/versolicitud', methods=['GET', 'POST'])
 def versolicitud():
     """ Funcion para consultar registros de la tabla Solicitud""" 
-#    init_db(db_session)
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     pro = db_session.query(Proyecto).filter_by(id=session['pry']).first()
     if  request.args.get('id') == None:
         id_sol= request.form.get('id')
@@ -426,6 +466,10 @@ def versolicitud():
 @app.route('/solicitud/reportesol', methods=['GET', 'POST'])
 def reportesol():   
     """ Funcion que imprime el reporte de la sol """
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     today = datetime.date.today()
     form = ReporteFormulario(request.form)
     form.fecha.data = today
@@ -482,6 +526,10 @@ def reportesol():
 @app.route('/solicitud/reportehistorial', methods=['GET', 'POST'])
 def reportehistorial():   
     """ Funcion que imprime el reporte del historial """
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     form = ReporteHistorialFormulario(request.form)
     items = db_session.query(Item).from_statement("Select it.*  from item it, "+ 
                         " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id "+
@@ -525,6 +573,10 @@ def reportehistorial():
 @app.route('/solicitud/reportelista', methods=['GET', 'POST'])
 def reportelista():   
     """ Funcion que imprime el reporte la lista de items """
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     today = datetime.date.today()
     form = ListaItemFormulario(request.form)
     form.fecha.data = today
@@ -573,7 +625,11 @@ def reportelista():
     return render_template('item/reporteitem.html', form=form, fases=fases)
 
 @app.route('/solicitud/administrarreportes', methods=['GET', 'POST'])
-def administrarreportes():   
+def administrarreportes():
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     return render_template('reportes/administrarreportes.html')
 
 @app.errorhandler(404)

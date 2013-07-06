@@ -7,6 +7,7 @@ from ges.mod.Relacion import Relacion
 from des.mod.Fase import Fase
 from adm.mod.Proyecto import Proyecto
 from des.mod.Item import Item
+from adm.mod.Recurso import Recurso
 from flask_login import current_user
 from ges.relacion.RelacionFormulario import RelacionFormulario
 from ges.mod.TipoRelacion import TipoRelacion
@@ -30,16 +31,29 @@ def flash_errors(form):
                 error
             ),'error')
  
+def verificarPermisoPro (id_proyecto, permiso):
+    recurso = db_session.query(Recurso).filter_by(id_proyecto=id_proyecto).first()
+    if recurso != None: 
+        permission = UserPermission(permiso, int(recurso.id))
+        if permission.can() == False:
+            return False
+        else: 
+            return True
+    else :
+        return False   
+ 
 @app.route('/relacion/nuevarelacion', methods=['GET', 'POST'])
 def nuevarelacion():
     """ Funcion para agregar registros a la tabla relacion"""
     if not current_user.is_authenticated():
         flash('Debe loguearse primeramente!!!!', 'loggin')
         return render_template('index.html')
-    #===========================================================================
-    # permission = UserPermission('administrador')
-    # if permission.can():
-    #===========================================================================
+    
+    permission = UserPermission('ADMINISTRAR RELACION',int(session['pry']))
+    if permission.can() == False:
+        flash('No posee los Permisos suficientes para realizar esta Operacion','info')
+        return render_template('index.html')
+    
     codItem = request.args.get('cod_item')
     codItem2 = request.args.get('cod_item2')
     #===========================================================================
@@ -94,6 +108,11 @@ def editarrelacion():
     if not current_user.is_authenticated():
         flash('Debe loguearse primeramente!!!!', 'loggin')
         return render_template('index.html')
+    
+    permission = UserPermission('ADMINISTRAR RELACION',int(session['pry']))
+    if permission.can() == False:
+        flash('No posee los Permisos suficientes para realizar esta Operacion','info')
+        return render_template('index.html')
 
     p = db_session.query(Relacion).filter_by(codigo=request.args.get('cod')).first()
     form = RelacionFormulario(request.form,p)
@@ -113,6 +132,11 @@ def eliminarrelacion():
         flash('Debe loguearse primeramente!!!!', 'loggin')
         return render_template('index.html')
     
+    permission = UserPermission('ADMINISTRAR RELACION',int(session['pry']))
+    if permission.can() == False:
+        flash('No posee los Permisos suficientes para realizar esta Operacion','info')
+        return render_template('index.html')
+    
     cod = request.args.get('codigo')
     relacion = db_session.query(Relacion).filter_by(id=cod).first()
     relacion.estado='E'
@@ -125,6 +149,12 @@ def eliminarrelacion():
 def buscarrelacion():
     if not current_user.is_authenticated():
         flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
+    permi = verificarPermisoPro(session['pry'], 'COMITE CAMBIOS')
+    permission = UserPermission('ADMINISTRAR RELACION',int(session['pry']))
+    if permission.can() == False or permi ==False:
+        flash('No posee los Permisos suficientes para realizar esta Operacion','info')
         return render_template('index.html')
     
     valor = request.args['patron']
@@ -156,6 +186,12 @@ def buscarrelacion():
 def administrarrelacion():
     if not current_user.is_authenticated():
         flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
+    permi = verificarPermisoPro(session['pry'], 'COMITE CAMBIOS')
+    permission = UserPermission('ADMINISTRAR RELACION',int(session['pry']))
+    if permission.can() == False or permi==False:
+        flash('No posee los Permisos suficientes para realizar esta Operacion','info')
         return render_template('index.html')
     
     relaciones = getRelUltiVerEnProg()

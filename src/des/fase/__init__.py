@@ -182,7 +182,8 @@ def buscarfase():
         return render_template('index.html')
     
     permission =UserPermission('LIDER PROYECTO', int(session['pry']))
-    if permission.can()==False:
+    permi =UserPermission('COMITE CAMBIOS', int(session['pry']))
+    if permission.can()==False or permi.can()==False:
         flash('No posee los permisos suficientes para realizar la operacion', 'permiso')
         return render_template('index.html') 
     
@@ -236,7 +237,8 @@ def administrarfase():
         return render_template('index.html')
     
     permission =UserPermission('LIDER PROYECTO', int(session['pry']))
-    if permission.can()==False:
+    permi =UserPermission('COMITE CAMBIOS', int(session['pry']))
+    if permission.can()==False or permi.can()==False:
         flash('No posee los permisos suficientes para realizar la operacion', 'permiso')
         return render_template('index.html')
     
