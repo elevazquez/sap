@@ -8,7 +8,7 @@ USU='testdesa'
 PATRON=USU
 PARAM='usuario'
 
-class MiembrosComiteTestCase(unittest.TestCase):
+class MiembrosComite1TestCase(unittest.TestCase):
     """Clase que implementa los test para el caso de uso Miembros Comite."""
    
     def setUp(self):

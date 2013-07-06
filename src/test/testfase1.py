@@ -18,7 +18,7 @@ id_proyecto = PROYECTOID
 PATRON = nombre
 PARAM = 'nombre'
 
-class FaseTestCase(unittest.TestCase):
+class Fase1TestCase(unittest.TestCase):
     """Clase que implementa los test para el caso de uso Fase."""
     
     def setUp(self):
