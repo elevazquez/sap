@@ -275,7 +275,8 @@ def buscarproyecto():
         if 'pry' in session:
             idproy = session['pry']
         permiss = UserPermission('LIDER PROYECTO', int(idproy))
-        if permiss.can():
+        opcionPerm = UserPermission('COMITE CAMBIOS', int(session['pry']))
+        if permiss.can() or opcionPerm.can():
             valor = request.args['patron']
             parametro = request.args['parametro']
             if valor == "" : 
@@ -311,7 +312,8 @@ def administrarproyecto():
             proyectos = db_session.query(Proyecto).order_by(Proyecto.nombre)
     else:
         permiss = UserPermission('LIDER PROYECTO', int(idproy))
-        if permiss.can():
+        opcionPerm = UserPermission('COMITE CAMBIOS', int(session['pry']))
+        if permiss.can() or opcionPerm.can():
             proyectos = db_session.query(Proyecto).filter(Proyecto.id == idproy).all()
         else:
             flash('Sin permisos para administrar proyectos', 'permiso')

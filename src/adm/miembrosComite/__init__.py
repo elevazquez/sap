@@ -123,7 +123,8 @@ def buscarmiembrosComite():
         return render_template('index.html')
     
     permission =UserPermission('LIDER PROYECTO', int(session['pry']))
-    if permission.can()==False:
+    opcionPerm = UserPermission('COMITE CAMBIOS', int(session['pry']))
+    if permission.can()==False or opcionPerm.can() ==False:
         flash('No posee los permisos suficientes para realizar la operacion', 'permiso')
         return render_template('index.html')
     
@@ -165,7 +166,8 @@ def administrarmiembrosComite():
         return render_template('index.html')
     
     permission =UserPermission('LIDER PROYECTO', int(session['pry']))
-    if permission.can():
+    opcionPerm = UserPermission('COMITE CAMBIOS', int(session['pry']))
+    if permission.can() or opcionPerm.can():
         miembrosComites = db_session.query(MiembrosComite).filter_by(id_proyecto=session['pry']).order_by(MiembrosComite.id_usuario)
         return render_template('miembrosComite/administrarmiembrosComite.html', miembrosComites = miembrosComites)
     else:

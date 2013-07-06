@@ -1,5 +1,4 @@
-from wtforms import Form, TextField, validators, IntegerField, SelectField, DateField, PasswordField
-from adm.mod.Usuario import Usuario
+from wtforms import Form, TextField, validators, IntegerField, DateField, PasswordField
 from util.database import engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 

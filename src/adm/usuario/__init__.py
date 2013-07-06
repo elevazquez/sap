@@ -323,15 +323,17 @@ def quitarrolusu():
         roles=request.form.getlist('selectrol')
         try:
             list_aux=[]
-            if len(rolesv) == len(roles):
-                flash('El Usuario no puede quedarse sin Roles','info')   
-                return redirect('/usuario/administrarusuario')
+            #===================================================================
+            # if len(rolesv) == len(roles):
+            #    flash('El Usuario no puede quedarse sin Roles','info')   
+            #    return redirect('/usuario/administrarusuario')
+            #===================================================================
             for rl in roles :
                 r = db_session.query(Rol).filter_by(id=rl).first()
                 list_aux.append(r)
                           
             for rl in list_aux:
-                ur = db_session.query(UsuarioRol).filter_by(id_rol=rl.id).first()  
+                ur = db_session.query(UsuarioRol).filter_by(id_rol=rl.id,id_usuario=request.form.get('id')).first()  
                 db_session.delete(ur)
                 db_session.commit()
                 flash('Se quito el Rol con Exito','info')   
