@@ -5,6 +5,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 import flask, flask.views
 from des.mod.Item import *
 from ges.mod.Relacion import *
+from flask_login import current_user
 
 db_session = scoped_session(sessionmaker(autocommit=False,
                                          autoflush=False,
@@ -23,6 +24,11 @@ def flash_errors(form):
 
 @app.route('/calculoimpacto', methods=['GET', 'POST'])
 def calculoImpactoAll():
+    """Funcion que obtiene todos los impactos"""
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     global camino_general
     camino_general = []
     idItem = request.args.get('id')
@@ -45,7 +51,7 @@ def calculoImpactoAll():
     return render_template('calculoImpacto/calculoimpacto.html', caminogeneral=camino_general, impactoTotal = impacto_general, caminos = caminos, caminoimpacto = caminoImpacto, item = item)
         
 def getAllCaminos(item):
-    """ Funcion para calcular impacto"""
+    """ Funcion para calcular impacto """
     caminos = []
     unicoCamino = [item]
     caminos.append(unicoCamino)
@@ -53,6 +59,7 @@ def getAllCaminos(item):
     return caminosItem
     
 def getItemsPadres(idItem):
+    """ Funcion que obtiene los items padres """
     itemsrelacionados = db_session.query(Item).join(Relacion, Relacion.id_item_duenho == Item.id).filter(Relacion.id_item == idItem).filter(Relacion.estado == 'A').all()
     for i in itemsrelacionados :
         try:
@@ -62,6 +69,7 @@ def getItemsPadres(idItem):
     return itemsrelacionados
     
 def getListas(listaItem, ultimoItem, itemsAAnhadir):
+    """ Funcion que obtiene la lista de items """
     listaNueva=[]
     for i in itemsAAnhadir:
         auxiliar = listaItem
@@ -70,6 +78,7 @@ def getListas(listaItem, ultimoItem, itemsAAnhadir):
     return listaNueva
 
 def getCaminos(listaCamino):
+    """ Funcion para obtener la lista de caminos """
     bandera= True
     unicoCamino = listaCamino.pop(0)
     posicion = len(unicoCamino) - 1

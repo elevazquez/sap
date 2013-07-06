@@ -90,7 +90,7 @@ def editartipoAtributo():
 
 @app.route('/tipoAtributo/eliminartipoAtributo', methods=['GET', 'POST'])
 def eliminartipoAtributo():
-    """funcion que permite eliminar un tipo atributo"""
+    """ Funcion que permite eliminar un tipo atributo """
     if not current_user.is_authenticated():
         flash('Debe loguearse primeramente!!!!', 'loggin')
         return render_template('index.html')

@@ -24,6 +24,8 @@ import datetime
 from ges.mod.Relacion  import Relacion
 from ges.mod.TipoRelacion import TipoRelacion
 from adm.mod.Permiso import Permiso
+from flask_login import current_user
+from adm.mod.RolPermiso import RolPermiso
 
 fase_global= None;
 linea_global= None;
@@ -51,22 +53,25 @@ def verificarPermiso ( id_fase, permiso):
         else: 
             return True
     else :
-        return False            
- 
+        return False
   
 @app.route('/lineaBase/listafaselb', methods=['GET', 'POST'])
 def listafaselb():   
     """ Funcion que lista las fases de la cual se escoge una para la creacion de la LB"""   
-    ##init_db(db_session)    
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+      
     fases = db_session.query(Fase).from_statement(" select * from fase where id_proyecto = "+str(session['pry'])+" and estado !='I' order by nro_orden " )
     return render_template('lineaBase/listafaselb.html', fases = fases)  
 
-
-    
 @app.route('/lineaBase/listaitem', methods=['GET', 'POST'])
 def listaitem():   
     """ Funcion que lista los items posibles a formar parte de una linea base"""     
-    ##init_db(db_session)
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+
     idfase = request.args.get('id_fase')
     if verificarPermiso(idfase, "CREAR LINEA BASE") == False:
             flash('No posee los Permisos suficientes para realizar esta Operacion','info')
@@ -74,26 +79,33 @@ def listaitem():
         
     items = db_session.query(Item).from_statement(" select * from item where id_fase = "+request.args.get('id_fase')+" and (estado = 'A' and estado != 'B') order by codigo " )
     return render_template('lineaBase/listaitem.html', items = items)  
-
-
-
     
 @app.route('/lineaBase/agregaritems', methods=['GET', 'POST'])
 def agregaritems():   
     """ Funcion que agrega a una lista los items seleccionados para formar parte de la LB""" 
-    ##init_db(db_session)
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+
     selecteditem=  request.args.get('id_item')      
     items = db_session.query(Item).from_statement(" select * from item where id_fase = "+request.args.get('id_fase')+" and (estado = 'A' and estado != 'B') order by codigo " )
     return render_template('lineaBase/listaitem.html', items = items)  
    
- 
-
-
 @app.route('/lineaBase/nuevalineabase', methods=['GET', 'POST'])
 def nuevalineabase():
-    """ Funcion para agregar registros a tabla de linea base""" 
+    """ Funcion para agregar registros a tabla de linea base"""
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     today = datetime.date.today()
     idfase = request.args.get('id_fase')
+    
+    if idfase != None:
+        if verificarPermiso(idfase, "CREAR LINEA BASE") == False:
+            flash('No posee los Permisos suficientes para realizar esta Operacion','info')
+            return redirect('/lineaBase/administrarlineabase') 
+    
     recurso = db_session.query(Recurso).filter_by(id_fase = idfase).first()
     
     form =  LineaBaseFormulario(request.form)
@@ -103,8 +115,6 @@ def nuevalineabase():
                         " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id "+
                         " and f.id_proyecto = "+str(session['pry'])+"  group by codigo order by 1 ) s "+
                         " where it.codigo = cod and it.version= vermax and (it.estado = 'A' and it.estado != 'B') and it.id_fase= "+str(request.args.get('id_fase'))+" and it.id not in (select  id_item from lb_item ) order by it.codigo " )
-   
-      
            
     if request.method != 'POST' :
         items = db_session.query(Item).from_statement("Select it.*  from item it, "+ 
@@ -116,8 +126,6 @@ def nuevalineabase():
         for it in items :
             if it.id != None:
                 idfase= it.id_fase
-    
-    
     
         if verificarPermiso(idfase, "CREAR LINEA BASE") == False:
             flash('No posee los Permisos suficientes para realizar esta Operacion','info')
@@ -161,7 +169,6 @@ def nuevalineabase():
             multiselect= request.form.getlist('selectitem')  
             list_aux=[]
             
-            
             #se cambia el estado de los items involucrados
             for it in multiselect :
                 i = db_session.query(Item).filter_by(id=it).first()  
@@ -173,9 +180,6 @@ def nuevalineabase():
                 item = Item(i.codigo, i.nombre, i.descripcion, 'B', i.complejidad, today, i.costo, 
                     session['user_id']  , i.version +1 , i.id_fase , i.id_tipo_item , i.archivo)            
                 db_session.add(item)         
-                          
-    
-     
                 db_session.commit()
                 list_aux.append(item)
                 id_fase= i.id_fase  
@@ -249,9 +253,12 @@ def nuevalineabase():
 
 @app.route('/lineaBase/agregaritem', methods=['GET', 'POST'])
 def agregaritem():
-    """ Funcion para asignar Items a una linea base""" 
-    today = datetime.date.today()
-    ##init_db(db_session)   
+    """ Funcion para asignar Items a una linea base"""
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
+    today = datetime.date.today()   
     lin = db_session.query(LineaBase).filter_by(id=request.args.get('id_linea')).first()  
    
     if  request.args.get('id_linea') == None:
@@ -315,7 +322,6 @@ def agregaritem():
                         " and f.id_proyecto = "+str(session['pry'])+"  group by codigo order by 1 ) s "+
                         " where it.codigo = cod and it.version= vermax and (it.estado = 'A' and it.estado != 'B') and it.id_fase= "+str(request.args.get('id_fase'))+" and it.id not in (select  id_item from lb_item )  and it.id != "+str(it.id)+"  order by it.codigo " )
 
-                        
     if request.method == 'POST' and form.validate(): 
         items=request.form.getlist('selectitem')
         try:
@@ -396,9 +402,12 @@ def agregaritem():
     
 @app.route('/lineaBase/quitaritem', methods=['GET', 'POST'])
 def quitaritem():
-    """ Funcion para quitar Items de una linea base""" 
+    """ Funcion para quitar Items de una linea base"""
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     today = datetime.date.today()
-    ##init_db(db_session)   
     lin = db_session.query(LineaBase).filter_by(id=request.args.get('id_linea')).first()  
    
     if  request.args.get('id_linea') == None:
@@ -518,8 +527,11 @@ def quitaritem():
 @app.route('/lineaBase/editarlineabase', methods=['GET', 'POST'])
 def editarlineabase():
     """Funcion para buscar una Linea Base"""
-    today = datetime.date.today()
-    ##init_db(db_session)   
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
+    today = datetime.date.today()   
     lin = db_session.query(LineaBase).filter_by(id=request.args.get('id_linea')).first()  
    
     if  request.args.get('id_linea') == None:
@@ -531,10 +543,7 @@ def editarlineabase():
     form = LineaBaseModifFormulario(request.form,lin) 
     
     linea = db_session.query(LineaBase).filter_by(id= form.id.data).first() 
-#    if linea.estado == 'L':
-#        itemslb=  db_session.query(Item).join(LbItem, Item.id== LbItem.id_item).filter(LbItem.id_linea_base== id_linea ).filter(Item.estado=='A').all()   
-#    else :
-#        itemslb=  db_session.query(Item).join(LbItem, Item.id== LbItem.id_item).filter(LbItem.id_linea_base== id_linea ).filter(Item.estado=='B').all()   
+
     itemslb=  db_session.query(Item).join(LbItem, Item.id== LbItem.id_item).filter(LbItem.id_linea_base== id_linea ).all()  
     item_aux= db_session.query(Item).join(LbItem, Item.id== LbItem.id_item).filter(LbItem.id_linea_base== id_linea).first()   
      
@@ -634,6 +643,14 @@ def editarlineabase():
 @app.route('/lineaBase/buscarlineabase', methods=['GET', 'POST'])
 def buscarlineabase():
     """"Funcion para buscar una linea Base"""
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
+    if verificarPermiso(session['pry'], "BUSCAR LINEA BASE") == False:
+            flash('No posee los Permisos suficientes para realizar esta Operacion','info')
+            return redirect('/lineaBase/administrarlineabase') 
+    
     valor = request.args['patron']
     parametro = request.args['parametro']
     ##init_db(db_session)
@@ -709,8 +726,6 @@ def liberarlineabase():
     else:
         flash_errors(form)
     return render_template('lineaBase/liberarlineabase.html', form=form, itemslb= itemslb )
-    
-    
  
 def liberarOn(itemslb, id_linea):
     list_aux=[]
@@ -846,8 +861,6 @@ def liberarOn(itemslb, id_linea):
         db_session.delete(lin) 
         db_session.commit()
                  
-                 
-    
 def cambiar_estado(i, id_linea):
                 list_aux=[]
                 list_aux2=[]
@@ -962,14 +975,14 @@ def cambiar_estado(i, id_linea):
                     db_session.delete(lin)
                     db_session.commit()
                 
-                 
-    
-        
 @app.route('/lineaBase/componerlineabase', methods=['GET', 'POST'])
 def componerlineabase():  
-    """funcion que permite componer una lineas base liberada"""  
-    today = datetime.date.today()
-    ##init_db(db_session)   
+    """funcion que permite componer una lineas base liberada"""
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
+    today = datetime.date.today()  
     lin = db_session.query(LineaBase).filter_by(id=request.args.get('id_linea')).first()  
    
     if  request.args.get('id_linea') == None:
@@ -1073,7 +1086,6 @@ def componerlineabase():
                             db_session.add(relacion)
                             db_session.commit() 
             
-            
             linea.estado='V'           
             db_session.merge(linea)
             db_session.commit()   
@@ -1099,21 +1111,24 @@ def componerlineabase():
         flash_errors(form)
     return render_template('lineaBase/componerlineabase.html', form=form, itemslb= itemslb, permitir= permitir )
     
-    
 @app.route('/lineaBase/administrarlineabase')
 def administrarlineabase():
     """Funcion que lista todas las lineas Bases"""
-    #init_db(db_session)
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    permi= UserPermission('LIDER PROYECTO', int(session['pry']))
+    if verificarPermiso(session['pry'], "VER LINEA BASE") == False or permi.can()==False:
+            flash('No posee los Permisos suficientes para realizar esta Operacion','info')
+            return redirect('/lineaBase/administrarlineabase')
+    
     LB = db_session.query(LineaBase).join(LbItem, LineaBase.id== LbItem.id_linea_base).join(Item, LbItem.id_item== Item.id).join(Fase,Item.id_fase ==Fase.id).filter(Fase.id_proyecto==session['pry']).all()    
     return render_template('lineaBase/administrarlineabase.html', lineas = LB)
-
-
 
 @app.errorhandler(404)
 def page_not_found(error):
     """Lanza un mensaje de error en caso de que la pagina solicitada no exista"""
     return 'Esta Pagina no existe', 404
-
 
 @app.after_request
 def shutdown_session(response):

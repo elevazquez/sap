@@ -6,6 +6,7 @@ import flask, flask.views
 from des.mod.Item import *
 from ges.mod.Relacion import * 
 from decimal import *
+from flask_login import current_user
 
 db_session = scoped_session(sessionmaker(autocommit=False,
                                          autoflush=False,
@@ -25,6 +26,10 @@ def flash_errors(form):
 @app.route('/calculocosto', methods=['GET', 'POST'])
 def calculoCostoAll():
     """Funcion que obtiene todos los costos"""
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     global camino_general
     camino_general = []
     idItem = request.args.get('id')
@@ -45,11 +50,9 @@ def calculoCostoAll():
     print caminos, caminoCosto
     print camino_general, costo_general
     return render_template('calculoCosto/calculocosto.html', caminogeneral=camino_general, costoTotal = costo_general, caminos = caminos, caminoCosto = caminoCosto, item = item)
-
-
         
 def getAllCaminos(item):
-    """ Funcion para calcular costo"""
+    """ Funcion para calcular costo """
     caminos = []
     unicoCamino = [item]
     caminos.append(unicoCamino)

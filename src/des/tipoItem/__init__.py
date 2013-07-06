@@ -164,6 +164,15 @@ def eliminartipoItem():
 @app.route('/tipoItem/buscartipoItem', methods=['GET', 'POST'])
 def buscartipoItem():
     """ Funcion para buscar registros de la tabla de Tipo de Item""" 
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
+    permission =UserPermission('LIDER PROYECTO', int(session['pry']))
+    if permission.can()==False:
+        flash('No posee los permisos suficientes para realizar la operacion', 'info')
+        return render_template('index.html')  
+    
     valor = request.args['patron']
     parametro = request.args['parametro']
     #init_db(db_session)
@@ -185,6 +194,15 @@ def buscartipoItem():
 @app.route('/tipoItem/buscartipoItem2', methods=['GET', 'POST'])
 def buscartipoItem2():
     """ Funcion para buscar registros de la tabla de Tipo de Item""" 
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
+    permission =UserPermission('LIDER PROYECTO', int(session['pry']))
+    if permission.can()==False:
+        flash('No posee los permisos suficientes para realizar la operacion', 'info')
+        return render_template('index.html')  
+    
     valor = request.args['patron']
     parametro = request.args['parametro']
     #init_db(db_session)
@@ -221,25 +239,45 @@ def administrartipoItem():
 @app.route('/tipoItem/listartipoItem')
 def listartipoItem():
     """ Funcion para listar registros de la tabla de Tipo de Item""" 
-    #init_db(db_session)
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
+    permission =UserPermission('LIDER PROYECTO', int(session['pry']))
+    if permission.can()==False:
+        flash('No posee los permisos suficientes para realizar la operacion', 'info')
+        return render_template('index.html')  
+    
     tipoItems2 = db_session.query(TipoItem).order_by(TipoItem.nombre)
     return render_template('tipoItem/listartipoItem.html', tipoItems2 = tipoItems2)
 
 @app.route('/tipoItem/listaatt', methods=['GET', 'POST'])
 def listaatt():   
     """ Funcion que lista los atributos posibles a formar parte de un Tipo Item"""     
-    #init_db(db_session)
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
+    permission =UserPermission('LIDER PROYECTO', int(session['pry']))
+    if permission.can()==False:
+        flash('No posee los permisos suficientes para realizar la operacion', 'info')
+        return render_template('index.html')  
+    
     atts = db_session.query(Atributo).from_statement(" select * from atributo " )
     return render_template('tipoItem/listaatt.html', atts = atts)  
 
 @app.route('/lineaBase/agregaritems', methods=['GET', 'POST'])
 def agregaritems():   
-    """ Funcion que agrega Atributos a un Tipo Item"""     
+    """ Funcion que agrega Atributos a un Tipo Item"""
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     permission =UserPermission('LIDER PROYECTO', int(session['pry']))
     if permission.can()==False:
         flash('No posee los permisos suficientes para realizar la operacion', 'info')
         return render_template('tipoItem/administrartipoItem.html') 
-    #init_db(db_session)
+    
     selectedatt=  request.args.get('ti')    
     atts = db_session.query(Atributo).from_statement(" select * from atributo  " )
     return render_template('tipoItem/listaatt.html', atts = atts)  
@@ -247,6 +285,10 @@ def agregaritems():
 @app.route('/tipoItem/importartipoItem', methods=['GET', 'POST'])
 def importartipoItem():
     """ Funcion para importar registros a la tabla de Tipo de Item"""
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     permission =UserPermission('LIDER PROYECTO', int(session['pry']))
     if permission.can()==False:
         flash('No posee los permisos suficientes para realizar la operacion', 'info')
