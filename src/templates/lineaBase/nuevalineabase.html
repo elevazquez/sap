@@ -34,16 +34,12 @@
 		{% for item in items %}
 			<TR>
 				<TD class="c1"> <input type="checkbox" name="selectitem" value="{{ item.id }}"/> </TD>					
-				<TD class="c2"><SPAN>{{item.codigo|e}}</SPAN></TD>
-				<TD class="c3"><SPAN>{{item.nombre|e}}</SPAN></TD>
-				<TD class="c4"><SPAN>{{item.descripcion|e}}</SPAN></TD>
-				<TD class="c5"><SPAN>{{'Abierto' if item.estado=='I' else 'En Progreso' if item.estado=='P' 
+				<TD class="c2"><SPAN>{{ item.codigo }}</SPAN></TD>
+				<TD class="c3"><SPAN>{{ item.nombre }}</SPAN></TD>
+				<TD class="c4"><SPAN>{{ item.descripcion }}</SPAN></TD>
+				<TD class="c5"><SPAN>{{ 'Abierto' if item.estado=='I' else 'En Progreso' if item.estado=='P' 
 					else 'Resuelto' if item.estado=='R' else 'Aprobado' if item.estado=='A' else 'Eliminado' if item.estado=='E'
 					else 'Rechazado' if item.estado=='Z' else 'Revision' if item.estado=='V' else 'Bloqueado' if item.estado=='B' }}</SPAN></TD>
-			</TR>
-		{% else %}
-			<TR>
-				<em>La fase no cuenta con Items que pueden ser agregados.</em>
 			</TR>
 		{% endfor %}
 	</table>

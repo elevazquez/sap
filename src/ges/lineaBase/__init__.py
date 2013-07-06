@@ -56,7 +56,7 @@ def verificarPermiso ( id_fase, permiso):
         return False
   
 def verificarPermisoPro ( id_proyecto, permiso):
-    recurso = db_session.query(Recurso).filter_by(id_proyecto=id_proyecto).first()
+    recurso = db_session.query(Recurso).filter_by(id_proyecto=id_proyecto).first() 
     if recurso != None: 
         permission = UserPermission(permiso, int(recurso.id))
         if permission.can() == False:
@@ -123,17 +123,18 @@ def nuevalineabase():
     form =  LineaBaseFormulario(request.form)
     form.fechaCreacion.data= today
              
-    items = db_session.query(Item).from_statement("Select it.*  from item it, "+ 
-                        " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id "+
-                        " and f.id_proyecto = "+str(session['pry'])+"  group by codigo order by 1 ) s "+
-                        " where it.codigo = cod and it.version= vermax and (it.estado = 'A' and it.estado != 'B') and it.id_fase= "+str(request.args.get('id_fase'))+" and it.id not in (select  id_item from lb_item ) order by it.codigo " ).all()
-    
+#    items = db_session.query(Item).from_statement("Select it.*  from item it, "+ 
+#                        " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id "+
+#                        " and f.id_proyecto = "+str(session['pry'])+"  group by codigo order by 1 ) s "+
+#                        " where it.codigo = cod and it.version= vermax and (it.estado = 'A' and it.estado != 'B') and it.id_fase= "+str(request.args.get('id_fase'))+" and it.id not in (select  id_item from lb_item ) order by it.codigo " ).all()
+#    
             
     if request.method != 'POST' :
         items = db_session.query(Item).from_statement("Select it.*  from item it, "+ 
                         " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id "+
                         " and f.id_proyecto = "+str(session['pry'])+"  group by codigo order by 1 ) s "+
                         " where it.codigo = cod and it.version= vermax and (it.estado = 'A' and it.estado != 'B') and it.id_fase= "+str(request.args.get('id_fase'))+" and it.id not in (select  id_item from lb_item ) order by it.codigo " ).all()
+        print items 
    
         idfase = request.args.get('id_fase')
         for it in items :
@@ -159,23 +160,24 @@ def nuevalineabase():
                 for rp in relac_padre :
                     linea= db_session.query(LbItem).join(LineaBase, LineaBase.id==LbItem.id_linea_base).filter(LbItem.id_item==rp.id_item).filter(LineaBase.estado=='V').first()
                     if linea == None:
-                       
                         items = db_session.query(Item).from_statement("Select it.*  from item it, "+ 
                                                                       " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id "+
                                                                       " and f.id_proyecto = "+str(session['pry'])+"  group by codigo order by 1 ) s "+
-                                                                      " where it.codigo = cod and it.version= vermax and (it.estado = 'A' and it.estado != 'B') and it.id_fase= "+str(request.args.get('id_fase'))+" and it.id not in (select  id_item from lb_item )  and it.id != "+str(it.id)+"  order by it.codigo " )
+                                                                      " where it.codigo = cod and it.version= vermax and (it.estado = 'A' and it.estado != 'B') and it.id_fase= "+str(request.args.get('id_fase'))+" and it.id not in (select  id_item from lb_item )  and it.id != "+str(it.id)+"  order by it.codigo " ).all()
+                                                                    
                     else:
                         items = db_session.query(Item).from_statement("Select it.*  from item it, "+ 
                                                                       " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id "+
                                                                       " and f.id_proyecto = "+str(session['pry'])+"  group by codigo order by 1 ) s "+
-                                                                      " where it.codigo = cod and it.version= vermax and (it.estado = 'A' and it.estado != 'B') and it.id_fase= "+str(request.args.get('id_fase'))+" and it.id not in (select  id_item from lb_item ) order by it.codigo " )
-       
+                                                                      " where it.codigo = cod and it.version= vermax and (it.estado = 'A' and it.estado != 'B') and it.id_fase= "+str(request.args.get('id_fase'))+" and it.id not in (select  id_item from lb_item ) order by it.codigo " ).all()
+                        
     
-                else:
-                    items = db_session.query(Item).from_statement("Select it.*  from item it, "+ 
-                        " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id "+
-                        " and f.id_proyecto = "+str(session['pry'])+"  group by codigo order by 1 ) s "+
-                        " where it.codigo = cod and it.version= vermax and (it.estado = 'A' and it.estado != 'B') and it.id_fase= "+str(request.args.get('id_fase'))+" and it.id not in (select  id_item from lb_item )  and it.id != "+str(it.id)+"  order by it.codigo " )
+#                else:
+#                    items = db_session.query(Item).from_statement("Select it.*  from item it, "+ 
+#                        " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id "+
+#                        " and f.id_proyecto = "+str(session['pry'])+"  group by codigo order by 1 ) s "+
+#                        " where it.codigo = cod and it.version= vermax and (it.estado = 'A' and it.estado != 'B') and it.id_fase= "+str(request.args.get('id_fase'))+" and it.id not in (select  id_item from lb_item )  and it.id != "+str(it.id)+"  order by it.codigo " ).all()
+#                    print items     
       
         
     if request.method == 'POST' and form.validate():                
@@ -1140,7 +1142,7 @@ def administrarlineabase():
         return render_template('index.html')
     
     opcionpermi=UserPermission('COMITE CAMBIOS',int(session['pry']))
-    if verificarPermisoPro(session['pry'], 'VER LINEA BASE') == False or opcionpermi.can()==False:
+    if verificarPermisoPro(int(session['pry']), 'VER LINEA BASE') == False or opcionpermi.can()==False:
             flash('No posee los Permisos suficientes para realizar esta Operacion','info')
             return render_template('index.html')
     
