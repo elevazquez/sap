@@ -568,9 +568,6 @@ def editarlineabase():
     form.fecha_creacion.data=  request.args.get('fecha_crea')
     
     idfase = item_aux.id_fase
-    if verificarPermiso(idfase, "VER LINEA BASE") == False:
-            flash('No posee los Permisos suficientes para realizar esta Operacion','info')
-            return redirect('/lineaBase/administrarlineabase') 
         
     if request.method == 'POST' and form.validate():        
         try:  
