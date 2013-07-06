@@ -110,14 +110,15 @@ def nuevalineabase():
         return render_template('index.html')
     
     today = datetime.date.today()
-    idfase = request.args.get('id_fase')
     
-    if idfase != None:
-        if verificarPermiso(idfase, "CREAR LINEA BASE") == False:
-            flash('No posee los Permisos suficientes para realizar esta Operacion','info')
-            return redirect('/lineaBase/administrarlineabase') 
-    
-    recurso = db_session.query(Recurso).filter_by(id_fase = idfase).first()
+#    idfase = request.args.get('id_fase')
+#    
+#    if idfase != None:
+#        if verificarPermiso(idfase, "CREAR LINEA BASE") == False:
+#            flash('No posee los Permisos suficientes para realizar esta Operacion','info')
+#            return redirect('/lineaBase/administrarlineabase') 
+#    
+#    recurso = db_session.query(Recurso).filter_by(id_fase = idfase).first()
     
     form =  LineaBaseFormulario(request.form)
     form.fechaCreacion.data= today
@@ -125,13 +126,14 @@ def nuevalineabase():
     items = db_session.query(Item).from_statement("Select it.*  from item it, "+ 
                         " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id "+
                         " and f.id_proyecto = "+str(session['pry'])+"  group by codigo order by 1 ) s "+
-                        " where it.codigo = cod and it.version= vermax and (it.estado = 'A' and it.estado != 'B') and it.id_fase= "+str(request.args.get('id_fase'))+" and it.id not in (select  id_item from lb_item ) order by it.codigo " )
-           
+                        " where it.codigo = cod and it.version= vermax and (it.estado = 'A' and it.estado != 'B') and it.id_fase= "+str(request.args.get('id_fase'))+" and it.id not in (select  id_item from lb_item ) order by it.codigo " ).all()
+    
+            
     if request.method != 'POST' :
         items = db_session.query(Item).from_statement("Select it.*  from item it, "+ 
                         " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id "+
                         " and f.id_proyecto = "+str(session['pry'])+"  group by codigo order by 1 ) s "+
-                        " where it.codigo = cod and it.version= vermax and (it.estado = 'A' and it.estado != 'B') and it.id_fase= "+str(request.args.get('id_fase'))+" and it.id not in (select  id_item from lb_item ) order by it.codigo " )
+                        " where it.codigo = cod and it.version= vermax and (it.estado = 'A' and it.estado != 'B') and it.id_fase= "+str(request.args.get('id_fase'))+" and it.id not in (select  id_item from lb_item ) order by it.codigo " ).all()
    
         idfase = request.args.get('id_fase')
         for it in items :
@@ -140,6 +142,11 @@ def nuevalineabase():
     
         if verificarPermiso(idfase, "CREAR LINEA BASE") == False:
             flash('No posee los Permisos suficientes para realizar esta Operacion','info')
+            return redirect('/lineaBase/administrarlineabase') 
+        
+          
+        if items == None  or items == []:
+            flash('La fase no cuenta con Items que pueden ser agregados','info')
             return redirect('/lineaBase/administrarlineabase') 
         
         verfase= db_session.query(Fase).filter_by(id_proyecto= session['pry']).filter_by(id=request.args.get('id_fase')).first()
@@ -255,6 +262,7 @@ def nuevalineabase():
             flash('La Linea Base fue creada con exito','info')            
             return redirect('/lineaBase/administrarlineabase') 
         except DatabaseError, e:
+                db_session.rollback()
                 flash('Error en la Base de Datos' + e.args[0],'error')
                 return render_template('lineaBase/nuevalineabase.html',items= items, form= form )
     else:
@@ -295,13 +303,17 @@ def agregaritem():
     itemsdisp = db_session.query(Item).from_statement("Select it.*  from item it, "+ 
                         " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id "+
                         " and f.id_proyecto = "+str(session['pry'])+"  group by codigo order by 1 ) s "+
-                        " where it.codigo = cod and it.version= vermax and (it.estado = 'A' and it.estado != 'B') and it.id_fase= "+str(item_aux.id_fase)+" and it.id not in (select  id_item from lb_item ) order by it.codigo " )
+                        " where it.codigo = cod and it.version= vermax and (it.estado = 'A' and it.estado != 'B') and it.id_fase= "+str(item_aux.id_fase)+" and it.id not in (select  id_item from lb_item ) order by it.codigo " ).all()
     
     idfase = item_aux.id_fase
     if verificarPermiso(idfase, "AGREGAR ITEM LINEA BASE") == False:
             flash('No posee los Permisos suficientes para realizar esta Operacion','info')
             return redirect('/lineaBase/administrarlineabase') 
-           
+    
+    if itemsdisp == None or itemsdisp ==   []:
+            flash('La fase no cuenta con Items que pueden ser agregados','info')
+            return redirect('/lineaBase/administrarlineabase') 
+        
     if request.method != 'POST':
         
         verfase= db_session.query(Fase).filter_by(id_proyecto= session['pry']).filter_by(id=item_aux.id_fase ).first()
@@ -319,19 +331,19 @@ def agregaritem():
                         itemsdisp = db_session.query(Item).from_statement("Select it.*  from item it, "+ 
                                                                       " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id "+
                                                                       " and f.id_proyecto = "+str(session['pry'])+"  group by codigo order by 1 ) s "+
-                                                                      " where it.codigo = cod and it.version= vermax and (it.estado = 'A' and it.estado != 'B') and it.id_fase= "+str(request.args.get('id_fase'))+" and it.id not in (select  id_item from lb_item )  and it.id != "+str(it.id)+"  order by it.codigo " )
+                                                                      " where it.codigo = cod and it.version= vermax and (it.estado = 'A' and it.estado != 'B') and it.id_fase= "+str(item_aux.id_fase)+" and it.id not in (select  id_item from lb_item )  and it.id != "+str(it.id)+"  order by it.codigo " )
                     else:
                         itemsdisp = db_session.query(Item).from_statement("Select it.*  from item it, "+ 
                                                                       " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id "+
                                                                       " and f.id_proyecto = "+str(session['pry'])+"  group by codigo order by 1 ) s "+
-                                                                      " where it.codigo = cod and it.version= vermax and (it.estado = 'A' and it.estado != 'B') and it.id_fase= "+str(request.args.get('id_fase'))+" and it.id not in (select  id_item from lb_item ) order by it.codigo " )
+                                                                      " where it.codigo = cod and it.version= vermax and (it.estado = 'A' and it.estado != 'B') and it.id_fase= "+str(item_aux.id_fase)+" and it.id not in (select  id_item from lb_item ) order by it.codigo " )
        
     
                 else:
                     itemsdisp = db_session.query(Item).from_statement("Select it.*  from item it, "+ 
                         " (Select  i.codigo cod, max(i.version) vermax from item i, fase f  where i.id_fase = f.id "+
                         " and f.id_proyecto = "+str(session['pry'])+"  group by codigo order by 1 ) s "+
-                        " where it.codigo = cod and it.version= vermax and (it.estado = 'A' and it.estado != 'B') and it.id_fase= "+str(request.args.get('id_fase'))+" and it.id not in (select  id_item from lb_item )  and it.id != "+str(it.id)+"  order by it.codigo " )
+                        " where it.codigo = cod and it.version= vermax and (it.estado = 'A' and it.estado != 'B') and it.id_fase= "+str(item_aux.id_fase)+" and it.id not in (select  id_item from lb_item )  and it.id != "+str(it.id)+"  order by it.codigo " )
 
     if request.method == 'POST' and form.validate(): 
         items=request.form.getlist('selectitem')
@@ -403,7 +415,8 @@ def agregaritem():
      
             flash('Se agrego el Item con Exito','info')   
             return redirect('/lineaBase/administrarlineabase')
-        except DatabaseError, e:            
+        except DatabaseError, e:    
+            db_session.rollback()        
             flash('Error en la Base de Datos' + e.args[0],'error')
             return render_template('lineaBase/agregaritem.html', form=form,  items= itemsdisp)  
     else:
