@@ -32,6 +32,10 @@ def flash_errors(form):
 
 @app.route('/solicitudavotar/administrarsolicitudavotar', methods=['GET', 'POST'])
 def administrarsolicitudavotar():
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     idusuario = current_user.id
     idproyecto= session['pry']
     solicitudes = db_session.query(SolicitudCambio).join(MiembrosComite, MiembrosComite.id_proyecto == SolicitudCambio.id_proyecto).filter(MiembrosComite.id_usuario == idusuario).filter(SolicitudCambio.id_proyecto == idproyecto).filter(SolicitudCambio.estado == 'E').all()
@@ -39,6 +43,10 @@ def administrarsolicitudavotar():
 
 @app.route('/solicitudavotar/buscarsolicitudavotar', methods=['GET', 'POST'])
 def buscarsolicitudavotar():
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     idusuario = current_user.id
     idproyecto= session['pry']
     valor = request.args['patron']
@@ -72,7 +80,10 @@ def buscarsolicitudavotar():
 @app.route('/solicitudavotar/veritems', methods=['GET', 'POST'])  
 def veritems():
     """ Funcion para editar registros de la tabla Solicitud""" 
-#    init_db(db_session)
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     pro = db_session.query(Proyecto).filter_by(id=session['pry']).first()
     idusuario= current_user.id
     if  request.args.get('id') == None:
@@ -92,6 +103,10 @@ def veritems():
 
 @app.route('/solicitudavotar/votar', methods=['GET', 'POST'])  
 def votar():
+    if not current_user.is_authenticated():
+        flash('Debe loguearse primeramente!!!!', 'loggin')
+        return render_template('index.html')
+    
     voto = request.form.get('voto')
     if voto == None :
         voto = False
