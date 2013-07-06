@@ -94,12 +94,16 @@ def eliminarpermiso():
     
     permission = UserRol('ADMINISTRADOR')
     if permission.can():
-        cod = request.args.get('codigo')
-        rol = db_session.query(Permiso).filter_by(codigo=cod).first()
-        db_session.delete(rol)
-        db_session.commit()
-        flash('El permiso ha sido eliminado con exito','info')
-        return redirect('/permiso/administrarpermiso')
+        try:
+            cod = request.args.get('codigo')
+            rol = db_session.query(Permiso).filter_by(codigo=cod).first()
+            db_session.delete(rol)
+            db_session.commit()
+            flash('El permiso ha sido eliminado con exito','info')
+            return redirect('/permiso/administrarpermiso')
+        except DatabaseError, e:
+            flash('Error en la Base de Datos' + e.args[0], 'info')
+            return render_template('permiso/administrarpermiso.html')
     else:
         flash('Sin permisos para eliminar permisos', 'permiso')
         return render_template('index.html')

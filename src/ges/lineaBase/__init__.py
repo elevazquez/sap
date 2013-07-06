@@ -55,6 +55,17 @@ def verificarPermiso ( id_fase, permiso):
     else :
         return False
   
+def verificarPermisoPro ( id_proyecto, permiso):
+    recurso = db_session.query(Recurso).filter_by(id_proyecto=id_proyecto).first()
+    if recurso != None: 
+        permission = UserPermission(permiso, int(recurso.id))
+        if permission.can() == False:
+            return False
+        else: 
+            return True
+    else :
+        return False  
+  
 @app.route('/lineaBase/listafaselb', methods=['GET', 'POST'])
 def listafaselb():   
     """ Funcion que lista las fases de la cual se escoge una para la creacion de la LB"""   
@@ -1117,10 +1128,15 @@ def administrarlineabase():
     if not current_user.is_authenticated():
         flash('Debe loguearse primeramente!!!!', 'loggin')
         return render_template('index.html')
-    permi= UserPermission('LIDER PROYECTO', int(session['pry']))
-    if verificarPermiso(session['pry'], "VER LINEA BASE") == False or permi.can()==False:
+    
+    permi= UserPermission('COMITE CAMBIOS', int(session['pry']))
+    if verificarPermisoPro(session['pry'], "VER LINEA BASE") == False:
             flash('No posee los Permisos suficientes para realizar esta Operacion','info')
-            return redirect('/lineaBase/administrarlineabase')
+            return render_template('index.html')
+    else:
+        if permi.can()==False:
+            flash('No posee los Permisos suficientes para realizar esta Operacion','info')
+            return render_template('index.html')
     
     LB = db_session.query(LineaBase).join(LbItem, LineaBase.id== LbItem.id_linea_base).join(Item, LbItem.id_item== Item.id).join(Fase,Item.id_fase ==Fase.id).filter(Fase.id_proyecto==session['pry']).all()    
     return render_template('lineaBase/administrarlineabase.html', lineas = LB)
